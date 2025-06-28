@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,11 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {DiaryEntry, RootStackParamList} from '../types';
-import {loadDiaryEntries} from '../utils/storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DiaryEntry, RootStackParamList } from '../types';
+import { loadDiaryEntries } from '../utils/storage';
 
 type SearchScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -29,7 +30,8 @@ interface SearchFilters {
   selectedTags: string[];
 }
 
-const SearchScreen: React.FC<Props> = ({navigation}) => {
+const SearchScreen: React.FC<Props> = ({ navigation }) => {
+  const safeAreaInsets = useSafeAreaInsets();
   const [allEntries, setAllEntries] = useState<DiaryEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,17 +160,17 @@ const SearchScreen: React.FC<Props> = ({navigation}) => {
         // 카테고리 검색 (selectedWeather, selectedPeople 등)
         let categoryMatch = false;
         const categoryFields = [
-          {field: 'selectedWeather', mapKey: 'weather'},
-          {field: 'selectedPeople', mapKey: 'people'},
-          {field: 'selectedSchool', mapKey: 'school'},
-          {field: 'selectedCompany', mapKey: 'company'},
-          {field: 'selectedTravel', mapKey: 'travel'},
-          {field: 'selectedFood', mapKey: 'food'},
-          {field: 'selectedDessert', mapKey: 'dessert'},
-          {field: 'selectedDrink', mapKey: 'drink'},
+          { field: 'selectedWeather', mapKey: 'weather' },
+          { field: 'selectedPeople', mapKey: 'people' },
+          { field: 'selectedSchool', mapKey: 'school' },
+          { field: 'selectedCompany', mapKey: 'company' },
+          { field: 'selectedTravel', mapKey: 'travel' },
+          { field: 'selectedFood', mapKey: 'food' },
+          { field: 'selectedDessert', mapKey: 'dessert' },
+          { field: 'selectedDrink', mapKey: 'drink' },
         ];
 
-        categoryFields.forEach(({field, mapKey}) => {
+        categoryFields.forEach(({ field, mapKey }) => {
           const categoryValues = entry[field as keyof typeof entry] as
             | string[]
             | undefined;
@@ -227,11 +229,11 @@ const SearchScreen: React.FC<Props> = ({navigation}) => {
   };
 
   const handleKeywordChange = (text: string) => {
-    setFilters(prev => ({...prev, keyword: text}));
+    setFilters(prev => ({ ...prev, keyword: text }));
   };
 
   const handleDateChange = (field: 'startDate' | 'endDate', value: string) => {
-    setFilters(prev => ({...prev, [field]: value}));
+    setFilters(prev => ({ ...prev, [field]: value }));
   };
 
   const toggleTag = (tag: string) => {
@@ -283,13 +285,14 @@ const SearchScreen: React.FC<Props> = ({navigation}) => {
     }
   };
 
-  const renderSearchResult = ({item}: {item: DiaryEntry}) => {
+  const renderSearchResult = ({ item }: { item: DiaryEntry }) => {
     const displayEmoji = item.emoji || getMoodEmoji(item.mood);
 
     return (
       <TouchableOpacity
         style={styles.resultCard}
-        onPress={() => navigation.navigate('ViewEntry', {entry: item})}>
+        onPress={() => navigation.navigate('ViewEntry', { entry: item })}
+      >
         <View style={styles.resultHeader}>
           <Text style={styles.resultEmoji}>{displayEmoji}</Text>
           <View style={styles.resultInfo}>
@@ -309,15 +312,16 @@ const SearchScreen: React.FC<Props> = ({navigation}) => {
             {item.tags.slice(0, 3).map((tag, index) => {
               const tagInfo =
                 typeof tag === 'string'
-                  ? {name: tag, icon: '', color: '#e9ecef'}
+                  ? { name: tag, icon: '', color: '#e9ecef' }
                   : tag;
               return (
                 <View
                   key={index}
                   style={[
                     styles.resultTag,
-                    {backgroundColor: tagInfo.color + '20'},
-                  ]}>
+                    { backgroundColor: tagInfo.color + '20' },
+                  ]}
+                >
                   {tagInfo.icon && (
                     <Text style={styles.tagIcon}>{tagInfo.icon}</Text>
                   )}
@@ -343,7 +347,7 @@ const SearchScreen: React.FC<Props> = ({navigation}) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🔍 일기 찾기</Text>
         <Text style={styles.headerSubtitle}>
@@ -353,7 +357,8 @@ const SearchScreen: React.FC<Props> = ({navigation}) => {
 
       <ScrollView
         style={styles.filterContainer}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         {/* 키워드 검색 */}
         <View style={styles.filterSection}>
           <Text style={styles.filterTitle}>🔤 키워드 검색</Text>
@@ -407,13 +412,15 @@ const SearchScreen: React.FC<Props> = ({navigation}) => {
                     filters.selectedTags.includes(tag) &&
                       styles.selectedTagButton,
                   ]}
-                  onPress={() => toggleTag(tag)}>
+                  onPress={() => toggleTag(tag)}
+                >
                   <Text
                     style={[
                       styles.tagButtonText,
                       filters.selectedTags.includes(tag) &&
                         styles.selectedTagButtonText,
-                    ]}>
+                    ]}
+                  >
                     #{tag}
                   </Text>
                 </TouchableOpacity>

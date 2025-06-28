@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,11 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {useFocusEffect} from '@react-navigation/native';
-import {RootStackParamList, DiaryEntry} from '../types';
-import {loadDiaryEntries, deleteDiaryEntry} from '../utils/storage';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { RootStackParamList, DiaryEntry } from '../types';
+import { loadDiaryEntries, deleteDiaryEntry } from '../utils/storage';
 
 type HomeScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -22,7 +23,8 @@ interface Props {
   navigation: HomeScreenNavigationProp;
 }
 
-const HomeScreen: React.FC<Props> = ({navigation}) => {
+const HomeScreen: React.FC<Props> = ({ navigation }) => {
+  const safeAreaInsets = useSafeAreaInsets();
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -54,11 +56,11 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
   };
 
   const handleEditEntry = (entry: DiaryEntry) => {
-    navigation.navigate('WriteEntry', {entry, isEdit: true});
+    navigation.navigate('WriteEntry', { entry, isEdit: true });
   };
 
   const handleViewEntry = (entry: DiaryEntry) => {
-    navigation.navigate('ViewEntry', {entry});
+    navigation.navigate('ViewEntry', { entry });
   };
 
   useFocusEffect(
@@ -67,30 +69,33 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
     }, []),
   );
 
-  const renderEntry = ({item}: {item: DiaryEntry}) => (
+  const renderEntry = ({ item }: { item: DiaryEntry }) => (
     <TouchableOpacity
       style={styles.entryCard}
-      onPress={() => handleViewEntry(item)}>
+      onPress={() => handleViewEntry(item)}
+    >
       <View style={styles.entryHeader}>
         <Text style={styles.entryTitle}>{item.title}</Text>
         <View style={styles.entryActions}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => handleEditEntry(item)}>
+            onPress={() => handleEditEntry(item)}
+          >
             <Text style={styles.actionText}>✏️</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
               Alert.alert('일기 삭제', '정말로 이 일기를 삭제하시겠습니까?', [
-                {text: '취소', style: 'cancel'},
+                { text: '취소', style: 'cancel' },
                 {
                   text: '삭제',
                   style: 'destructive',
                   onPress: () => handleDeleteEntry(item.id),
                 },
               ]);
-            }}>
+            }}
+          >
             <Text style={styles.actionText}>🗑️</Text>
           </TouchableOpacity>
         </View>
@@ -113,7 +118,7 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>미래일기</Text>
       </View>
@@ -124,7 +129,8 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
           <Text style={styles.emptySubText}>첫 번째 일기를 작성해보세요!</Text>
           <TouchableOpacity
             style={styles.emptyButton}
-            onPress={() => navigation.navigate('WriteEntry', {})}>
+            onPress={() => navigation.navigate('WriteEntry', {})}
+          >
             <Text style={styles.emptyButtonText}>일기 쓰기</Text>
           </TouchableOpacity>
         </View>
@@ -146,7 +152,8 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
       {/* 플로팅 액션 버튼 */}
       <TouchableOpacity
         style={styles.floatingButton}
-        onPress={() => navigation.navigate('WriteEntry', {})}>
+        onPress={() => navigation.navigate('WriteEntry', {})}
+      >
         <Text style={styles.floatingButtonText}>✏️</Text>
       </TouchableOpacity>
     </View>
@@ -226,7 +233,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,

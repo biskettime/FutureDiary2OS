@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {StatusBar} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
-import {RootStackParamList, TabParamList} from './src/types';
-import {ThemeProvider, useTheme} from './src/contexts/ThemeContext';
+import { RootStackParamList, TabParamList } from './src/types';
+import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import TimelineScreen from './src/screens/TimelineScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import WriteEntryScreen from './src/screens/WriteEntryScreen';
@@ -29,7 +29,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 const MainTabs = () => {
-  const {currentTheme} = useTheme();
+  const { currentTheme } = useTheme();
 
   return (
     <Tab.Navigator
@@ -42,13 +42,14 @@ const MainTabs = () => {
         },
         tabBarActiveTintColor: currentTheme.colors.primary,
         tabBarInactiveTintColor: currentTheme.colors.textSecondary,
-      }}>
+      }}
+    >
       <Tab.Screen
         name="Timeline"
         component={TimelineScreen}
         options={{
           tabBarLabel: '타임라인',
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <Icon name="activity" size={size} color={color} />
           ),
         }}
@@ -58,7 +59,7 @@ const MainTabs = () => {
         component={HomeScreen}
         options={{
           tabBarLabel: '일기쓰기',
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <Icon name="edit-3" size={size} color={color} />
           ),
         }}
@@ -68,7 +69,7 @@ const MainTabs = () => {
         component={MyDiaryScreen}
         options={{
           tabBarLabel: '나의 일기장',
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <Icon name="book-open" size={size} color={color} />
           ),
         }}
@@ -78,7 +79,7 @@ const MainTabs = () => {
         component={SearchScreen}
         options={{
           tabBarLabel: '일기 찾기',
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <Icon name="search" size={size} color={color} />
           ),
         }}
@@ -88,7 +89,7 @@ const MainTabs = () => {
         component={SettingsScreen}
         options={{
           tabBarLabel: '설정',
-          tabBarIcon: ({color, size}) => (
+          tabBarIcon: ({ color, size }) => (
             <Icon name="settings" size={size} color={color} />
           ),
         }}
@@ -98,7 +99,7 @@ const MainTabs = () => {
 };
 
 const AppContent: React.FC = () => {
-  const {currentTheme} = useTheme();
+  const { currentTheme } = useTheme();
 
   return (
     <>
@@ -122,11 +123,12 @@ const AppContent: React.FC = () => {
             headerTitleStyle: {
               fontWeight: 'bold',
             },
-          }}>
+          }}
+        >
           <Stack.Screen
             name="MainTabs"
             component={MainTabs}
-            options={{headerShown: false}}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="WriteEntry"
@@ -134,6 +136,7 @@ const AppContent: React.FC = () => {
             options={{
               presentation: 'modal',
               headerTitle: '새 일기',
+              headerShown: false,
             }}
           />
           <Stack.Screen
