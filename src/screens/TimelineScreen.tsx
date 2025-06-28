@@ -13,6 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
+import Icon from 'react-native-vector-icons/Feather';
 import { useTheme } from '../contexts/ThemeContext';
 import { DiaryEntry, RootStackParamList } from '../types';
 import { loadDiaryEntries, saveDiaryEntry } from '../utils/storage';
@@ -652,11 +653,17 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
             },
           ]}
         >
-          <Text
-            style={[styles.headerTitle, { color: currentTheme.colors.text }]}
-          >
-            {currentTheme.icons.home} 미래일기 타임라인
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Icon name="star" size={22} color="#8B5CF6" />
+            <Text
+              style={[
+                styles.headerTitle,
+                { color: currentTheme.colors.text, marginLeft: 8 },
+              ]}
+            >
+              미래일기 타임라인
+            </Text>
+          </View>
           <Text
             style={[
               styles.headerSubtitle,
