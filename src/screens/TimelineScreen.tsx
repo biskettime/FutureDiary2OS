@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,12 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {useTheme} from '../contexts/ThemeContext';
-import {DiaryEntry, RootStackParamList} from '../types';
-import {loadDiaryEntries, saveDiaryEntry} from '../utils/storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useTheme } from '../contexts/ThemeContext';
+import { DiaryEntry, RootStackParamList } from '../types';
+import { loadDiaryEntries, saveDiaryEntry } from '../utils/storage';
 import AngelBackground from '../components/AngelBackground';
 
 type TimelineScreenNavigationProp = StackNavigationProp<
@@ -32,8 +33,9 @@ interface TimelineItem {
   daysFromNow: number;
 }
 
-const TimelineScreen: React.FC<Props> = ({navigation}) => {
-  const {currentTheme} = useTheme();
+const TimelineScreen: React.FC<Props> = ({ navigation }) => {
+  const { currentTheme } = useTheme();
+  const safeAreaInsets = useSafeAreaInsets();
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
   const [todayEntries, setTodayEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,82 +52,82 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
     weather: {
       title: '날씨',
       options: {
-        sunny: {name: '맑음', icon: '☀️', color: '#FFE066'},
-        cloudy: {name: '흐림', icon: '☁️', color: '#E0E0E0'},
-        rainy: {name: '비', icon: '🌧️', color: '#81D4FA'},
-        snowy: {name: '눈', icon: '❄️', color: '#E1F5FE'},
-        windy: {name: '바람', icon: '💨', color: '#B0BEC5'},
+        sunny: { name: '맑음', icon: '☀️', color: '#FFE066' },
+        cloudy: { name: '흐림', icon: '☁️', color: '#E0E0E0' },
+        rainy: { name: '비', icon: '🌧️', color: '#81D4FA' },
+        snowy: { name: '눈', icon: '❄️', color: '#E1F5FE' },
+        windy: { name: '바람', icon: '💨', color: '#B0BEC5' },
       } as const,
     },
     people: {
       title: '사람',
       options: {
-        friends: {name: '친구', icon: '⭐', color: '#64B5F6'},
-        family: {name: '가족', icon: '🌱', color: '#81C784'},
-        lover: {name: '연인', icon: '💖', color: '#F06292'},
-        acquaintance: {name: '지인', icon: '😊', color: '#FFB74D'},
-        alone: {name: '만나지 않음', icon: '❌', color: '#90A4AE'},
+        friends: { name: '친구', icon: '⭐', color: '#64B5F6' },
+        family: { name: '가족', icon: '🌱', color: '#81C784' },
+        lover: { name: '연인', icon: '💖', color: '#F06292' },
+        acquaintance: { name: '지인', icon: '😊', color: '#FFB74D' },
+        alone: { name: '만나지 않음', icon: '❌', color: '#90A4AE' },
       } as const,
     },
     school: {
       title: '학교',
       options: {
-        class: {name: '수업', icon: '📚', color: '#4CAF50'},
-        study: {name: '공부', icon: '🔍', color: '#FFC107'},
-        assignment: {name: '과제', icon: '📝', color: '#FF9800'},
-        exam: {name: '시험', icon: '🌸', color: '#E91E63'},
-        teamwork: {name: '팀플', icon: '💬', color: '#4CAF50'},
+        class: { name: '수업', icon: '📚', color: '#4CAF50' },
+        study: { name: '공부', icon: '🔍', color: '#FFC107' },
+        assignment: { name: '과제', icon: '📝', color: '#FF9800' },
+        exam: { name: '시험', icon: '🌸', color: '#E91E63' },
+        teamwork: { name: '팀플', icon: '💬', color: '#4CAF50' },
       } as const,
     },
     company: {
       title: '회사',
       options: {
-        meeting: {name: '회의', icon: '👥', color: '#2196F3'},
-        work: {name: '업무', icon: '💼', color: '#607D8B'},
-        project: {name: '프로젝트', icon: '📊', color: '#9C27B0'},
-        presentation: {name: '발표', icon: '🎤', color: '#FF5722'},
-        training: {name: '교육', icon: '📖', color: '#795548'},
+        meeting: { name: '회의', icon: '👥', color: '#2196F3' },
+        work: { name: '업무', icon: '💼', color: '#607D8B' },
+        project: { name: '프로젝트', icon: '📊', color: '#9C27B0' },
+        presentation: { name: '발표', icon: '🎤', color: '#FF5722' },
+        training: { name: '교육', icon: '📖', color: '#795548' },
       } as const,
     },
     travel: {
       title: '여행',
       options: {
-        airplane: {name: '비행기', icon: '✈️', color: '#03A9F4'},
-        ship: {name: '배', icon: '🚢', color: '#00BCD4'},
-        train: {name: '기차', icon: '🚄', color: '#4CAF50'},
-        bus: {name: '버스', icon: '🚌', color: '#FF9800'},
-        car: {name: '승용차', icon: '🚗', color: '#9E9E9E'},
-        motorcycle: {name: '오토바이', icon: '🏍️', color: '#F44336'},
+        airplane: { name: '비행기', icon: '✈️', color: '#03A9F4' },
+        ship: { name: '배', icon: '🚢', color: '#00BCD4' },
+        train: { name: '기차', icon: '🚄', color: '#4CAF50' },
+        bus: { name: '버스', icon: '🚌', color: '#FF9800' },
+        car: { name: '승용차', icon: '🚗', color: '#9E9E9E' },
+        motorcycle: { name: '오토바이', icon: '🏍️', color: '#F44336' },
       } as const,
     },
     food: {
       title: '음식',
       options: {
-        korean: {name: '한식', icon: '🍚', color: '#8BC34A'},
-        western: {name: '양식', icon: '🍝', color: '#FFC107'},
-        chinese: {name: '중식', icon: '🥢', color: '#FF5722'},
-        japanese: {name: '일식', icon: '🍣', color: '#E91E63'},
-        fast_food: {name: '패스트푸드', icon: '🍔', color: '#FF9800'},
+        korean: { name: '한식', icon: '🍚', color: '#8BC34A' },
+        western: { name: '양식', icon: '🍝', color: '#FFC107' },
+        chinese: { name: '중식', icon: '🥢', color: '#FF5722' },
+        japanese: { name: '일식', icon: '🍣', color: '#E91E63' },
+        fast_food: { name: '패스트푸드', icon: '🍔', color: '#FF9800' },
       } as const,
     },
     dessert: {
       title: '디저트',
       options: {
-        cake: {name: '케이크', icon: '🍰', color: '#F8BBD9'},
-        ice_cream: {name: '아이스크림', icon: '🍦', color: '#E1F5FE'},
-        chocolate: {name: '초콜릿', icon: '🍫', color: '#8D6E63'},
-        cookie: {name: '쿠키', icon: '🍪', color: '#FFCC02'},
-        fruit: {name: '과일', icon: '🍓', color: '#4CAF50'},
+        cake: { name: '케이크', icon: '🍰', color: '#F8BBD9' },
+        ice_cream: { name: '아이스크림', icon: '🍦', color: '#E1F5FE' },
+        chocolate: { name: '초콜릿', icon: '🍫', color: '#8D6E63' },
+        cookie: { name: '쿠키', icon: '🍪', color: '#FFCC02' },
+        fruit: { name: '과일', icon: '🍓', color: '#4CAF50' },
       } as const,
     },
     drink: {
       title: '음료',
       options: {
-        coffee: {name: '커피', icon: '☕', color: '#8D6E63'},
-        milk_tea: {name: '밀크티', icon: '🧋', color: '#D7CCC8'},
-        juice: {name: '주스', icon: '🧃', color: '#FFC107'},
-        water: {name: '물', icon: '💧', color: '#03A9F4'},
-        alcohol: {name: '술', icon: '🍺', color: '#FF9800'},
+        coffee: { name: '커피', icon: '☕', color: '#8D6E63' },
+        milk_tea: { name: '밀크티', icon: '🧋', color: '#D7CCC8' },
+        juice: { name: '주스', icon: '🧃', color: '#FFC107' },
+        water: { name: '물', icon: '💧', color: '#03A9F4' },
+        alcohol: { name: '술', icon: '🍺', color: '#FF9800' },
       } as const,
     },
   } as const;
@@ -258,7 +260,7 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
       setTimelineItems(prev =>
         prev.map(item =>
           item.entry.id === selectedEntry.id
-            ? {...item, entry: updatedEntry}
+            ? { ...item, entry: updatedEntry }
             : item,
         ),
       );
@@ -369,14 +371,16 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
     return (
       <TouchableOpacity
         style={styles.timelineItem}
-        onPress={() => navigation.navigate('ViewEntry', {entry: item.entry})}>
+        onPress={() => navigation.navigate('ViewEntry', { entry: item.entry })}
+      >
         <View style={styles.timelineContent}>
           <View style={styles.timelineLeft}>
             <View
               style={[
                 styles.timelineIcon,
-                {backgroundColor: getStatusColor(item.status)},
-              ]}>
+                { backgroundColor: getStatusColor(item.status) },
+              ]}
+            >
               <Text style={styles.timelineIconText}>
                 {getStatusIcon(item.status)}
               </Text>
@@ -385,7 +389,7 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
               <View
                 style={[
                   styles.timelineLine,
-                  {backgroundColor: getStatusColor(item.status)},
+                  { backgroundColor: getStatusColor(item.status) },
                 ]}
               />
             )}
@@ -395,8 +399,9 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
             <Text
               style={[
                 styles.timelineDate,
-                {color: getStatusColor(item.status)},
-              ]}>
+                { color: getStatusColor(item.status) },
+              ]}
+            >
               {formatTimelineDate(item.daysFromNow, item.entry.date)}
             </Text>
 
@@ -420,8 +425,9 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
                       return (
                         <View
                           key={tagIndex}
-                          style={[styles.tag, {backgroundColor: '#e9ecef'}]}>
-                          <Text style={[styles.tagText, {color: '#495057'}]}>
+                          style={[styles.tag, { backgroundColor: '#e9ecef' }]}
+                        >
+                          <Text style={[styles.tagText, { color: '#495057' }]}>
                             #{tag}
                           </Text>
                         </View>
@@ -430,7 +436,8 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
                       return (
                         <View
                           key={tagIndex}
-                          style={[styles.tag, {backgroundColor: tag.color}]}>
+                          style={[styles.tag, { backgroundColor: tag.color }]}
+                        >
                           <Text style={styles.tagIcon}>{tag.icon}</Text>
                           <Text style={styles.tagText}>{tag.name}</Text>
                         </View>
@@ -451,7 +458,7 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
     );
   };
 
-  const renderTodayEntry = ({item}: {item: DiaryEntry}) => {
+  const renderTodayEntry = ({ item }: { item: DiaryEntry }) => {
     const displayEmoji = item.emoji || getMoodEmoji(item.mood);
     const hasResult =
       item.resultStatus ||
@@ -481,12 +488,16 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
             {item.tags.slice(0, 3).map((tag, index) => {
               const tagInfo =
                 typeof tag === 'string'
-                  ? {name: tag, icon: '', color: '#e9ecef'}
+                  ? { name: tag, icon: '', color: '#e9ecef' }
                   : tag;
               return (
                 <View
                   key={index}
-                  style={[styles.tag, {backgroundColor: tagInfo.color + '20'}]}>
+                  style={[
+                    styles.tag,
+                    { backgroundColor: tagInfo.color + '20' },
+                  ]}
+                >
                   {tagInfo.icon && (
                     <Text style={styles.tagIcon}>{tagInfo.icon}</Text>
                   )}
@@ -509,14 +520,16 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
                 item.resultStatus === 'realized'
                   ? styles.realizedResult
                   : styles.notRealizedResult,
-              ]}>
+              ]}
+            >
               <Text
                 style={[
                   styles.resultStatusText,
                   item.resultStatus === 'realized'
                     ? styles.realizedText
                     : styles.notRealizedText,
-                ]}>
+                ]}
+              >
                 {item.resultStatus === 'realized'
                   ? '✅ 이루어졌어요! 😊'
                   : '❌ 아직 실현되지 않았어요:('}
@@ -534,14 +547,16 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
             </View>
             <TouchableOpacity
               style={styles.editResultButton}
-              onPress={() => handleAddResult(item)}>
+              onPress={() => handleAddResult(item)}
+            >
               <Text style={styles.editResultButtonText}>변경</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <TouchableOpacity
             style={styles.addResultButton}
-            onPress={() => handleAddResult(item)}>
+            onPress={() => handleAddResult(item)}
+          >
             <Text style={styles.addResultButtonText}>🤔 어떻게 되었나요?</Text>
           </TouchableOpacity>
         )}
@@ -552,20 +567,20 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
   // 선택된 카테고리들을 렌더링하는 함수
   const renderSelectedCategories = (entry: DiaryEntry) => {
     const categories = [
-      {key: 'selectedWeather', mapKey: 'weather'},
-      {key: 'selectedPeople', mapKey: 'people'},
-      {key: 'selectedSchool', mapKey: 'school'},
-      {key: 'selectedCompany', mapKey: 'company'},
-      {key: 'selectedTravel', mapKey: 'travel'},
-      {key: 'selectedFood', mapKey: 'food'},
-      {key: 'selectedDessert', mapKey: 'dessert'},
-      {key: 'selectedDrink', mapKey: 'drink'},
+      { key: 'selectedWeather', mapKey: 'weather' },
+      { key: 'selectedPeople', mapKey: 'people' },
+      { key: 'selectedSchool', mapKey: 'school' },
+      { key: 'selectedCompany', mapKey: 'company' },
+      { key: 'selectedTravel', mapKey: 'travel' },
+      { key: 'selectedFood', mapKey: 'food' },
+      { key: 'selectedDessert', mapKey: 'dessert' },
+      { key: 'selectedDrink', mapKey: 'drink' },
     ];
 
-    const selectedItems: Array<{icon: string; name: string; color: string}> =
+    const selectedItems: Array<{ icon: string; name: string; color: string }> =
       [];
 
-    categories.forEach(({key, mapKey}) => {
+    categories.forEach(({ key, mapKey }) => {
       const selectedValues = entry[key as keyof DiaryEntry] as
         | string[]
         | undefined;
@@ -594,7 +609,8 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
         {selectedItems.slice(0, 3).map((item, index) => (
           <View
             key={index}
-            style={[styles.categoryTag, {backgroundColor: item.color}]}>
+            style={[styles.categoryTag, { backgroundColor: item.color }]}
+          >
             <Text style={styles.categoryTagIcon}>{item.icon}</Text>
             <Text style={styles.categoryTagText}>{item.name}</Text>
           </View>
@@ -621,8 +637,12 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
       <View
         style={[
           styles.container,
-          {backgroundColor: currentTheme.colors.background},
-        ]}>
+          {
+            backgroundColor: currentTheme.colors.background,
+            paddingTop: safeAreaInsets.top,
+          },
+        ]}
+      >
         <View
           style={[
             styles.header,
@@ -630,15 +650,19 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
               backgroundColor: currentTheme.colors.surface,
               borderBottomColor: currentTheme.colors.border,
             },
-          ]}>
-          <Text style={[styles.headerTitle, {color: currentTheme.colors.text}]}>
+          ]}
+        >
+          <Text
+            style={[styles.headerTitle, { color: currentTheme.colors.text }]}
+          >
             {currentTheme.icons.home} 미래일기 타임라인
           </Text>
           <Text
             style={[
               styles.headerSubtitle,
-              {color: currentTheme.colors.textSecondary},
-            ]}>
+              { color: currentTheme.colors.textSecondary },
+            ]}
+          >
             오늘부터 시작되는 나의 미래 여행
           </Text>
         </View>
@@ -648,14 +672,16 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
           <View
             style={[
               styles.todaySection,
-              {backgroundColor: currentTheme.colors.surface},
-            ]}>
+              { backgroundColor: currentTheme.colors.surface },
+            ]}
+          >
             <View style={styles.todaySectionTitleContainer}>
               <Text
                 style={[
                   styles.todaySectionTitle,
-                  {color: currentTheme.colors.text},
-                ]}>
+                  { color: currentTheme.colors.text },
+                ]}
+              >
                 ☀️ 오늘 일어날 일!
               </Text>
               <Text
@@ -665,15 +691,17 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
                     backgroundColor: currentTheme.colors.primary,
                     color: currentTheme.colors.background,
                   },
-                ]}>
+                ]}
+              >
                 Today
               </Text>
             </View>
             <Text
               style={[
                 styles.todaySectionSubtitle,
-                {color: currentTheme.colors.textSecondary},
-              ]}>
+                { color: currentTheme.colors.textSecondary },
+              ]}
+            >
               과거에 작성했던 오늘의 예상 일정들입니다
             </Text>
             <FlatList
@@ -692,27 +720,32 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
 
         {timelineItems.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, {color: currentTheme.colors.text}]}>
+            <Text
+              style={[styles.emptyText, { color: currentTheme.colors.text }]}
+            >
               아직 작성된 일기가 없습니다.
             </Text>
             <Text
               style={[
                 styles.emptySubText,
-                {color: currentTheme.colors.textSecondary},
-              ]}>
+                { color: currentTheme.colors.textSecondary },
+              ]}
+            >
               미래의 나에게 보낼 첫 번째 일기를 작성해보세요!
             </Text>
             <TouchableOpacity
               style={[
                 styles.emptyButton,
-                {backgroundColor: currentTheme.colors.primary},
+                { backgroundColor: currentTheme.colors.primary },
               ]}
-              onPress={() => navigation.navigate('WriteEntry', {})}>
+              onPress={() => navigation.navigate('WriteEntry', {})}
+            >
               <Text
                 style={[
                   styles.emptyButtonText,
-                  {color: currentTheme.colors.background},
-                ]}>
+                  { color: currentTheme.colors.background },
+                ]}
+              >
                 미래일기 쓰기
               </Text>
             </TouchableOpacity>
@@ -735,22 +768,26 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
           visible={showResultModal}
           animationType="slide"
           transparent={true}
-          onRequestClose={() => setShowResultModal(false)}>
+          onRequestClose={() => setShowResultModal(false)}
+        >
           <View style={styles.modalContainer}>
             <View
               style={[
                 styles.modalContent,
-                {backgroundColor: currentTheme.colors.surface},
-              ]}>
+                { backgroundColor: currentTheme.colors.surface },
+              ]}
+            >
               <Text
-                style={[styles.modalTitle, {color: currentTheme.colors.text}]}>
+                style={[styles.modalTitle, { color: currentTheme.colors.text }]}
+              >
                 실제 결과 기록
               </Text>
               <Text
                 style={[
                   styles.modalSubtitle,
-                  {color: currentTheme.colors.textSecondary},
-                ]}>
+                  { color: currentTheme.colors.textSecondary },
+                ]}
+              >
                 "{selectedEntry?.title}"에 대한 결과를 기록해주세요
               </Text>
 
@@ -761,20 +798,23 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
                     styles.realizedOption,
                     selectedStatus === 'realized' && styles.selectedOption,
                   ]}
-                  onPress={() => handleSelectStatus('realized')}>
+                  onPress={() => handleSelectStatus('realized')}
+                >
                   <Text style={styles.resultOptionEmoji}>✅</Text>
                   <Text
                     style={[
                       styles.resultOptionText,
-                      {color: currentTheme.colors.text},
-                    ]}>
+                      { color: currentTheme.colors.text },
+                    ]}
+                  >
                     이루어졌어요! 😊
                   </Text>
                   <Text
                     style={[
                       styles.resultOptionDescription,
-                      {color: currentTheme.colors.textSecondary},
-                    ]}>
+                      { color: currentTheme.colors.textSecondary },
+                    ]}
+                  >
                     예상했던 일이 실제로 일어났어요
                   </Text>
                 </TouchableOpacity>
@@ -785,20 +825,23 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
                     styles.notRealizedOption,
                     selectedStatus === 'not_realized' && styles.selectedOption,
                   ]}
-                  onPress={() => handleSelectStatus('not_realized')}>
+                  onPress={() => handleSelectStatus('not_realized')}
+                >
                   <Text style={styles.resultOptionEmoji}>❌</Text>
                   <Text
                     style={[
                       styles.resultOptionText,
-                      {color: currentTheme.colors.text},
-                    ]}>
+                      { color: currentTheme.colors.text },
+                    ]}
+                  >
                     아직 실현되지 않았어요:(
                   </Text>
                   <Text
                     style={[
                       styles.resultOptionDescription,
-                      {color: currentTheme.colors.textSecondary},
-                    ]}>
+                      { color: currentTheme.colors.textSecondary },
+                    ]}
+                  >
                     예상과 다르게 일어나지 않았어요
                   </Text>
                 </TouchableOpacity>
@@ -808,8 +851,9 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
                 <Text
                   style={[
                     styles.detailInputLabel,
-                    {color: currentTheme.colors.text},
-                  ]}>
+                    { color: currentTheme.colors.text },
+                  ]}
+                >
                   실제로 일어난 일을 기록해주세요
                 </Text>
                 <TextInput
@@ -835,24 +879,27 @@ const TimelineScreen: React.FC<Props> = ({navigation}) => {
                 <TouchableOpacity
                   style={[
                     styles.cancelButton,
-                    {backgroundColor: currentTheme.colors.textSecondary},
+                    { backgroundColor: currentTheme.colors.textSecondary },
                   ]}
-                  onPress={() => setShowResultModal(false)}>
+                  onPress={() => setShowResultModal(false)}
+                >
                   <Text style={styles.cancelButtonText}>취소</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.saveButton,
-                    {backgroundColor: currentTheme.colors.success},
+                    { backgroundColor: currentTheme.colors.success },
                     !selectedStatus && styles.disabledButton,
                   ]}
                   onPress={handleSaveResult}
-                  disabled={!selectedStatus}>
+                  disabled={!selectedStatus}
+                >
                   <Text
                     style={[
                       styles.saveButtonText,
                       !selectedStatus && styles.disabledButtonText,
-                    ]}>
+                    ]}
+                  >
                     저장
                   </Text>
                 </TouchableOpacity>
@@ -1053,7 +1100,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    transform: [{rotate: '-10deg'}],
+    transform: [{ rotate: '-10deg' }],
     shadowColor: '#000',
     shadowOffset: {
       width: 2,
