@@ -95,9 +95,9 @@ export interface DiaryFilter {
 
 export type RootStackParamList = {
   MainTabs: undefined;
-  WriteEntry: {entry?: DiaryEntry; isEdit?: boolean};
-  ViewEntry: {entry: DiaryEntry};
-  Login: {onAuthSuccess?: (user: any) => void};
+  WriteEntry: { entry?: DiaryEntry; isEdit?: boolean };
+  ViewEntry: { entry: DiaryEntry };
+  Login: undefined;
   ThemeStore: undefined;
   SecretStore: undefined;
 };

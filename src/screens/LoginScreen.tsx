@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,17 +11,12 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import authService, {User} from '../services/authService';
 
 interface LoginScreenProps {
   navigation: any;
-  onAuthSuccess?: (user: User) => void;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({
-  navigation,
-  onAuthSuccess,
-}) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,89 +41,53 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
 
     setLoading(true);
     try {
-      let user: User | null = null;
-
-      if (isLogin) {
-        user = await authService.signInWithEmail(email, password);
-      } else {
-        user = await authService.signUpWithEmail(email, password);
-      }
-
-      if (user) {
-        Alert.alert(
-          '로그인 성공',
-          `환영합니다, ${user.displayName || user.email}님!`,
-          [
-            {
-              text: '확인',
-              onPress: () => {
-                if (onAuthSuccess) {
-                  onAuthSuccess(user);
-                }
-                navigation.goBack();
-              },
-            },
-          ],
-        );
-      }
+      // 로컬 전용 앱이므로 인증 기능 비활성화
+      Alert.alert(
+        '알림',
+        '현재 버전은 로컬 전용 앱입니다. 로그인 없이 사용할 수 있습니다.',
+        [
+          {
+            text: '확인',
+            onPress: () => navigation.goBack(),
+          },
+        ],
+      );
     } catch (error) {
-      console.error('Email auth error:', error);
+      console.error('Auth error:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleAuth = async () => {
-    setLoading(true);
-    try {
-      const user = await authService.signInWithGoogle();
-
-      if (user) {
-        Alert.alert(
-          '로그인 성공',
-          `환영합니다, ${user.displayName || user.email}님!`,
-          [
-            {
-              text: '확인',
-              onPress: () => {
-                if (onAuthSuccess) {
-                  onAuthSuccess(user);
-                }
-                navigation.goBack();
-              },
-            },
-          ],
-        );
-      }
-    } catch (error) {
-      console.error('Google auth error:', error);
-    } finally {
-      setLoading(false);
-    }
+    Alert.alert(
+      '알림',
+      '현재 버전은 로컬 전용 앱입니다. 로그인 없이 사용할 수 있습니다.',
+      [
+        {
+          text: '확인',
+          onPress: () => navigation.goBack(),
+        },
+      ],
+    );
   };
 
   const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      Alert.alert('이메일 입력', '비밀번호를 재설정할 이메일을 입력해주세요.');
-      return;
-    }
-
-    const success = await authService.resetPassword(email);
-    if (success) {
-      Alert.alert(
-        '비밀번호 재설정',
-        '비밀번호 재설정 이메일을 발송했습니다. 이메일을 확인해주세요.',
-      );
-    }
+    Alert.alert(
+      '알림',
+      '현재 버전은 로컬 전용 앱입니다. 비밀번호 재설정 기능을 사용할 수 없습니다.',
+    );
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <Text style={styles.title}>{isLogin ? '로그인' : '회원가입'}</Text>
           <Text style={styles.subtitle}>미래 일기에 오신 것을 환영합니다</Text>
@@ -139,7 +98,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
           <TouchableOpacity
             style={styles.googleButton}
             onPress={handleGoogleAuth}
-            disabled={loading}>
+            disabled={loading}
+          >
             <Text style={styles.googleButtonText}>🔍</Text>
             <Text style={styles.googleButtonLabel}>Google로 계속하기</Text>
           </TouchableOpacity>
@@ -201,7 +161,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
           <TouchableOpacity
             style={[styles.authButton, loading && styles.disabledButton]}
             onPress={handleEmailAuth}
-            disabled={loading}>
+            disabled={loading}
+          >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
@@ -216,7 +177,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
             <TouchableOpacity
               style={styles.forgotPasswordButton}
               onPress={handleForgotPassword}
-              disabled={loading}>
+              disabled={loading}
+            >
               <Text style={styles.forgotPasswordText}>
                 비밀번호를 잊으셨나요?
               </Text>
@@ -230,7 +192,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
             </Text>
             <TouchableOpacity
               onPress={() => setIsLogin(!isLogin)}
-              disabled={loading}>
+              disabled={loading}
+            >
               <Text style={styles.switchButton}>
                 {isLogin ? '회원가입' : '로그인'}
               </Text>
@@ -282,7 +245,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
