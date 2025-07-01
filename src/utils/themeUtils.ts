@@ -49,40 +49,40 @@ export const defaultTheme: Theme = {
   isActive: true,
 };
 
-// 천사 테마 (프리미엄) - 개선된 버전
+// 천사의 일기 테마 (프리미엄)
 export const angelTheme: Theme = {
   id: 'angel',
   name: '천사의 일기',
-  description: '순백의 깃털과 황금빛 후광이 감싸는 신성한 테마',
+  description: '순백의 깃털과 황금빛 후광이 감싸는 천상의 테마',
   category: 'premium',
-  price: 4500,
+  price: 3900,
   colors: {
-    primary: '#FFD700', // 황금색
-    secondary: '#F0F8FF', // 앨리스 블루
-    background: '#FFFAFA', // 설백색
-    surface: '#F5F5DC', // 베이지
-    text: '#2F4F4F', // 진한 슬레이트 그레이
-    textSecondary: '#696969', // 딤 그레이
-    accent: '#FFB6C1', // 라이트 핑크
-    success: '#98FB98', // 팔레 그린
-    warning: '#F0E68C', // 카키
-    error: '#FFA07A', // 라이트 살몬
+    primary: '#FFD700', // 골드
+    secondary: '#F5F5DC', // 베이지
+    background: '#FFFEF7', // 아이보리
+    surface: '#FEFEFE', // 순백
+    text: '#4A4A4A', // 차콜그레이
+    textSecondary: '#8B7355', // 브론즈
+    accent: '#FFA500', // 오렌지골드
+    success: '#32CD32', // 라임그린
+    warning: '#FF8C00', // 다크오렌지
+    error: '#DC143C', // 크림슨
     border: '#E6E6FA', // 라벤더
-    shadow: '#D3D3D3', // 라이트 그레이
+    shadow: '#D3D3D3', // 라이트그레이
   },
   icons: {
-    home: '👼',
-    diary: '📜',
+    home: '🏠',
+    diary: '📖',
     search: '🔍',
     settings: '⚙️',
     add: '✨',
-    edit: '🖋️',
+    edit: '✏️',
     delete: '🗑️',
     back: '⬅️',
     close: '❌',
     save: '💾',
     share: '📤',
-    heart: '🤍',
+    heart: '💛',
     star: '⭐',
     moon: '🌙',
     sun: '☀️',
@@ -92,8 +92,6 @@ export const angelTheme: Theme = {
     wind: '💨',
     thunder: '⚡',
   },
-  backgroundPattern: 'angel',
-  fontFamily: 'System',
   isActive: false,
 };
 
@@ -101,30 +99,30 @@ export const angelTheme: Theme = {
 export const galaxyDreamTheme: Theme = {
   id: 'galaxy-dream',
   name: '은하수 꿈',
-  description: '별이 쏟아지는 밤하늘을 담은 신비로운 테마',
+  description: '별이 쏟아지는 밤하늘을 담은 신비로운 다크 테마',
   category: 'premium',
   price: 3900,
   colors: {
-    primary: '#6B46C1', // 보라
-    secondary: '#1E1B4B', // 진한 남색
-    background: '#0F0F23', // 거의 검정
-    surface: '#1E1B4B', // 진한 남색
-    text: '#E5E7EB', // 연한 회색
-    textSecondary: '#9CA3AF', // 중간 회색
-    accent: '#F59E0B', // 황금
-    success: '#10B981', // 에메랄드
-    warning: '#F59E0B', // 황금
-    error: '#EF4444', // 빨강
-    border: '#374151', // 진한 회색
-    shadow: '#000000', // 검정
+    primary: '#4A148C', // 딥퍼플
+    secondary: '#7B1FA2', // 퍼플
+    background: '#1A1A2E', // 다크네이비
+    surface: '#16213E', // 미드나잇블루
+    text: '#E8EAF6', // 라이트퍼플
+    textSecondary: '#B39DDB', // 라벤더
+    accent: '#9C27B0', // 퍼플액센트
+    success: '#00BCD4', // 시안
+    warning: '#FF9800', // 오렌지
+    error: '#F44336', // 레드
+    border: '#3F51B5', // 인디고
+    shadow: '#000051', // 다크인디고
   },
   icons: {
     home: '🌌',
-    diary: '📚',
-    search: '🔭',
+    diary: '📘',
+    search: '🔍',
     settings: '⚙️',
-    add: '✨',
-    edit: '🖋️',
+    add: '💫',
+    edit: '✏️',
     delete: '🗑️',
     back: '⬅️',
     close: '❌',
@@ -149,27 +147,27 @@ export const rosegoldLoveTheme: Theme = {
   name: '로즈골드 러브',
   description: '따뜻한 로즈골드가 사랑을 속삭이는 로맨틱 테마',
   category: 'premium',
-  price: 3400,
+  price: 3900,
   colors: {
-    primary: '#E91E63', // 딥핑크
-    secondary: '#F8BBD9', // 연한 핑크
-    background: '#FFF8F0', // 크림색
-    surface: '#FCE4EC', // 연한 로즈
-    text: '#4A148C', // 진한 보라
-    textSecondary: '#7B1FA2', // 중간 보라
-    accent: '#FF6F91', // 코랄핑크
-    success: '#81C784', // 연한 초록
-    warning: '#FFB74D', // 연한 주황
-    error: '#E57373', // 연한 빨강
-    border: '#F8BBD9', // 연한 핑크
-    shadow: '#E1BEE7', // 연한 라벤더
+    primary: '#E91E63', // 핑크
+    secondary: '#F8BBD9', // 라이트핑크
+    background: '#FFF0F5', // 라벤더블러시
+    surface: '#FCE4EC', // 연한핑크
+    text: '#880E4F', // 다크핑크
+    textSecondary: '#AD1457', // 핑크800
+    accent: '#FF4081', // 핑크액센트
+    success: '#4CAF50', // 그린
+    warning: '#FF9800', // 오렌지
+    error: '#F44336', // 레드
+    border: '#F48FB1', // 핑크300
+    shadow: '#EC407A', // 핑크400
   },
   icons: {
     home: '💖',
-    diary: '💕',
+    diary: '📕',
     search: '🔍',
     settings: '⚙️',
-    add: '💝',
+    add: '💕',
     edit: '✏️',
     delete: '🗑️',
     back: '⬅️',
@@ -177,7 +175,7 @@ export const rosegoldLoveTheme: Theme = {
     save: '💾',
     share: '📤',
     heart: '💗',
-    star: '🌟',
+    star: '⭐',
     moon: '🌙',
     sun: '☀️',
     cloud: '☁️',
@@ -195,27 +193,27 @@ export const auroraVisionTheme: Theme = {
   name: '오로라 비전',
   description: '신비로운 극광이 춤추는 환상적인 테마',
   category: 'premium',
-  price: 4200,
+  price: 3900,
   colors: {
-    primary: '#00FFF0', // 시안
-    secondary: '#8A2BE2', // 블루바이올렛
-    background: '#0A0A1A', // 어두운 남색
-    surface: '#1A1A2E', // 진한 남색
-    text: '#E0FFFF', // 연한 시안
-    textSecondary: '#B0E0E6', // 파우더 블루
-    accent: '#FF1493', // 딥핑크
-    success: '#00FF7F', // 스프링그린
-    warning: '#FFD700', // 골드
-    error: '#FF6347', // 토마토
-    border: '#4169E1', // 로얄블루
-    shadow: '#191970', // 미드나잇블루
+    primary: '#00BCD4', // 시안
+    secondary: '#B2EBF2', // 라이트시안
+    background: '#E0F7FA', // 연한시안
+    surface: '#F0FDFF', // 아이스블루
+    text: '#006064', // 다크시안
+    textSecondary: '#00838F', // 시안800
+    accent: '#18FFFF', // 시안액센트
+    success: '#4CAF50', // 그린
+    warning: '#FF9800', // 오렌지
+    error: '#F44336', // 레드
+    border: '#4DD0E1', // 시안300
+    shadow: '#26C6DA', // 시안400
   },
   icons: {
-    home: '🌃',
-    diary: '📔',
+    home: '🏠',
+    diary: '📗',
     search: '🔍',
     settings: '⚙️',
-    add: '🌠',
+    add: '✨',
     edit: '✏️',
     delete: '🗑️',
     back: '⬅️',
@@ -241,24 +239,24 @@ export const moonlightSerenadeTheme: Theme = {
   name: '달빛 세레나데',
   description: '은은한 달빛 아래 흐르는 고요한 선율의 테마',
   category: 'premium',
-  price: 3600,
+  price: 3900,
   colors: {
-    primary: '#4FC3F7', // 스카이블루
-    secondary: '#E1F5FE', // 연한 블루
-    background: '#F8F9FA', // 연한 회색
-    surface: '#E3F2FD', // 연한 블루
-    text: '#263238', // 블루그레이
-    textSecondary: '#546E7A', // 중간 블루그레이
-    accent: '#29B6F6', // 라이트블루
-    success: '#66BB6A', // 라이트그린
-    warning: '#FFA726', // 오렌지
-    error: '#EF5350', // 레드
-    border: '#B3E5FC', // 연한 스카이블루
-    shadow: '#90A4AE', // 블루그레이
+    primary: '#3F51B5', // 인디고
+    secondary: '#C5CAE9', // 라이트인디고
+    background: '#E8EAF6', // 연한인디고
+    surface: '#F3F4FB', // 매우연한인디고
+    text: '#1A237E', // 다크인디고
+    textSecondary: '#303F9F', // 인디고700
+    accent: '#536DFE', // 인디고액센트
+    success: '#4CAF50', // 그린
+    warning: '#FF9800', // 오렌지
+    error: '#F44336', // 레드
+    border: '#9FA8DA', // 인디고300
+    shadow: '#7986CB', // 인디고400
   },
   icons: {
     home: '🌙',
-    diary: '📖',
+    diary: '📘',
     search: '🔍',
     settings: '⚙️',
     add: '🌟',
@@ -268,7 +266,7 @@ export const moonlightSerenadeTheme: Theme = {
     close: '❌',
     save: '💾',
     share: '📤',
-    heart: '🤍',
+    heart: '💙',
     star: '⭐',
     moon: '🌙',
     sun: '☀️',
@@ -287,24 +285,24 @@ export const cherryBlossomTheme: Theme = {
   name: '벚꽃 환상',
   description: '봄바람에 흩날리는 벚꽃 꽃잎의 꿈결같은 테마',
   category: 'premium',
-  price: 3200,
+  price: 3900,
   colors: {
-    primary: '#F8BBD9', // 체리블라썸
-    secondary: '#FCE4EC', // 연한 핑크
-    background: '#FFFDE7', // 크림 옐로우
-    surface: '#FFF3E0', // 연한 오렌지
-    text: '#4A148C', // 퍼플
-    textSecondary: '#6A1B9A', // 중간 퍼플
-    accent: '#FF4081', // 핑크 액센트
-    success: '#8BC34A', // 라이트그린
-    warning: '#FFC107', // 앰버
-    error: '#F44336', // 레드
-    border: '#F8BBD9', // 체리블라썸
-    shadow: '#E1BEE7', // 라이트퍼플
+    primary: '#E91E63', // 핑크
+    secondary: '#F8BBD9', // 라이트핑크
+    background: '#FDF2F8', // 매우연한핑크
+    surface: '#FCE7F3', // 로즈블러시
+    text: '#831843', // 다크로즈
+    textSecondary: '#BE185D', // 핑크800
+    accent: '#EC4899', // 핑크500
+    success: '#10B981', // 에메랄드
+    warning: '#F59E0B', // 앰버
+    error: '#EF4444', // 레드
+    border: '#F9A8D4', // 핑크300
+    shadow: '#F472B6', // 핑크400
   },
   icons: {
     home: '🌸',
-    diary: '📝',
+    diary: '📓',
     search: '🔍',
     settings: '⚙️',
     add: '🌺',
@@ -333,7 +331,7 @@ export const lavenderDreamTheme: Theme = {
   name: '라벤더 드림',
   description: '향긋한 라벤더 향이 감도는 평온한 꿈의 테마',
   category: 'premium',
-  price: 2800,
+  price: 3900,
   colors: {
     primary: '#9C27B0', // 퍼플
     secondary: '#E1BEE7', // 라이트퍼플
@@ -379,7 +377,7 @@ export const goldenSunsetTheme: Theme = {
   name: '황금 일몰',
   description: '따뜻한 노을이 물든 황금빛 하늘의 테마',
   category: 'premium',
-  price: 3800,
+  price: 3900,
   colors: {
     primary: '#FF9800', // 오렌지
     secondary: '#FFE0B2', // 연한 오렌지
@@ -445,11 +443,7 @@ export const saveThemes = async (themes: Theme[]): Promise<void> => {
 // 테마 불러오기
 export const loadThemes = async (): Promise<Theme[]> => {
   try {
-    const data = await AsyncStorage.getItem(THEMES_KEY);
-    if (data) {
-      return JSON.parse(data);
-    }
-    // 기본 테마들 저장
+    // 항상 최신 테마 목록을 저장하고 반환
     await saveThemes(allThemes);
     return allThemes;
   } catch (error) {
@@ -486,15 +480,30 @@ export const getCurrentTheme = async (): Promise<Theme> => {
   return themes.find(theme => theme.id === activeThemeId) || defaultTheme;
 };
 
-// 테마 구매 처리
+// 테마 구매 처리 (구매 후 바로 적용)
 export const purchaseTheme = async (themeId: string): Promise<void> => {
   try {
     const themes = await loadThemes();
     const themeIndex = themes.findIndex(theme => theme.id === themeId);
 
     if (themeIndex >= 0) {
-      themes[themeIndex].category = 'free'; // 구매 후 무료로 변경
-      await saveThemes(themes);
+      // 테마를 무료로 변경 (구매 완료)
+      themes[themeIndex].category = 'free';
+
+      // 모든 테마의 활성화 상태를 false로 설정
+      const updatedThemes = themes.map(theme => ({
+        ...theme,
+        isActive: theme.id === themeId, // 구매한 테마만 활성화
+      }));
+
+      // 구매한 테마의 카테고리를 무료로 변경
+      updatedThemes[themeIndex].category = 'free';
+
+      // 테마 목록 저장
+      await saveThemes(updatedThemes);
+
+      // 활성 테마로 설정
+      await saveActiveTheme(themeId);
     }
   } catch (error) {
     console.error('테마 구매 처리 중 오류:', error);
