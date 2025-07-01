@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {useTheme} from '../contexts/ThemeContext';
-import {Theme} from '../types';
+import { useTheme } from '../contexts/ThemeContext';
+import { Theme } from '../types';
 
 const ThemeStoreScreen: React.FC = () => {
-  const {currentTheme, allThemes, applyTheme, purchaseTheme} = useTheme();
+  const { currentTheme, allThemes, applyTheme, purchaseTheme } = useTheme();
   const [loading, setLoading] = useState<string | null>(null);
 
   const handlePurchase = async (theme: Theme) => {
@@ -26,7 +26,7 @@ const ThemeStoreScreen: React.FC = () => {
         theme.name
       } 테마를 ${theme.price?.toLocaleString()}원에 구매하시겠습니까?`,
       [
-        {text: '취소', style: 'cancel'},
+        { text: '취소', style: 'cancel' },
         {
           text: '구매',
           onPress: async () => {
@@ -79,8 +79,9 @@ const ThemeStoreScreen: React.FC = () => {
               : theme.colors.border,
             borderWidth: isCurrentTheme ? 2 : 1,
           },
-        ]}>
-        {/* 테마 미리보기 */}
+        ]}
+      >
+        {/* 테마 미리보기 - 타임라인 */}
         <View
           style={[
             styles.themePreview,
@@ -88,41 +89,206 @@ const ThemeStoreScreen: React.FC = () => {
               backgroundColor: theme.colors.background,
               borderColor: theme.colors.border,
             },
-          ]}>
+          ]}
+        >
           <View style={styles.previewHeader}>
-            <Text style={[styles.previewTitle, {color: theme.colors.text}]}>
-              {theme.icons.diary} 일기 미리보기
+            <Text style={[styles.previewTitle, { color: theme.colors.text }]}>
+              {theme.icons.diary} 타임라인 미리보기
             </Text>
           </View>
-          <View style={styles.previewContent}>
-            <Text
-              style={[styles.previewText, {color: theme.colors.textSecondary}]}>
-              오늘의 일기...
-            </Text>
+          <View style={styles.timelineContainer}>
+            {/* 오늘 */}
+            <View style={styles.timelineItem}>
+              <View style={styles.timelineDate}>
+                <Text
+                  style={[
+                    styles.timelineDateText,
+                    { color: theme.colors.primary },
+                  ]}
+                >
+                  오늘
+                </Text>
+                <Text
+                  style={[styles.timelineDateNum, { color: theme.colors.text }]}
+                >
+                  12/25
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.timelineContent,
+                  { backgroundColor: theme.colors.surface },
+                ]}
+              >
+                <Text
+                  style={[styles.timelineTitle, { color: theme.colors.text }]}
+                >
+                  크리스마스 파티 {theme.icons.heart}
+                </Text>
+                <Text
+                  style={[
+                    styles.timelineText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  친구들과 즐거운 시간을 보내고...
+                </Text>
+                <View style={styles.timelineTags}>
+                  <View
+                    style={[
+                      styles.timelineTag,
+                      { backgroundColor: theme.colors.accent },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.timelineTagText,
+                        { color: theme.colors.background },
+                      ]}
+                    >
+                      친구
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* 내일 */}
+            <View style={styles.timelineItem}>
+              <View style={styles.timelineDate}>
+                <Text
+                  style={[
+                    styles.timelineDateText,
+                    { color: theme.colors.secondary },
+                  ]}
+                >
+                  내일
+                </Text>
+                <Text
+                  style={[styles.timelineDateNum, { color: theme.colors.text }]}
+                >
+                  12/26
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.timelineContent,
+                  { backgroundColor: theme.colors.surface },
+                ]}
+              >
+                <Text
+                  style={[styles.timelineTitle, { color: theme.colors.text }]}
+                >
+                  새로운 프로젝트 시작 {theme.icons.star}
+                </Text>
+                <Text
+                  style={[
+                    styles.timelineText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  새로운 도전이 기다리고 있어...
+                </Text>
+                <View style={styles.timelineTags}>
+                  <View
+                    style={[
+                      styles.timelineTag,
+                      { backgroundColor: theme.colors.success },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.timelineTagText,
+                        { color: theme.colors.background },
+                      ]}
+                    >
+                      회사
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* 다음 주 */}
+            <View style={styles.timelineItem}>
+              <View style={styles.timelineDate}>
+                <Text
+                  style={[
+                    styles.timelineDateText,
+                    { color: theme.colors.warning },
+                  ]}
+                >
+                  1/2
+                </Text>
+                <Text
+                  style={[styles.timelineDateNum, { color: theme.colors.text }]}
+                >
+                  목표
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.timelineContent,
+                  { backgroundColor: theme.colors.surface },
+                ]}
+              >
+                <Text
+                  style={[styles.timelineTitle, { color: theme.colors.text }]}
+                >
+                  새해 결심 실천하기 {theme.icons.sun}
+                </Text>
+                <Text
+                  style={[
+                    styles.timelineText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  올해는 정말 달라질 거야...
+                </Text>
+                <View style={styles.timelineTags}>
+                  <View
+                    style={[
+                      styles.timelineTag,
+                      { backgroundColor: theme.colors.primary },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.timelineTagText,
+                        { color: theme.colors.background },
+                      ]}
+                    >
+                      개인
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
           </View>
         </View>
 
         {/* 테마 정보 */}
         <View style={styles.themeInfo}>
-          <Text style={[styles.themeName, {color: theme.colors.text}]}>
+          <Text style={[styles.themeName, { color: theme.colors.text }]}>
             {theme.name}
           </Text>
           <Text
             style={[
               styles.themeDescription,
-              {color: theme.colors.textSecondary},
-            ]}>
+              { color: theme.colors.textSecondary },
+            ]}
+          >
             {theme.description}
           </Text>
 
           {/* 가격 정보 */}
           <View style={styles.priceContainer}>
             {isPremium ? (
-              <Text style={[styles.price, {color: theme.colors.accent}]}>
+              <Text style={[styles.price, { color: theme.colors.accent }]}>
                 {theme.price?.toLocaleString()}원
               </Text>
             ) : (
-              <Text style={[styles.free, {color: theme.colors.success}]}>
+              <Text style={[styles.free, { color: theme.colors.success }]}>
                 무료
               </Text>
             )}
@@ -133,10 +299,12 @@ const ThemeStoreScreen: React.FC = () => {
             <View
               style={[
                 styles.currentBadge,
-                {backgroundColor: theme.colors.primary},
-              ]}>
+                { backgroundColor: theme.colors.primary },
+              ]}
+            >
               <Text
-                style={[styles.currentText, {color: theme.colors.background}]}>
+                style={[styles.currentText, { color: theme.colors.background }]}
+              >
                 현재 적용됨
               </Text>
             </View>
@@ -148,13 +316,15 @@ const ThemeStoreScreen: React.FC = () => {
               <View
                 style={[
                   styles.appliedButton,
-                  {backgroundColor: theme.colors.success},
-                ]}>
+                  { backgroundColor: theme.colors.success },
+                ]}
+              >
                 <Text
                   style={[
                     styles.appliedText,
-                    {color: theme.colors.background},
-                  ]}>
+                    { color: theme.colors.background },
+                  ]}
+                >
                   적용됨
                 </Text>
               </View>
@@ -164,15 +334,17 @@ const ThemeStoreScreen: React.FC = () => {
                   <TouchableOpacity
                     style={[
                       styles.purchaseButton,
-                      {backgroundColor: theme.colors.accent},
+                      { backgroundColor: theme.colors.accent },
                     ]}
                     onPress={() => handlePurchase(theme)}
-                    disabled={loading === theme.id}>
+                    disabled={loading === theme.id}
+                  >
                     <Text
                       style={[
                         styles.buttonText,
-                        {color: theme.colors.background},
-                      ]}>
+                        { color: theme.colors.background },
+                      ]}
+                    >
                       {loading === theme.id ? '구매 중...' : '구매'}
                     </Text>
                   </TouchableOpacity>
@@ -181,15 +353,17 @@ const ThemeStoreScreen: React.FC = () => {
                   <TouchableOpacity
                     style={[
                       styles.applyButton,
-                      {backgroundColor: theme.colors.primary},
+                      { backgroundColor: theme.colors.primary },
                     ]}
                     onPress={() => handleApply(theme)}
-                    disabled={loading === theme.id}>
+                    disabled={loading === theme.id}
+                  >
                     <Text
                       style={[
                         styles.buttonText,
-                        {color: theme.colors.background},
-                      ]}>
+                        { color: theme.colors.background },
+                      ]}
+                    >
                       {loading === theme.id ? '적용 중...' : '적용'}
                     </Text>
                   </TouchableOpacity>
@@ -206,25 +380,32 @@ const ThemeStoreScreen: React.FC = () => {
     <View
       style={[
         styles.container,
-        {backgroundColor: currentTheme.colors.background},
-      ]}>
+        { backgroundColor: currentTheme.colors.background },
+      ]}
+    >
       <View
-        style={[styles.header, {backgroundColor: currentTheme.colors.surface}]}>
-        <Text style={[styles.headerTitle, {color: currentTheme.colors.text}]}>
+        style={[
+          styles.header,
+          { backgroundColor: currentTheme.colors.surface },
+        ]}
+      >
+        <Text style={[styles.headerTitle, { color: currentTheme.colors.text }]}>
           {currentTheme.icons.settings} 테마 스토어
         </Text>
         <Text
           style={[
             styles.headerSubtitle,
-            {color: currentTheme.colors.textSecondary},
-          ]}>
+            { color: currentTheme.colors.textSecondary },
+          ]}
+        >
           나만의 특별한 일기 테마를 선택하세요
         </Text>
       </View>
 
       <ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.themesContainer}>
           {allThemes.map(renderThemeCard)}
         </View>
@@ -271,7 +452,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   themePreview: {
-    height: 120,
+    height: 200,
     borderRadius: 12,
     marginBottom: 16,
     borderWidth: 1,
@@ -286,13 +467,53 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  previewContent: {
+  timelineContainer: {
     flex: 1,
-    padding: 12,
-    justifyContent: 'center',
+    padding: 8,
   },
-  previewText: {
-    fontSize: 12,
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    alignItems: 'flex-start',
+  },
+  timelineDate: {
+    width: 50,
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  timelineDateText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  timelineDateNum: {
+    fontSize: 8,
+    marginTop: 2,
+  },
+  timelineContent: {
+    flex: 1,
+    borderRadius: 8,
+    padding: 8,
+  },
+  timelineTitle: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  timelineText: {
+    fontSize: 9,
+    marginBottom: 4,
+  },
+  timelineTags: {
+    flexDirection: 'row',
+  },
+  timelineTag: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  timelineTagText: {
+    fontSize: 8,
+    fontWeight: '500',
   },
   themeInfo: {
     gap: 8,
