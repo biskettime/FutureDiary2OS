@@ -112,7 +112,6 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
     { id: 'cloudy', name: '흐림', icon: '☁️', color: '#E0E0E0' },
     { id: 'rainy', name: '비', icon: '🌧️', color: '#81D4FA' },
     { id: 'snowy', name: '눈', icon: '❄️', color: '#E1F5FE' },
-    { id: 'windy', name: '바람', icon: '💨', color: '#B0BEC5' },
   ];
 
   const peopleOptions = [
@@ -120,7 +119,6 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
     { id: 'family', name: '가족', icon: '🌱', color: '#81C784' },
     { id: 'lover', name: '연인', icon: '💖', color: '#F06292' },
     { id: 'acquaintance', name: '지인', icon: '😊', color: '#FFB74D' },
-    { id: 'alone', name: '만나지 않음', icon: '❌', color: '#90A4AE' },
   ];
 
   const schoolOptions = [
@@ -136,7 +134,6 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
     { id: 'work', name: '업무', icon: '💼', color: '#607D8B' },
     { id: 'project', name: '프로젝트', icon: '📊', color: '#9C27B0' },
     { id: 'presentation', name: '발표', icon: '🎤', color: '#FF5722' },
-    { id: 'training', name: '교육', icon: '📖', color: '#795548' },
   ];
 
   const travelOptions = [
@@ -175,10 +172,8 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
   // 기본 추천 태그들 (제공된 이미지 스타일)
   const recommendedTags = [
     { id: 'daily', name: '매일 운동하기', icon: '🏃', color: '#4285f4' },
-    { id: 'travel', name: '제주 감귤하기', icon: '🍊', color: '#ff6d00' },
     { id: 'music', name: '근육 늘리기', icon: '💪', color: '#9c27b0' },
     { id: 'health', name: '건강한 식습관', icon: '🥗', color: '#4caf50' },
-    { id: 'book', name: '닥터리 연습', icon: '📚', color: '#f44336' },
     { id: 'meditation', name: '금연하기', icon: '🚭', color: '#607d8b' },
     { id: 'habit', name: '책읽는 습관', icon: '📖', color: '#673ab7' },
     { id: 'nature', name: '상식교양쌓기', icon: '🧠', color: '#009688' },

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {useTheme} from '../contexts/ThemeContext';
-import {Theme} from '../types';
+import { useTheme } from '../contexts/ThemeContext';
+import { Theme } from '../types';
 import AngelBackground from '../components/AngelBackground';
 
 interface StoreItem {
@@ -23,7 +23,7 @@ interface StoreItem {
 }
 
 const SecretStoreScreen: React.FC = () => {
-  const {currentTheme, allThemes, applyTheme, purchaseTheme} = useTheme();
+  const { currentTheme, allThemes, applyTheme, purchaseTheme } = useTheme();
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleThemePurchase = async (theme: Theme) => {
@@ -38,7 +38,7 @@ const SecretStoreScreen: React.FC = () => {
         theme.name
       } 테마를 ${theme.price?.toLocaleString()}원에 구매하시겠습니까?`,
       [
-        {text: '취소', style: 'cancel'},
+        { text: '취소', style: 'cancel' },
         {
           text: '구매',
           onPress: async () => {
@@ -79,7 +79,7 @@ const SecretStoreScreen: React.FC = () => {
       '기능 구매',
       `${item.title}을 ${item.price.toLocaleString()}원에 구매하시겠습니까?`,
       [
-        {text: '취소', style: 'cancel'},
+        { text: '취소', style: 'cancel' },
         {
           text: '구매',
           onPress: () => {
@@ -98,14 +98,17 @@ const SecretStoreScreen: React.FC = () => {
 
     return (
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, {color: currentTheme.colors.text}]}>
+        <Text
+          style={[styles.sectionTitle, { color: currentTheme.colors.text }]}
+        >
           🎨 프리미엄 테마
         </Text>
         <Text
           style={[
             styles.sectionDescription,
-            {color: currentTheme.colors.textSecondary},
-          ]}>
+            { color: currentTheme.colors.textSecondary },
+          ]}
+        >
           특별한 분위기의 일기 테마를 구매하세요
         </Text>
 
@@ -118,24 +121,34 @@ const SecretStoreScreen: React.FC = () => {
                 backgroundColor: currentTheme.colors.surface,
                 borderColor: currentTheme.colors.border,
               },
-            ]}>
+            ]}
+          >
             <View style={styles.itemHeader}>
               <Text style={styles.itemIcon}>{theme.icons.diary}</Text>
               <View style={styles.itemInfo}>
                 <Text
-                  style={[styles.itemTitle, {color: currentTheme.colors.text}]}>
+                  style={[
+                    styles.itemTitle,
+                    { color: currentTheme.colors.text },
+                  ]}
+                >
                   {theme.name}
                 </Text>
                 <Text
                   style={[
                     styles.itemDescription,
-                    {color: currentTheme.colors.textSecondary},
-                  ]}>
+                    { color: currentTheme.colors.textSecondary },
+                  ]}
+                >
                   {theme.description}
                 </Text>
               </View>
               <Text
-                style={[styles.itemPrice, {color: currentTheme.colors.accent}]}>
+                style={[
+                  styles.itemPrice,
+                  { color: currentTheme.colors.accent },
+                ]}
+              >
                 {theme.price?.toLocaleString()}원
               </Text>
             </View>
@@ -143,15 +156,17 @@ const SecretStoreScreen: React.FC = () => {
             <TouchableOpacity
               style={[
                 styles.purchaseButton,
-                {backgroundColor: currentTheme.colors.accent},
+                { backgroundColor: currentTheme.colors.accent },
               ]}
               onPress={() => handleThemePurchase(theme)}
-              disabled={loading === theme.id}>
+              disabled={loading === theme.id}
+            >
               <Text
                 style={[
                   styles.buttonText,
-                  {color: currentTheme.colors.background},
-                ]}>
+                  { color: currentTheme.colors.background },
+                ]}
+              >
                 {loading === theme.id ? '구매 중...' : '구매'}
               </Text>
             </TouchableOpacity>
@@ -161,15 +176,17 @@ const SecretStoreScreen: React.FC = () => {
         <Text
           style={[
             styles.sectionTitle,
-            {color: currentTheme.colors.text, marginTop: 24},
-          ]}>
+            { color: currentTheme.colors.text, marginTop: 24 },
+          ]}
+        >
           🎨 무료 테마
         </Text>
         <Text
           style={[
             styles.sectionDescription,
-            {color: currentTheme.colors.textSecondary},
-          ]}>
+            { color: currentTheme.colors.textSecondary },
+          ]}
+        >
           기본 제공되는 테마들
         </Text>
 
@@ -182,27 +199,34 @@ const SecretStoreScreen: React.FC = () => {
                 backgroundColor: currentTheme.colors.surface,
                 borderColor: currentTheme.colors.border,
               },
-            ]}>
+            ]}
+          >
             <View style={styles.itemHeader}>
               <Text style={styles.itemIcon}>{theme.icons.diary}</Text>
               <View style={styles.itemInfo}>
                 <Text
-                  style={[styles.itemTitle, {color: currentTheme.colors.text}]}>
+                  style={[
+                    styles.itemTitle,
+                    { color: currentTheme.colors.text },
+                  ]}
+                >
                   {theme.name}
                 </Text>
                 <Text
                   style={[
                     styles.itemDescription,
-                    {color: currentTheme.colors.textSecondary},
-                  ]}>
+                    { color: currentTheme.colors.textSecondary },
+                  ]}
+                >
                   {theme.description}
                 </Text>
               </View>
               <Text
                 style={[
                   styles.itemPrice,
-                  {color: currentTheme.colors.success},
-                ]}>
+                  { color: currentTheme.colors.success },
+                ]}
+              >
                 무료
               </Text>
             </View>
@@ -210,15 +234,17 @@ const SecretStoreScreen: React.FC = () => {
             <TouchableOpacity
               style={[
                 styles.purchaseButton,
-                {backgroundColor: currentTheme.colors.primary},
+                { backgroundColor: currentTheme.colors.primary },
               ]}
               onPress={() => handleThemeApply(theme)}
-              disabled={loading === theme.id}>
+              disabled={loading === theme.id}
+            >
               <Text
                 style={[
                   styles.buttonText,
-                  {color: currentTheme.colors.background},
-                ]}>
+                  { color: currentTheme.colors.background },
+                ]}
+              >
                 {loading === theme.id ? '적용 중...' : '적용'}
               </Text>
             </TouchableOpacity>
@@ -230,33 +256,6 @@ const SecretStoreScreen: React.FC = () => {
 
   const renderFeatureSection = () => {
     const features: StoreItem[] = [
-      {
-        id: 'encryption',
-        title: '고급 암호화',
-        description: '일기 내용을 군사급 암호화로 보호',
-        price: 4900,
-        icon: '🔐',
-        category: 'security',
-        onPurchase: () => handleFeaturePurchase,
-      },
-      {
-        id: 'biometric',
-        title: '생체 인증',
-        description: '지문, 얼굴 인식으로 앱 잠금',
-        price: 2900,
-        icon: '👆',
-        category: 'security',
-        onPurchase: () => handleFeaturePurchase,
-      },
-      {
-        id: 'cloud-backup',
-        title: '무제한 클라우드 백업',
-        description: '모든 일기를 안전하게 백업',
-        price: 3900,
-        icon: '☁️',
-        category: 'feature',
-        onPurchase: () => handleFeaturePurchase,
-      },
       {
         id: 'export',
         title: '고급 내보내기',
@@ -270,85 +269,17 @@ const SecretStoreScreen: React.FC = () => {
 
     return (
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, {color: currentTheme.colors.text}]}>
-          🔒 보안 기능
-        </Text>
         <Text
-          style={[
-            styles.sectionDescription,
-            {color: currentTheme.colors.textSecondary},
-          ]}>
-          일기를 더욱 안전하게 보호하세요
-        </Text>
-
-        {features
-          .filter(f => f.category === 'security')
-          .map(item => (
-            <View
-              key={item.id}
-              style={[
-                styles.storeItem,
-                {
-                  backgroundColor: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                },
-              ]}>
-              <View style={styles.itemHeader}>
-                <Text style={styles.itemIcon}>{item.icon}</Text>
-                <View style={styles.itemInfo}>
-                  <Text
-                    style={[
-                      styles.itemTitle,
-                      {color: currentTheme.colors.text},
-                    ]}>
-                    {item.title}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.itemDescription,
-                      {color: currentTheme.colors.textSecondary},
-                    ]}>
-                    {item.description}
-                  </Text>
-                </View>
-                <Text
-                  style={[
-                    styles.itemPrice,
-                    {color: currentTheme.colors.accent},
-                  ]}>
-                  {item.price.toLocaleString()}원
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                style={[
-                  styles.purchaseButton,
-                  {backgroundColor: currentTheme.colors.accent},
-                ]}
-                onPress={() => handleFeaturePurchase(item)}>
-                <Text
-                  style={[
-                    styles.buttonText,
-                    {color: currentTheme.colors.background},
-                  ]}>
-                  구매
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-
-        <Text
-          style={[
-            styles.sectionTitle,
-            {color: currentTheme.colors.text, marginTop: 24},
-          ]}>
+          style={[styles.sectionTitle, { color: currentTheme.colors.text }]}
+        >
           ⚡ 프리미엄 기능
         </Text>
         <Text
           style={[
             styles.sectionDescription,
-            {color: currentTheme.colors.textSecondary},
-          ]}>
+            { color: currentTheme.colors.textSecondary },
+          ]}
+        >
           더욱 편리한 일기 작성 기능
         </Text>
 
@@ -363,30 +294,34 @@ const SecretStoreScreen: React.FC = () => {
                   backgroundColor: currentTheme.colors.surface,
                   borderColor: currentTheme.colors.border,
                 },
-              ]}>
+              ]}
+            >
               <View style={styles.itemHeader}>
                 <Text style={styles.itemIcon}>{item.icon}</Text>
                 <View style={styles.itemInfo}>
                   <Text
                     style={[
                       styles.itemTitle,
-                      {color: currentTheme.colors.text},
-                    ]}>
+                      { color: currentTheme.colors.text },
+                    ]}
+                  >
                     {item.title}
                   </Text>
                   <Text
                     style={[
                       styles.itemDescription,
-                      {color: currentTheme.colors.textSecondary},
-                    ]}>
+                      { color: currentTheme.colors.textSecondary },
+                    ]}
+                  >
                     {item.description}
                   </Text>
                 </View>
                 <Text
                   style={[
                     styles.itemPrice,
-                    {color: currentTheme.colors.accent},
-                  ]}>
+                    { color: currentTheme.colors.accent },
+                  ]}
+                >
                   {item.price.toLocaleString()}원
                 </Text>
               </View>
@@ -394,14 +329,16 @@ const SecretStoreScreen: React.FC = () => {
               <TouchableOpacity
                 style={[
                   styles.purchaseButton,
-                  {backgroundColor: currentTheme.colors.accent},
+                  { backgroundColor: currentTheme.colors.accent },
                 ]}
-                onPress={() => handleFeaturePurchase(item)}>
+                onPress={() => handleFeaturePurchase(item)}
+              >
                 <Text
                   style={[
                     styles.buttonText,
-                    {color: currentTheme.colors.background},
-                  ]}>
+                    { color: currentTheme.colors.background },
+                  ]}
+                >
                   구매
                 </Text>
               </TouchableOpacity>
@@ -416,28 +353,34 @@ const SecretStoreScreen: React.FC = () => {
       <View
         style={[
           styles.container,
-          {backgroundColor: currentTheme.colors.background},
-        ]}>
+          { backgroundColor: currentTheme.colors.background },
+        ]}
+      >
         <View
           style={[
             styles.header,
-            {backgroundColor: currentTheme.colors.surface},
-          ]}>
-          <Text style={[styles.headerTitle, {color: currentTheme.colors.text}]}>
+            { backgroundColor: currentTheme.colors.surface },
+          ]}
+        >
+          <Text
+            style={[styles.headerTitle, { color: currentTheme.colors.text }]}
+          >
             🔒 비밀 일기 스토어
           </Text>
           <Text
             style={[
               styles.headerSubtitle,
-              {color: currentTheme.colors.textSecondary},
-            ]}>
+              { color: currentTheme.colors.textSecondary },
+            ]}
+          >
             프리미엄 기능과 테마를 구매하세요
           </Text>
         </View>
 
         <ScrollView
           style={styles.scrollView}
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+        >
           {renderThemeSection()}
           {renderFeatureSection()}
 
@@ -445,8 +388,9 @@ const SecretStoreScreen: React.FC = () => {
             <Text
               style={[
                 styles.footerText,
-                {color: currentTheme.colors.textSecondary},
-              ]}>
+                { color: currentTheme.colors.textSecondary },
+              ]}
+            >
               모든 구매는 영구적으로 적용됩니다
             </Text>
           </View>
