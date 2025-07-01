@@ -406,7 +406,12 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
               {formatTimelineDate(item.daysFromNow, item.entry.date)}
             </Text>
 
-            <View style={styles.entryCard}>
+            <View
+              style={[
+                styles.entryCard,
+                { borderLeftColor: getStatusColor(item.status) },
+              ]}
+            >
               <View style={styles.entryHeader}>
                 <Text style={styles.entryMood}>{displayEmoji}</Text>
                 <Text style={styles.entryTitle}>{item.entry.title}</Text>
@@ -1029,6 +1034,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    borderLeftWidth: 4,
   },
   entryHeader: {
     flexDirection: 'row',

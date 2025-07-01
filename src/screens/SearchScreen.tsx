@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DiaryEntry, RootStackParamList } from '../types';
 import { loadDiaryEntries } from '../utils/storage';
+import { useTheme } from '../contexts/ThemeContext';
 
 type SearchScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -32,6 +33,7 @@ interface SearchFilters {
 
 const SearchScreen: React.FC<Props> = ({ navigation }) => {
   const safeAreaInsets = useSafeAreaInsets();
+  const { currentTheme } = useTheme();
   const [allEntries, setAllEntries] = useState<DiaryEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -340,17 +342,52 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.loadingText}>일기를 불러오는 중...</Text>
+      <View
+        style={[
+          styles.centerContainer,
+          { backgroundColor: currentTheme.colors.background },
+        ]}
+      >
+        <Text
+          style={[
+            styles.loadingText,
+            { color: currentTheme.colors.textSecondary },
+          ]}
+        >
+          일기를 불러오는 중...
+        </Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>🔍 일기 찾기</Text>
-        <Text style={styles.headerSubtitle}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: safeAreaInsets.top,
+          backgroundColor: currentTheme.colors.background,
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: currentTheme.colors.surface,
+            borderBottomColor: currentTheme.colors.border,
+          },
+        ]}
+      >
+        <Text style={[styles.headerTitle, { color: currentTheme.colors.text }]}>
+          🔍 일기 찾기
+        </Text>
+        <Text
+          style={[
+            styles.headerSubtitle,
+            { color: currentTheme.colors.textSecondary },
+          ]}
+        >
           키워드, 날짜, 태그로 일기를 검색해보세요
         </Text>
       </View>

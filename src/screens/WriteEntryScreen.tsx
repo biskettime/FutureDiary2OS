@@ -22,6 +22,7 @@ import {
   getDaysAgo,
   getDaysLater,
 } from '../utils/dateUtils';
+import { useTheme } from '../contexts/ThemeContext';
 
 type WriteEntryScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -37,6 +38,7 @@ interface Props {
 const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
   const { entry, isEdit } = route.params;
   const safeAreaInsets = useSafeAreaInsets();
+  const { currentTheme } = useTheme();
 
   const [title, setTitle] = useState(entry?.title || '');
   const [content, setContent] = useState(entry?.content || '');

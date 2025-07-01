@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,15 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
-import {loadDiaryEntries} from '../utils/storage';
-import {DiaryEntry as StorageDiaryEntry} from '../types';
+import { useFocusEffect } from '@react-navigation/native';
+import { loadDiaryEntries } from '../utils/storage';
+import { DiaryEntry as StorageDiaryEntry } from '../types';
 import {
   formatDateToMonthDay,
   getDayOfWeek,
   getDateStatus,
 } from '../utils/dateUtils';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface DiaryEntry {
   id: string;
@@ -35,6 +36,7 @@ interface YearSection {
 }
 
 const MyDiaryScreen: React.FC = () => {
+  const { currentTheme } = useTheme();
   const [diaryData, setDiaryData] = useState<YearSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,82 +46,82 @@ const MyDiaryScreen: React.FC = () => {
     weather: {
       title: '날씨',
       options: {
-        sunny: {name: '맑음', icon: '☀️', color: '#FFE066'},
-        cloudy: {name: '흐림', icon: '☁️', color: '#E0E0E0'},
-        rainy: {name: '비', icon: '🌧️', color: '#81D4FA'},
-        snowy: {name: '눈', icon: '❄️', color: '#E1F5FE'},
-        windy: {name: '바람', icon: '💨', color: '#B0BEC5'},
+        sunny: { name: '맑음', icon: '☀️', color: '#FFE066' },
+        cloudy: { name: '흐림', icon: '☁️', color: '#E0E0E0' },
+        rainy: { name: '비', icon: '🌧️', color: '#81D4FA' },
+        snowy: { name: '눈', icon: '❄️', color: '#E1F5FE' },
+        windy: { name: '바람', icon: '💨', color: '#B0BEC5' },
       } as const,
     },
     people: {
       title: '사람',
       options: {
-        friends: {name: '친구', icon: '⭐', color: '#64B5F6'},
-        family: {name: '가족', icon: '🌱', color: '#81C784'},
-        lover: {name: '연인', icon: '💖', color: '#F06292'},
-        acquaintance: {name: '지인', icon: '😊', color: '#FFB74D'},
-        alone: {name: '만나지 않음', icon: '❌', color: '#90A4AE'},
+        friends: { name: '친구', icon: '⭐', color: '#64B5F6' },
+        family: { name: '가족', icon: '🌱', color: '#81C784' },
+        lover: { name: '연인', icon: '💖', color: '#F06292' },
+        acquaintance: { name: '지인', icon: '😊', color: '#FFB74D' },
+        alone: { name: '만나지 않음', icon: '❌', color: '#90A4AE' },
       } as const,
     },
     school: {
       title: '학교',
       options: {
-        class: {name: '수업', icon: '📚', color: '#4CAF50'},
-        study: {name: '공부', icon: '🔍', color: '#FFC107'},
-        assignment: {name: '과제', icon: '📝', color: '#FF9800'},
-        exam: {name: '시험', icon: '🌸', color: '#E91E63'},
-        teamwork: {name: '팀플', icon: '💬', color: '#4CAF50'},
+        class: { name: '수업', icon: '📚', color: '#4CAF50' },
+        study: { name: '공부', icon: '🔍', color: '#FFC107' },
+        assignment: { name: '과제', icon: '📝', color: '#FF9800' },
+        exam: { name: '시험', icon: '🌸', color: '#E91E63' },
+        teamwork: { name: '팀플', icon: '💬', color: '#4CAF50' },
       } as const,
     },
     company: {
       title: '회사',
       options: {
-        meeting: {name: '회의', icon: '👥', color: '#2196F3'},
-        work: {name: '업무', icon: '💼', color: '#607D8B'},
-        project: {name: '프로젝트', icon: '📊', color: '#9C27B0'},
-        presentation: {name: '발표', icon: '🎤', color: '#FF5722'},
-        training: {name: '교육', icon: '📖', color: '#795548'},
+        meeting: { name: '회의', icon: '👥', color: '#2196F3' },
+        work: { name: '업무', icon: '💼', color: '#607D8B' },
+        project: { name: '프로젝트', icon: '📊', color: '#9C27B0' },
+        presentation: { name: '발표', icon: '🎤', color: '#FF5722' },
+        training: { name: '교육', icon: '📖', color: '#795548' },
       } as const,
     },
     travel: {
       title: '여행',
       options: {
-        airplane: {name: '비행기', icon: '✈️', color: '#03A9F4'},
-        ship: {name: '배', icon: '🚢', color: '#00BCD4'},
-        train: {name: '기차', icon: '🚄', color: '#4CAF50'},
-        bus: {name: '버스', icon: '🚌', color: '#FF9800'},
-        car: {name: '승용차', icon: '🚗', color: '#9E9E9E'},
-        motorcycle: {name: '오토바이', icon: '🏍️', color: '#F44336'},
+        airplane: { name: '비행기', icon: '✈️', color: '#03A9F4' },
+        ship: { name: '배', icon: '🚢', color: '#00BCD4' },
+        train: { name: '기차', icon: '🚄', color: '#4CAF50' },
+        bus: { name: '버스', icon: '🚌', color: '#FF9800' },
+        car: { name: '승용차', icon: '🚗', color: '#9E9E9E' },
+        motorcycle: { name: '오토바이', icon: '🏍️', color: '#F44336' },
       } as const,
     },
     food: {
       title: '음식',
       options: {
-        korean: {name: '한식', icon: '🍚', color: '#8BC34A'},
-        western: {name: '양식', icon: '🍝', color: '#FFC107'},
-        chinese: {name: '중식', icon: '🥢', color: '#FF5722'},
-        japanese: {name: '일식', icon: '🍣', color: '#E91E63'},
-        fast_food: {name: '패스트푸드', icon: '🍔', color: '#FF9800'},
+        korean: { name: '한식', icon: '🍚', color: '#8BC34A' },
+        western: { name: '양식', icon: '🍝', color: '#FFC107' },
+        chinese: { name: '중식', icon: '🥢', color: '#FF5722' },
+        japanese: { name: '일식', icon: '🍣', color: '#E91E63' },
+        fast_food: { name: '패스트푸드', icon: '🍔', color: '#FF9800' },
       } as const,
     },
     dessert: {
       title: '디저트',
       options: {
-        cake: {name: '케이크', icon: '🍰', color: '#F8BBD9'},
-        ice_cream: {name: '아이스크림', icon: '🍦', color: '#E1F5FE'},
-        chocolate: {name: '초콜릿', icon: '🍫', color: '#8D6E63'},
-        cookie: {name: '쿠키', icon: '🍪', color: '#FFCC02'},
-        fruit: {name: '과일', icon: '🍓', color: '#4CAF50'},
+        cake: { name: '케이크', icon: '🍰', color: '#F8BBD9' },
+        ice_cream: { name: '아이스크림', icon: '🍦', color: '#E1F5FE' },
+        chocolate: { name: '초콜릿', icon: '🍫', color: '#8D6E63' },
+        cookie: { name: '쿠키', icon: '🍪', color: '#FFCC02' },
+        fruit: { name: '과일', icon: '🍓', color: '#4CAF50' },
       } as const,
     },
     drink: {
       title: '음료',
       options: {
-        coffee: {name: '커피', icon: '☕', color: '#8D6E63'},
-        milk_tea: {name: '밀크티', icon: '🧋', color: '#D7CCC8'},
-        juice: {name: '주스', icon: '🧃', color: '#FFC107'},
-        water: {name: '물', icon: '💧', color: '#03A9F4'},
-        alcohol: {name: '술', icon: '🍺', color: '#FF9800'},
+        coffee: { name: '커피', icon: '☕', color: '#8D6E63' },
+        milk_tea: { name: '밀크티', icon: '🧋', color: '#D7CCC8' },
+        juice: { name: '주스', icon: '🧃', color: '#FFC107' },
+        water: { name: '물', icon: '💧', color: '#03A9F4' },
+        alcohol: { name: '술', icon: '🍺', color: '#FF9800' },
       } as const,
     },
   } as const;
@@ -127,17 +129,17 @@ const MyDiaryScreen: React.FC = () => {
   // 기분에 따른 이모지와 색상 매핑
   const getMoodDisplay = (mood?: string) => {
     const moodMap = {
-      excited: {emoji: '🤩', color: '#ff6b6b'},
-      happy: {emoji: '😊', color: '#4ecdc4'},
-      content: {emoji: '😌', color: '#45b7d1'},
-      neutral: {emoji: '😐', color: '#96ceb4'},
-      sad: {emoji: '😢', color: '#74b9ff'},
-      angry: {emoji: '😠', color: '#fd79a8'},
-      anxious: {emoji: '😰', color: '#fdcb6e'},
+      excited: { emoji: '🤩', color: '#ff6b6b' },
+      happy: { emoji: '😊', color: '#4ecdc4' },
+      content: { emoji: '😌', color: '#45b7d1' },
+      neutral: { emoji: '😐', color: '#96ceb4' },
+      sad: { emoji: '😢', color: '#74b9ff' },
+      angry: { emoji: '😠', color: '#fd79a8' },
+      anxious: { emoji: '😰', color: '#fdcb6e' },
     };
 
     return (
-      moodMap[mood as keyof typeof moodMap] || {emoji: '😊', color: '#4ecdc4'}
+      moodMap[mood as keyof typeof moodMap] || { emoji: '😊', color: '#4ecdc4' }
     );
   };
 
@@ -256,7 +258,7 @@ const MyDiaryScreen: React.FC = () => {
   }
 
   const renderMoodIcon = (mood: string, color: string) => (
-    <View style={[styles.moodContainer, {backgroundColor: color}]}>
+    <View style={[styles.moodContainer, { backgroundColor: color }]}>
       <Text style={styles.moodEmoji}>{mood}</Text>
     </View>
   );
@@ -264,20 +266,20 @@ const MyDiaryScreen: React.FC = () => {
   // 선택된 카테고리들을 렌더링하는 함수
   const renderSelectedCategories = (entry: StorageDiaryEntry) => {
     const categories = [
-      {key: 'selectedWeather', mapKey: 'weather'},
-      {key: 'selectedPeople', mapKey: 'people'},
-      {key: 'selectedSchool', mapKey: 'school'},
-      {key: 'selectedCompany', mapKey: 'company'},
-      {key: 'selectedTravel', mapKey: 'travel'},
-      {key: 'selectedFood', mapKey: 'food'},
-      {key: 'selectedDessert', mapKey: 'dessert'},
-      {key: 'selectedDrink', mapKey: 'drink'},
+      { key: 'selectedWeather', mapKey: 'weather' },
+      { key: 'selectedPeople', mapKey: 'people' },
+      { key: 'selectedSchool', mapKey: 'school' },
+      { key: 'selectedCompany', mapKey: 'company' },
+      { key: 'selectedTravel', mapKey: 'travel' },
+      { key: 'selectedFood', mapKey: 'food' },
+      { key: 'selectedDessert', mapKey: 'dessert' },
+      { key: 'selectedDrink', mapKey: 'drink' },
     ];
 
-    const selectedItems: Array<{icon: string; name: string; color: string}> =
+    const selectedItems: Array<{ icon: string; name: string; color: string }> =
       [];
 
-    categories.forEach(({key, mapKey}) => {
+    categories.forEach(({ key, mapKey }) => {
       const selectedValues = entry[key as keyof StorageDiaryEntry] as
         | string[]
         | undefined;
@@ -308,7 +310,8 @@ const MyDiaryScreen: React.FC = () => {
           {selectedItems.map((item, index) => (
             <View
               key={index}
-              style={[styles.categoryTag, {backgroundColor: item.color}]}>
+              style={[styles.categoryTag, { backgroundColor: item.color }]}
+            >
               <Text style={styles.categoryTagIcon}>{item.icon}</Text>
               <Text style={styles.categoryTagText}>{item.name}</Text>
             </View>
@@ -327,7 +330,8 @@ const MyDiaryScreen: React.FC = () => {
       <TouchableOpacity
         key={entry.id}
         style={styles.entryCard}
-        activeOpacity={0.8}>
+        activeOpacity={0.8}
+      >
         <View style={styles.entryHeader}>
           {renderMoodIcon(entry.mood, entry.moodColor)}
           <View style={styles.dateContainer}>
@@ -336,8 +340,9 @@ const MyDiaryScreen: React.FC = () => {
               <View
                 style={[
                   styles.statusIcon,
-                  {backgroundColor: getStatusColor(status)},
-                ]}>
+                  { backgroundColor: getStatusColor(status) },
+                ]}
+              >
                 <Text style={styles.statusIconText}>
                   {getStatusIcon(status)}
                 </Text>
@@ -400,7 +405,8 @@ const MyDiaryScreen: React.FC = () => {
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }>
+      }
+    >
       <View style={styles.header}>
         <Text style={styles.headerTitle}>나의 일기장</Text>
         <Text style={styles.headerSubtitle}>소중한 순간들을 되돌아보세요</Text>
