@@ -123,7 +123,7 @@ const ThemeStoreScreen: React.FC = () => {
                 <Text
                   style={[styles.timelineTitle, { color: theme.colors.text }]}
                 >
-                  크리스마스 파티 {theme.icons.heart}
+                  별빛이 속삭인 이야기 {theme.icons.heart}
                 </Text>
                 <Text
                   style={[
@@ -131,7 +131,7 @@ const ThemeStoreScreen: React.FC = () => {
                     { color: theme.colors.textSecondary },
                   ]}
                 >
-                  친구들과 즐거운 시간을 보내고...
+                  밤하늘에 수놓인 꿈들이 내게 말해준다...
                 </Text>
                 <View style={styles.timelineTags}>
                   <View
@@ -146,7 +146,7 @@ const ThemeStoreScreen: React.FC = () => {
                         { color: theme.colors.background },
                       ]}
                     >
-                      친구
+                      감성
                     </Text>
                   </View>
                 </View>
@@ -179,7 +179,7 @@ const ThemeStoreScreen: React.FC = () => {
                 <Text
                   style={[styles.timelineTitle, { color: theme.colors.text }]}
                 >
-                  새로운 프로젝트 시작 {theme.icons.star}
+                  구름 위를 걷는 순간 {theme.icons.star}
                 </Text>
                 <Text
                   style={[
@@ -187,7 +187,7 @@ const ThemeStoreScreen: React.FC = () => {
                     { color: theme.colors.textSecondary },
                   ]}
                 >
-                  새로운 도전이 기다리고 있어...
+                  천사의 날개로 비상하는 꿈을 꾸었어...
                 </Text>
                 <View style={styles.timelineTags}>
                   <View
@@ -202,7 +202,7 @@ const ThemeStoreScreen: React.FC = () => {
                         { color: theme.colors.background },
                       ]}
                     >
-                      회사
+                      꿈
                     </Text>
                   </View>
                 </View>
@@ -218,12 +218,12 @@ const ThemeStoreScreen: React.FC = () => {
                     { color: theme.colors.warning },
                   ]}
                 >
-                  1/2
+                  1/15
                 </Text>
                 <Text
                   style={[styles.timelineDateNum, { color: theme.colors.text }]}
                 >
-                  목표
+                  희망
                 </Text>
               </View>
               <View
@@ -235,7 +235,7 @@ const ThemeStoreScreen: React.FC = () => {
                 <Text
                   style={[styles.timelineTitle, { color: theme.colors.text }]}
                 >
-                  새해 결심 실천하기 {theme.icons.sun}
+                  마법의 순간을 기다리며 {theme.icons.sun}
                 </Text>
                 <Text
                   style={[
@@ -243,7 +243,7 @@ const ThemeStoreScreen: React.FC = () => {
                     { color: theme.colors.textSecondary },
                   ]}
                 >
-                  올해는 정말 달라질 거야...
+                  황금빛 일출이 새로운 기적을 약속해...
                 </Text>
                 <View style={styles.timelineTags}>
                   <View
@@ -258,7 +258,7 @@ const ThemeStoreScreen: React.FC = () => {
                         { color: theme.colors.background },
                       ]}
                     >
-                      개인
+                      영감
                     </Text>
                   </View>
                 </View>

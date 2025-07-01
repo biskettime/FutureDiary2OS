@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   Alert,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import { Theme } from '../types';
 import AngelBackground from '../components/AngelBackground';
 
 interface StoreItem {
@@ -23,56 +22,7 @@ interface StoreItem {
 }
 
 const SecretStoreScreen: React.FC = () => {
-  const { currentTheme, allThemes, applyTheme, purchaseTheme } = useTheme();
-  const [loading, setLoading] = useState<string | null>(null);
-
-  const handleThemePurchase = async (theme: Theme) => {
-    if (theme.category === 'free') {
-      Alert.alert('알림', '이미 무료 테마입니다.');
-      return;
-    }
-
-    Alert.alert(
-      '테마 구매',
-      `${
-        theme.name
-      } 테마를 ${theme.price?.toLocaleString()}원에 구매하시겠습니까?`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '구매',
-          onPress: async () => {
-            setLoading(theme.id);
-            try {
-              await purchaseTheme(theme.id);
-              Alert.alert('성공', '테마가 성공적으로 구매되었습니다!');
-            } catch (error) {
-              Alert.alert('오류', '구매 중 오류가 발생했습니다.');
-            } finally {
-              setLoading(null);
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  const handleThemeApply = async (theme: Theme) => {
-    if (theme.category === 'premium') {
-      Alert.alert('알림', '먼저 테마를 구매해주세요.');
-      return;
-    }
-
-    setLoading(theme.id);
-    try {
-      await applyTheme(theme.id);
-      Alert.alert('성공', '테마가 적용되었습니다!');
-    } catch (error) {
-      Alert.alert('오류', '테마 적용 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(null);
-    }
-  };
+  const { currentTheme } = useTheme();
 
   const handleFeaturePurchase = (item: StoreItem) => {
     Alert.alert(
@@ -87,170 +37,6 @@ const SecretStoreScreen: React.FC = () => {
           },
         },
       ],
-    );
-  };
-
-  const renderThemeSection = () => {
-    const premiumThemes = allThemes.filter(
-      theme => theme.category === 'premium',
-    );
-    const freeThemes = allThemes.filter(theme => theme.category === 'free');
-
-    return (
-      <View style={styles.section}>
-        <Text
-          style={[styles.sectionTitle, { color: currentTheme.colors.text }]}
-        >
-          🎨 프리미엄 테마
-        </Text>
-        <Text
-          style={[
-            styles.sectionDescription,
-            { color: currentTheme.colors.textSecondary },
-          ]}
-        >
-          특별한 분위기의 일기 테마를 구매하세요
-        </Text>
-
-        {premiumThemes.map(theme => (
-          <View
-            key={theme.id}
-            style={[
-              styles.storeItem,
-              {
-                backgroundColor: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-              },
-            ]}
-          >
-            <View style={styles.itemHeader}>
-              <Text style={styles.itemIcon}>{theme.icons.diary}</Text>
-              <View style={styles.itemInfo}>
-                <Text
-                  style={[
-                    styles.itemTitle,
-                    { color: currentTheme.colors.text },
-                  ]}
-                >
-                  {theme.name}
-                </Text>
-                <Text
-                  style={[
-                    styles.itemDescription,
-                    { color: currentTheme.colors.textSecondary },
-                  ]}
-                >
-                  {theme.description}
-                </Text>
-              </View>
-              <Text
-                style={[
-                  styles.itemPrice,
-                  { color: currentTheme.colors.accent },
-                ]}
-              >
-                {theme.price?.toLocaleString()}원
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={[
-                styles.purchaseButton,
-                { backgroundColor: currentTheme.colors.accent },
-              ]}
-              onPress={() => handleThemePurchase(theme)}
-              disabled={loading === theme.id}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  { color: currentTheme.colors.background },
-                ]}
-              >
-                {loading === theme.id ? '구매 중...' : '구매'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: currentTheme.colors.text, marginTop: 24 },
-          ]}
-        >
-          🎨 무료 테마
-        </Text>
-        <Text
-          style={[
-            styles.sectionDescription,
-            { color: currentTheme.colors.textSecondary },
-          ]}
-        >
-          기본 제공되는 테마들
-        </Text>
-
-        {freeThemes.map(theme => (
-          <View
-            key={theme.id}
-            style={[
-              styles.storeItem,
-              {
-                backgroundColor: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-              },
-            ]}
-          >
-            <View style={styles.itemHeader}>
-              <Text style={styles.itemIcon}>{theme.icons.diary}</Text>
-              <View style={styles.itemInfo}>
-                <Text
-                  style={[
-                    styles.itemTitle,
-                    { color: currentTheme.colors.text },
-                  ]}
-                >
-                  {theme.name}
-                </Text>
-                <Text
-                  style={[
-                    styles.itemDescription,
-                    { color: currentTheme.colors.textSecondary },
-                  ]}
-                >
-                  {theme.description}
-                </Text>
-              </View>
-              <Text
-                style={[
-                  styles.itemPrice,
-                  { color: currentTheme.colors.success },
-                ]}
-              >
-                무료
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={[
-                styles.purchaseButton,
-                { backgroundColor: currentTheme.colors.primary },
-              ]}
-              onPress={() => handleThemeApply(theme)}
-              disabled={loading === theme.id}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  { color: currentTheme.colors.background },
-                ]}
-              >
-                {loading === theme.id ? '적용 중...' : '적용'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
     );
   };
 
@@ -373,7 +159,7 @@ const SecretStoreScreen: React.FC = () => {
               { color: currentTheme.colors.textSecondary },
             ]}
           >
-            프리미엄 기능과 테마를 구매하세요
+            프리미엄 기능을 구매하세요
           </Text>
         </View>
 
@@ -381,7 +167,6 @@ const SecretStoreScreen: React.FC = () => {
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
-          {renderThemeSection()}
           {renderFeatureSection()}
 
           <View style={styles.footer}>
