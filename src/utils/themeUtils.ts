@@ -105,8 +105,8 @@ export const galaxyDreamTheme: Theme = {
   colors: {
     primary: '#4A148C', // 딥퍼플
     secondary: '#7B1FA2', // 퍼플
-    background: '#1A1A2E', // 다크네이비
-    surface: '#16213E', // 미드나잇블루
+    background: '#2A2A5E', // 밝은 다크네이비
+    surface: '#1E2A4E', // 밝은 미드나잇블루
     text: '#E8EAF6', // 라이트퍼플
     textSecondary: '#B39DDB', // 라벤더
     accent: '#9C27B0', // 퍼플액센트

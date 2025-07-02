@@ -9,6 +9,7 @@ import {
   Modal,
   TextInput,
   Alert,
+  Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,7 +18,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useTheme } from '../contexts/ThemeContext';
 import { DiaryEntry, RootStackParamList } from '../types';
 import { loadDiaryEntries, saveDiaryEntry } from '../utils/storage';
-import AngelBackground from '../components/AngelBackground';
+import ThemeBackground from '../components/ThemeBackground';
 
 type TimelineScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -409,7 +410,10 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
             <View
               style={[
                 styles.entryCard,
-                { borderLeftColor: getStatusColor(item.status) },
+                {
+                  borderLeftColor: getStatusColor(item.status),
+                  backgroundColor: '#FFFFFF',
+                },
               ]}
             >
               <View style={styles.entryHeader}>
@@ -639,7 +643,7 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   return (
-    <AngelBackground>
+    <ThemeBackground>
       <View
         style={[
           styles.container,
@@ -658,25 +662,56 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
             },
           ]}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon name="star" size={22} color="#8B5CF6" />
-            <Text
-              style={[
-                styles.headerTitle,
-                { color: currentTheme.colors.text, marginLeft: 8 },
-              ]}
-            >
-              미래일기 타임라인
-            </Text>
-          </View>
-          <Text
-            style={[
-              styles.headerSubtitle,
-              { color: currentTheme.colors.textSecondary },
-            ]}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
           >
-            오늘부터 시작되는 나의 미래 여행
-          </Text>
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+            >
+              <Icon name="star" size={22} color="#8B5CF6" />
+              <View style={{ marginLeft: 8, flex: 1 }}>
+                <Text
+                  style={[
+                    styles.headerTitle,
+                    { color: currentTheme.colors.text },
+                  ]}
+                >
+                  미래일기 타임라인
+                </Text>
+                <Text
+                  style={[
+                    styles.headerSubtitle,
+                    { color: currentTheme.colors.textSecondary },
+                  ]}
+                >
+                  오늘부터 시작되는 나의 미래 여행
+                </Text>
+              </View>
+            </View>
+
+            {/* 천사 테마일 때만 angel01.png 이미지 표시 */}
+            {currentTheme.id === 'angel' && (
+              <Image
+                source={require('../images/angel01.png')}
+                style={styles.angelImage}
+                resizeMode="contain"
+              />
+            )}
+
+            {/* 은하수 테마일 때만 enhasu.png 이미지 표시 */}
+            {currentTheme.id === 'galaxy-dream' && (
+              <Image
+                source={require('../images/enhasu.png')}
+                style={styles.enhasuImage}
+                resizeMode="contain"
+                onError={error => console.log('enhasu.png 로드 실패:', error)}
+              />
+            )}
+          </View>
         </View>
 
         {/* 오늘 일어날 일 섹션 */}
@@ -920,7 +955,7 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </Modal>
       </View>
-    </AngelBackground>
+    </ThemeBackground>
   );
 };
 
@@ -1404,6 +1439,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6c757d',
     fontStyle: 'italic',
+  },
+  angelImage: {
+    width: 120,
+    height: 120,
+    opacity: 0.7,
+    backgroundColor: 'transparent',
+  },
+  enhasuImage: {
+    width: 180,
+    height: 180,
+    opacity: 0.7,
+    backgroundColor: 'transparent',
   },
 });
 

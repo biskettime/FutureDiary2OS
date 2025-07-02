@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { RootStackParamList, DiaryEntry } from '../types';
 import { loadDiaryEntries, deleteDiaryEntry } from '../utils/storage';
 import { useTheme } from '../contexts/ThemeContext';
-import AngelBackground from '../components/AngelBackground';
+import ThemeBackground from '../components/ThemeBackground';
 
 type HomeScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -350,7 +350,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   if (loading) {
     return (
-      <AngelBackground>
+      <ThemeBackground>
         <View
           style={[
             styles.centerContainer,
@@ -366,12 +366,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             일기를 불러오는 중...
           </Text>
         </View>
-      </AngelBackground>
+      </ThemeBackground>
     );
   }
 
   return (
-    <AngelBackground>
+    <ThemeBackground>
       <View
         style={[
           styles.container,
@@ -469,7 +469,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <Icon name="plus" size={28} color={currentTheme.colors.background} />
         </TouchableOpacity>
       </View>
-    </AngelBackground>
+    </ThemeBackground>
   );
 };
 

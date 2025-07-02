@@ -1,4 +1,4 @@
-import React, {useEffect, useCallback} from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {RouteProp} from '@react-navigation/native';
-import {RootStackParamList} from '../types';
-import {deleteDiaryEntry} from '../utils/storage';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../types';
+import { deleteDiaryEntry } from '../utils/storage';
+import { useTheme } from '../contexts/ThemeContext';
+import ThemeBackground from '../components/ThemeBackground';
 
 type ViewEntryScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -23,12 +25,13 @@ interface Props {
   route: ViewEntryScreenRouteProp;
 }
 
-const ViewEntryScreen: React.FC<Props> = ({navigation, route}) => {
-  const {entry} = route.params;
+const ViewEntryScreen: React.FC<Props> = ({ navigation, route }) => {
+  const { entry } = route.params;
+  const { currentTheme } = useTheme();
 
   const handleDelete = useCallback(() => {
     Alert.alert('일기 삭제', '정말로 이 일기를 삭제하시겠습니까?', [
-      {text: '취소', style: 'cancel'},
+      { text: '취소', style: 'cancel' },
       {
         text: '삭제',
         style: 'destructive',
@@ -52,13 +55,22 @@ const ViewEntryScreen: React.FC<Props> = ({navigation, route}) => {
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() =>
-              navigation.navigate('WriteEntry', {entry, isEdit: true})
-            }>
-            <Text style={styles.headerButtonText}>수정</Text>
+              navigation.navigate('WriteEntry', { entry, isEdit: true })
+            }
+          >
+            <Text
+              style={[
+                styles.headerButtonText,
+                { color: currentTheme.colors.primary },
+              ]}
+            >
+              수정
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.headerButton, styles.deleteButton]}
-            onPress={handleDelete}>
+            onPress={handleDelete}
+          >
             <Text style={[styles.headerButtonText, styles.deleteButtonText]}>
               삭제
             </Text>
@@ -66,7 +78,7 @@ const ViewEntryScreen: React.FC<Props> = ({navigation, route}) => {
         </View>
       ),
     });
-  }, [navigation, entry, handleDelete]);
+  }, [navigation, entry, handleDelete, currentTheme]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -89,19 +101,19 @@ const ViewEntryScreen: React.FC<Props> = ({navigation, route}) => {
   const getMoodInfo = (mood?: string) => {
     switch (mood) {
       case 'excited':
-        return {emoji: '🤩', label: '신남', color: '#ff6b6b'};
+        return { emoji: '🤩', label: '신남', color: '#ff6b6b' };
       case 'happy':
-        return {emoji: '😊', label: '행복', color: '#4ecdc4'};
+        return { emoji: '😊', label: '행복', color: '#4ecdc4' };
       case 'content':
-        return {emoji: '😌', label: '만족', color: '#45b7d1'};
+        return { emoji: '😌', label: '만족', color: '#45b7d1' };
       case 'neutral':
-        return {emoji: '😐', label: '보통', color: '#96ceb4'};
+        return { emoji: '😐', label: '보통', color: '#96ceb4' };
       case 'sad':
-        return {emoji: '😢', label: '슬픔', color: '#74b9ff'};
+        return { emoji: '😢', label: '슬픔', color: '#74b9ff' };
       case 'angry':
-        return {emoji: '😠', label: '화남', color: '#fd79a8'};
+        return { emoji: '😠', label: '화남', color: '#fd79a8' };
       case 'anxious':
-        return {emoji: '😰', label: '불안', color: '#fdcb6e'};
+        return { emoji: '😰', label: '불안', color: '#fdcb6e' };
       default:
         return null;
     }
@@ -111,78 +123,121 @@ const ViewEntryScreen: React.FC<Props> = ({navigation, route}) => {
   const displayEmoji = entry.emoji || (moodInfo ? moodInfo.emoji : '📝');
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <View style={styles.titleRow}>
-            <Text style={styles.mainEmoji}>{displayEmoji}</Text>
-            <Text style={styles.title}>{entry.title}</Text>
-          </View>
-          <Text style={styles.date}>{formatDate(entry.date)}</Text>
-          {moodInfo && (
-            <View style={styles.moodContainer}>
-              <Text style={styles.moodEmoji}>{moodInfo.emoji}</Text>
-              <Text style={[styles.moodLabel, {color: moodInfo.color}]}>
-                {moodInfo.label}
+    <ThemeBackground>
+      <ScrollView
+        style={[
+          styles.container,
+          { backgroundColor: currentTheme.colors.background },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <View style={styles.titleRow}>
+              <Text style={styles.mainEmoji}>{displayEmoji}</Text>
+              <Text style={[styles.title, { color: currentTheme.colors.text }]}>
+                {entry.title}
               </Text>
             </View>
-          )}
-        </View>
-
-        <View style={styles.body}>
-          <Text style={styles.contentText}>{entry.content}</Text>
-        </View>
-
-        {entry.tags && entry.tags.length > 0 && (
-          <View style={styles.tagsSection}>
-            <Text style={styles.tagsTitle}>태그</Text>
-            <View style={styles.tagsContainer}>
-              {entry.tags.map((tag, index) => {
-                if (typeof tag === 'string') {
-                  return (
-                    <View
-                      key={index}
-                      style={[styles.tag, {backgroundColor: '#e9ecef'}]}>
-                      <Text style={[styles.tagText, {color: '#495057'}]}>
-                        #{tag}
-                      </Text>
-                    </View>
-                  );
-                } else {
-                  return (
-                    <View
-                      key={index}
-                      style={[styles.tag, {backgroundColor: tag.color}]}>
-                      <Text style={styles.tagIcon}>{tag.icon}</Text>
-                      <Text style={styles.tagText}>{tag.name}</Text>
-                    </View>
-                  );
-                }
-              })}
-            </View>
-          </View>
-        )}
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            작성일: {formatDate(entry.createdAt)} {formatTime(entry.createdAt)}
-          </Text>
-          {entry.updatedAt !== entry.createdAt && (
-            <Text style={styles.footerText}>
-              수정일: {formatDate(entry.updatedAt)}{' '}
-              {formatTime(entry.updatedAt)}
+            <Text
+              style={[
+                styles.date,
+                { color: currentTheme.colors.textSecondary },
+              ]}
+            >
+              {formatDate(entry.date)}
             </Text>
+            {moodInfo && (
+              <View
+                style={[
+                  styles.moodContainer,
+                  { backgroundColor: currentTheme.colors.surface },
+                ]}
+              >
+                <Text style={styles.moodEmoji}>{moodInfo.emoji}</Text>
+                <Text style={[styles.moodLabel, { color: moodInfo.color }]}>
+                  {moodInfo.label}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.body}>
+            <Text style={styles.contentText}>{entry.content}</Text>
+          </View>
+
+          {entry.tags && entry.tags.length > 0 && (
+            <View style={styles.tagsSection}>
+              <Text
+                style={[styles.tagsTitle, { color: currentTheme.colors.text }]}
+              >
+                태그
+              </Text>
+              <View style={styles.tagsContainer}>
+                {entry.tags.map((tag, index) => {
+                  if (typeof tag === 'string') {
+                    return (
+                      <View
+                        key={index}
+                        style={[styles.tag, { backgroundColor: '#e9ecef' }]}
+                      >
+                        <Text style={[styles.tagText, { color: '#495057' }]}>
+                          #{tag}
+                        </Text>
+                      </View>
+                    );
+                  } else {
+                    return (
+                      <View
+                        key={index}
+                        style={[styles.tag, { backgroundColor: tag.color }]}
+                      >
+                        <Text style={styles.tagIcon}>{tag.icon}</Text>
+                        <Text style={styles.tagText}>{tag.name}</Text>
+                      </View>
+                    );
+                  }
+                })}
+              </View>
+            </View>
           )}
+
+          <View
+            style={[
+              styles.footer,
+              { borderTopColor: currentTheme.colors.border },
+            ]}
+          >
+            <Text
+              style={[
+                styles.footerText,
+                { color: currentTheme.colors.textSecondary },
+              ]}
+            >
+              작성일: {formatDate(entry.createdAt)}{' '}
+              {formatTime(entry.createdAt)}
+            </Text>
+            {entry.updatedAt !== entry.createdAt && (
+              <Text
+                style={[
+                  styles.footerText,
+                  { color: currentTheme.colors.textSecondary },
+                ]}
+              >
+                수정일: {formatDate(entry.updatedAt)}{' '}
+                {formatTime(entry.updatedAt)}
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ThemeBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   content: {
     padding: 20,
@@ -202,19 +257,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#343a40',
     lineHeight: 36,
     flex: 1,
   },
   date: {
     fontSize: 16,
-    color: '#6c757d',
     marginBottom: 12,
   },
   moodContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -253,7 +305,6 @@ const styles = StyleSheet.create({
   tagsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#343a40',
     marginBottom: 12,
   },
   tagsContainer: {
@@ -280,12 +331,10 @@ const styles = StyleSheet.create({
   },
   footer: {
     borderTopWidth: 1,
-    borderTopColor: '#dee2e6',
     paddingTop: 16,
   },
   footerText: {
     fontSize: 12,
-    color: '#6c757d',
     marginBottom: 4,
   },
   headerButtons: {
@@ -296,7 +345,6 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   headerButtonText: {
-    color: '#007bff',
     fontSize: 16,
     fontWeight: '600',
   },

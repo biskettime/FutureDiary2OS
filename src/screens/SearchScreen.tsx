@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DiaryEntry, RootStackParamList } from '../types';
 import { loadDiaryEntries } from '../utils/storage';
 import { useTheme } from '../contexts/ThemeContext';
+import ThemeBackground from '../components/ThemeBackground';
 
 type SearchScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -292,20 +293,25 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
       <TouchableOpacity
-        style={styles.resultCard}
+        style={[styles.resultCard, { backgroundColor: '#FFFFFF' }]}
         onPress={() => navigation.navigate('ViewEntry', { entry: item })}
       >
         <View style={styles.resultHeader}>
           <Text style={styles.resultEmoji}>{displayEmoji}</Text>
           <View style={styles.resultInfo}>
-            <Text style={styles.resultTitle}>{item.title}</Text>
-            <Text style={styles.resultDate}>
+            <Text style={[styles.resultTitle, { color: '#000000' }]}>
+              {item.title}
+            </Text>
+            <Text style={[styles.resultDate, { color: '#666666' }]}>
               {new Date(item.date).toLocaleDateString('ko-KR')}
             </Text>
           </View>
         </View>
 
-        <Text style={styles.resultContent} numberOfLines={2}>
+        <Text
+          style={[styles.resultContent, { color: '#333333' }]}
+          numberOfLines={2}
+        >
           {item.content}
         </Text>
 
@@ -327,12 +333,21 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
                   {tagInfo.icon && (
                     <Text style={styles.tagIcon}>{tagInfo.icon}</Text>
                   )}
-                  <Text style={styles.tagText}>{tagInfo.name}</Text>
+                  <Text style={[styles.tagText, { color: '#333333' }]}>
+                    {tagInfo.name}
+                  </Text>
                 </View>
               );
             })}
             {item.tags.length > 3 && (
-              <Text style={styles.moreTagsText}>+{item.tags.length - 3}</Text>
+              <Text
+                style={[
+                  styles.moreTagsText,
+                  { color: currentTheme.colors.textSecondary },
+                ]}
+              >
+                +{item.tags.length - 3}
+              </Text>
             )}
           </View>
         )}
@@ -342,174 +357,302 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View
-        style={[
-          styles.centerContainer,
-          { backgroundColor: currentTheme.colors.background },
-        ]}
-      >
-        <Text
+      <ThemeBackground>
+        <View
           style={[
-            styles.loadingText,
-            { color: currentTheme.colors.textSecondary },
+            styles.centerContainer,
+            { backgroundColor: currentTheme.colors.background },
           ]}
         >
-          일기를 불러오는 중...
-        </Text>
-      </View>
+          <Text
+            style={[
+              styles.loadingText,
+              { color: currentTheme.colors.textSecondary },
+            ]}
+          >
+            일기를 불러오는 중...
+          </Text>
+        </View>
+      </ThemeBackground>
     );
   }
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          paddingTop: safeAreaInsets.top,
-          backgroundColor: currentTheme.colors.background,
-        },
-      ]}
-    >
+    <ThemeBackground>
       <View
         style={[
-          styles.header,
+          styles.container,
           {
-            backgroundColor: currentTheme.colors.surface,
-            borderBottomColor: currentTheme.colors.border,
+            paddingTop: safeAreaInsets.top,
+            backgroundColor: currentTheme.colors.background,
           },
         ]}
       >
-        <Text style={[styles.headerTitle, { color: currentTheme.colors.text }]}>
-          🔍 일기 찾기
-        </Text>
-        <Text
+        <View
           style={[
-            styles.headerSubtitle,
-            { color: currentTheme.colors.textSecondary },
+            styles.header,
+            {
+              backgroundColor: currentTheme.colors.surface,
+              borderBottomColor: currentTheme.colors.border,
+            },
           ]}
         >
-          키워드, 날짜, 태그로 일기를 검색해보세요
-        </Text>
-      </View>
-
-      <ScrollView
-        style={styles.filterContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* 키워드 검색 */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterTitle}>🔤 키워드 검색</Text>
-          <TextInput
-            style={styles.keywordInput}
-            value={filters.keyword}
-            onChangeText={handleKeywordChange}
-            placeholder="제목, 내용, 태그, 카테고리에서 검색..."
-            placeholderTextColor="#6c757d"
-          />
+          <Text
+            style={[styles.headerTitle, { color: currentTheme.colors.text }]}
+          >
+            🔍 일기 찾기
+          </Text>
+          <Text
+            style={[
+              styles.headerSubtitle,
+              { color: currentTheme.colors.textSecondary },
+            ]}
+          >
+            키워드, 날짜, 태그로 일기를 검색해보세요
+          </Text>
         </View>
 
-        {/* 날짜 범위 검색 */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterTitle}>📅 날짜 범위</Text>
-          <View style={styles.dateRow}>
-            <View style={styles.dateInputContainer}>
-              <Text style={styles.dateLabel}>시작일</Text>
-              <TextInput
-                style={styles.dateInput}
-                value={filters.startDate}
-                onChangeText={text => handleDateChange('startDate', text)}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor="#6c757d"
-              />
-            </View>
-            <Text style={styles.dateSeparator}>~</Text>
-            <View style={styles.dateInputContainer}>
-              <Text style={styles.dateLabel}>종료일</Text>
-              <TextInput
-                style={styles.dateInput}
-                value={filters.endDate}
-                onChangeText={text => handleDateChange('endDate', text)}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor="#6c757d"
-              />
-            </View>
+        <ScrollView
+          style={[
+            styles.filterContainer,
+            { backgroundColor: currentTheme.colors.surface },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* 키워드 검색 */}
+          <View
+            style={[
+              styles.filterSection,
+              { borderBottomColor: currentTheme.colors.border },
+            ]}
+          >
+            <Text
+              style={[styles.filterTitle, { color: currentTheme.colors.text }]}
+            >
+              🔤 키워드 검색
+            </Text>
+            <TextInput
+              style={[
+                styles.keywordInput,
+                {
+                  backgroundColor: currentTheme.colors.background,
+                  borderColor: currentTheme.colors.border,
+                  color: currentTheme.colors.text,
+                },
+              ]}
+              value={filters.keyword}
+              onChangeText={handleKeywordChange}
+              placeholder="제목, 내용, 태그, 카테고리에서 검색..."
+              placeholderTextColor={currentTheme.colors.textSecondary}
+            />
           </View>
-        </View>
 
-        {/* 태그 검색 */}
-        {availableTags.length > 0 && (
-          <View style={styles.filterSection}>
-            <Text style={styles.filterTitle}>🏷️ 태그 선택</Text>
-            <View style={styles.tagContainer}>
-              {availableTags.map((tag, index) => (
-                <TouchableOpacity
-                  key={index}
+          {/* 날짜 범위 검색 */}
+          <View
+            style={[
+              styles.filterSection,
+              { borderBottomColor: currentTheme.colors.border },
+            ]}
+          >
+            <Text
+              style={[styles.filterTitle, { color: currentTheme.colors.text }]}
+            >
+              📅 날짜 범위
+            </Text>
+            <View style={styles.dateRow}>
+              <View style={styles.dateInputContainer}>
+                <Text
                   style={[
-                    styles.tagButton,
-                    filters.selectedTags.includes(tag) &&
-                      styles.selectedTagButton,
+                    styles.dateLabel,
+                    { color: currentTheme.colors.textSecondary },
                   ]}
-                  onPress={() => toggleTag(tag)}
                 >
-                  <Text
-                    style={[
-                      styles.tagButtonText,
-                      filters.selectedTags.includes(tag) &&
-                        styles.selectedTagButtonText,
-                    ]}
-                  >
-                    #{tag}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                  시작일
+                </Text>
+                <TextInput
+                  style={[
+                    styles.dateInput,
+                    {
+                      backgroundColor: currentTheme.colors.background,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    },
+                  ]}
+                  value={filters.startDate}
+                  onChangeText={text => handleDateChange('startDate', text)}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={currentTheme.colors.textSecondary}
+                />
+              </View>
+              <Text
+                style={[
+                  styles.dateSeparator,
+                  { color: currentTheme.colors.textSecondary },
+                ]}
+              >
+                ~
+              </Text>
+              <View style={styles.dateInputContainer}>
+                <Text
+                  style={[
+                    styles.dateLabel,
+                    { color: currentTheme.colors.textSecondary },
+                  ]}
+                >
+                  종료일
+                </Text>
+                <TextInput
+                  style={[
+                    styles.dateInput,
+                    {
+                      backgroundColor: currentTheme.colors.background,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    },
+                  ]}
+                  value={filters.endDate}
+                  onChangeText={text => handleDateChange('endDate', text)}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={currentTheme.colors.textSecondary}
+                />
+              </View>
             </View>
           </View>
-        )}
 
-        {/* 검색 버튼 */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.searchButton} onPress={applyFilters}>
-            <Text style={styles.searchButtonText}>🔍 검색하기</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.clearButton} onPress={clearFilters}>
-            <Text style={styles.clearButtonText}>🗑️ 초기화</Text>
-          </TouchableOpacity>
+          {/* 태그 검색 */}
+          {availableTags.length > 0 && (
+            <View
+              style={[
+                styles.filterSection,
+                { borderBottomColor: currentTheme.colors.border },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.filterTitle,
+                  { color: currentTheme.colors.text },
+                ]}
+              >
+                🏷️ 태그 선택
+              </Text>
+              <View style={styles.tagContainer}>
+                {availableTags.map((tag, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.tagButton,
+                      {
+                        backgroundColor: filters.selectedTags.includes(tag)
+                          ? currentTheme.colors.primary
+                          : currentTheme.colors.background,
+                        borderColor: filters.selectedTags.includes(tag)
+                          ? currentTheme.colors.primary
+                          : currentTheme.colors.border,
+                      },
+                    ]}
+                    onPress={() => toggleTag(tag)}
+                  >
+                    <Text
+                      style={[
+                        styles.tagButtonText,
+                        {
+                          color: filters.selectedTags.includes(tag)
+                            ? '#ffffff'
+                            : currentTheme.colors.textSecondary,
+                        },
+                      ]}
+                    >
+                      #{tag}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* 검색 버튼 */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[
+                styles.searchButton,
+                { backgroundColor: currentTheme.colors.primary },
+              ]}
+              onPress={applyFilters}
+            >
+              <Text style={styles.searchButtonText}>🔍 검색하기</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.clearButton,
+                { backgroundColor: currentTheme.colors.textSecondary },
+              ]}
+              onPress={clearFilters}
+            >
+              <Text style={styles.clearButtonText}>🗑️ 초기화</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+        {/* 검색 결과 */}
+        <View style={styles.resultsContainer}>
+          <Text
+            style={[styles.resultsTitle, { color: currentTheme.colors.text }]}
+          >
+            검색 결과 ({filteredEntries.length}개)
+          </Text>
+
+          {!hasActiveSearch() ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>🔍</Text>
+              <Text
+                style={[
+                  styles.emptyText,
+                  { color: currentTheme.colors.textSecondary },
+                ]}
+              >
+                검색어를 입력해주세요
+              </Text>
+              <Text
+                style={[
+                  styles.emptySubText,
+                  { color: currentTheme.colors.textSecondary },
+                ]}
+              >
+                키워드, 날짜, 태그로 일기를 검색할 수 있습니다
+              </Text>
+            </View>
+          ) : filteredEntries.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>😔</Text>
+              <Text
+                style={[
+                  styles.emptyText,
+                  { color: currentTheme.colors.textSecondary },
+                ]}
+              >
+                검색 결과가 없습니다
+              </Text>
+              <Text
+                style={[
+                  styles.emptySubText,
+                  { color: currentTheme.colors.textSecondary },
+                ]}
+              >
+                다른 검색 조건을 시도해보세요
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredEntries}
+              renderItem={renderSearchResult}
+              keyExtractor={item => item.id}
+              showsVerticalScrollIndicator={false}
+              style={styles.resultsList}
+            />
+          )}
         </View>
-      </ScrollView>
-
-      {/* 검색 결과 */}
-      <View style={styles.resultsContainer}>
-        <Text style={styles.resultsTitle}>
-          검색 결과 ({filteredEntries.length}개)
-        </Text>
-
-        {!hasActiveSearch() ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🔍</Text>
-            <Text style={styles.emptyText}>검색어를 입력해주세요</Text>
-            <Text style={styles.emptySubText}>
-              키워드, 날짜, 태그로 일기를 검색할 수 있습니다
-            </Text>
-          </View>
-        ) : filteredEntries.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>😔</Text>
-            <Text style={styles.emptyText}>검색 결과가 없습니다</Text>
-            <Text style={styles.emptySubText}>
-              다른 검색 조건을 시도해보세요
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={filteredEntries}
-            renderItem={renderSearchResult}
-            keyExtractor={item => item.id}
-            showsVerticalScrollIndicator={false}
-            style={styles.resultsList}
-          />
-        )}
       </View>
-    </View>
+    </ThemeBackground>
   );
 };
 

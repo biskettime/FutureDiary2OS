@@ -16,6 +16,7 @@ import {
   getDateStatus,
 } from '../utils/dateUtils';
 import { useTheme } from '../contexts/ThemeContext';
+import ThemeBackground from '../components/ThemeBackground';
 
 interface DiaryEntry {
   id: string;
@@ -305,7 +306,9 @@ const MyDiaryScreen: React.FC = () => {
 
     return (
       <View style={styles.categoriesContainer}>
-        <Text style={styles.categoriesTitle}>카테고리</Text>
+        <Text style={[styles.categoriesTitle, { color: '#000000' }]}>
+          카테고리
+        </Text>
         <View style={styles.categoryTagsContainer}>
           {selectedItems.map((item, index) => (
             <View
@@ -313,7 +316,9 @@ const MyDiaryScreen: React.FC = () => {
               style={[styles.categoryTag, { backgroundColor: item.color }]}
             >
               <Text style={styles.categoryTagIcon}>{item.icon}</Text>
-              <Text style={styles.categoryTagText}>{item.name}</Text>
+              <Text style={[styles.categoryTagText, { color: '#FFFFFF' }]}>
+                {item.name}
+              </Text>
             </View>
           ))}
         </View>
@@ -329,14 +334,16 @@ const MyDiaryScreen: React.FC = () => {
     return (
       <TouchableOpacity
         key={entry.id}
-        style={styles.entryCard}
+        style={[styles.entryCard, { backgroundColor: '#FFFFFF' }]}
         activeOpacity={0.8}
       >
         <View style={styles.entryHeader}>
           {renderMoodIcon(entry.mood, entry.moodColor)}
           <View style={styles.dateContainer}>
             <View style={styles.dateRow}>
-              <Text style={styles.dateText}>{entry.date}</Text>
+              <Text style={[styles.dateText, { color: '#333333' }]}>
+                {entry.date}
+              </Text>
               <View
                 style={[
                   styles.statusIcon,
@@ -348,22 +355,37 @@ const MyDiaryScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <Text style={styles.dayText}>{entry.dayOfWeek}</Text>
+            <Text style={[styles.dayText, { color: '#666666' }]}>
+              {entry.dayOfWeek}
+            </Text>
           </View>
         </View>
 
-        {entry.title && <Text style={styles.titleText}>{entry.title}</Text>}
+        {entry.title && (
+          <Text style={[styles.titleText, { color: '#000000' }]}>
+            {entry.title}
+          </Text>
+        )}
 
-        <Text style={styles.contentText}>{entry.content}</Text>
+        <Text style={[styles.contentText, { color: '#333333' }]}>
+          {entry.content}
+        </Text>
 
         {/* 선택된 카테고리들 표시 */}
         {entry.originalEntry && renderSelectedCategories(entry.originalEntry)}
 
         {/* 타임라인에서 입력한 실제 결과 표시 */}
         {entry.actualResult && (
-          <View style={styles.resultContainer}>
+          <View
+            style={[
+              styles.resultContainer,
+              { backgroundColor: currentTheme.colors.background },
+            ]}
+          >
             <View style={styles.resultHeader}>
-              <Text style={styles.resultLabel}>실제 결과</Text>
+              <Text style={[styles.resultLabel, { color: '#000000' }]}>
+                실제 결과
+              </Text>
               {entry.originalEntry?.resultStatus === 'realized' && (
                 <View style={styles.resultStatusIcon}>
                   <Text style={styles.resultStatusText}>✅ 실현됨</Text>
@@ -375,14 +397,23 @@ const MyDiaryScreen: React.FC = () => {
                 </View>
               )}
             </View>
-            <Text style={styles.resultText}>{entry.actualResult}</Text>
+            <Text style={[styles.resultText, { color: '#333333' }]}>
+              {entry.actualResult}
+            </Text>
           </View>
         )}
 
         {entry.image && (
           <View style={styles.imageContainer}>
-            <View style={styles.placeholderImage}>
-              <Text style={styles.imageText}>📸 서울 타워 사진</Text>
+            <View
+              style={[
+                styles.placeholderImage,
+                { backgroundColor: currentTheme.colors.background },
+              ]}
+            >
+              <Text style={[styles.imageText, { color: '#666666' }]}>
+                📸 서울 타워 사진
+              </Text>
             </View>
           </View>
         )}
@@ -392,7 +423,9 @@ const MyDiaryScreen: React.FC = () => {
 
   const renderYearSection = (yearSection: YearSection) => (
     <View key={yearSection.year} style={styles.yearSection}>
-      <Text style={styles.yearTitle}>{yearSection.year}</Text>
+      <Text style={[styles.yearTitle, { color: currentTheme.colors.text }]}>
+        {yearSection.year}
+      </Text>
       <View style={styles.entriesContainer}>
         {yearSection.entries.map(renderDiaryEntry)}
       </View>
@@ -400,34 +433,71 @@ const MyDiaryScreen: React.FC = () => {
   );
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>나의 일기장</Text>
-        <Text style={styles.headerSubtitle}>소중한 순간들을 되돌아보세요</Text>
-      </View>
-
-      {diaryData.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>📔</Text>
-          <Text style={styles.emptyTitle}>아직 작성한 일기가 없어요</Text>
-          <Text style={styles.emptySubtitle}>
-            첫 번째 일기를 작성해서{'\n'}소중한 순간을 기록해보세요!
+    <ThemeBackground>
+      <ScrollView
+        style={[
+          styles.container,
+          { backgroundColor: currentTheme.colors.background },
+        ]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: currentTheme.colors.surface },
+          ]}
+        >
+          <Text
+            style={[styles.headerTitle, { color: currentTheme.colors.text }]}
+          >
+            나의 일기장
+          </Text>
+          <Text
+            style={[
+              styles.headerSubtitle,
+              { color: currentTheme.colors.textSecondary },
+            ]}
+          >
+            소중한 순간들을 되돌아보세요
           </Text>
         </View>
-      ) : (
-        diaryData.map(renderYearSection)
-      )}
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>더 많은 추억을 만들어가세요 ✨</Text>
-      </View>
-    </ScrollView>
+        {diaryData.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>📔</Text>
+            <Text
+              style={[styles.emptyTitle, { color: currentTheme.colors.text }]}
+            >
+              아직 작성한 일기가 없어요
+            </Text>
+            <Text
+              style={[
+                styles.emptySubtitle,
+                { color: currentTheme.colors.textSecondary },
+              ]}
+            >
+              첫 번째 일기를 작성해서{'\n'}소중한 순간을 기록해보세요!
+            </Text>
+          </View>
+        ) : (
+          diaryData.map(renderYearSection)
+        )}
+
+        <View style={styles.footer}>
+          <Text
+            style={[
+              styles.footerText,
+              { color: currentTheme.colors.textSecondary },
+            ]}
+          >
+            더 많은 추억을 만들어가세요 ✨
+          </Text>
+        </View>
+      </ScrollView>
+    </ThemeBackground>
   );
 };
 

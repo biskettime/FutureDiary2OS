@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import AngelBackground from '../components/AngelBackground';
+import ThemeBackground from '../components/ThemeBackground';
 
 interface StoreItem {
   id: string;
@@ -135,7 +135,7 @@ const SecretStoreScreen: React.FC = () => {
   };
 
   return (
-    <AngelBackground>
+    <ThemeBackground>
       <View
         style={[
           styles.container,
@@ -181,7 +181,7 @@ const SecretStoreScreen: React.FC = () => {
           </View>
         </ScrollView>
       </View>
-    </AngelBackground>
+    </ThemeBackground>
   );
 };
 
@@ -193,10 +193,10 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8',
+    borderBottomColor: '#e9ecef',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 8,
   },
@@ -207,30 +207,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    padding: 16,
+    padding: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   sectionDescription: {
     fontSize: 14,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   storeItem: {
-    marginBottom: 16,
     borderRadius: 12,
     padding: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   itemHeader: {
     flexDirection: 'row',
@@ -238,28 +230,28 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   itemIcon: {
-    fontSize: 24,
-    marginRight: 12,
+    fontSize: 32,
+    marginRight: 16,
   },
   itemInfo: {
     flex: 1,
   },
   itemTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 4,
   },
   itemDescription: {
     fontSize: 14,
-    lineHeight: 18,
   },
   itemPrice: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   purchaseButton: {
-    paddingVertical: 12,
     borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     alignItems: 'center',
   },
   buttonText: {

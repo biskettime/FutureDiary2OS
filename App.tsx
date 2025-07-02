@@ -123,6 +123,7 @@ const AppContent: React.FC = () => {
             headerTitleStyle: {
               fontWeight: 'bold',
             },
+            headerBackTitle: '돌아가기',
           }}
         >
           <Stack.Screen
