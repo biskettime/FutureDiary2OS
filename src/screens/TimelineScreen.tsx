@@ -416,51 +416,150 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
                 },
               ]}
             >
-              <View style={styles.entryHeader}>
-                <Text style={styles.entryMood}>{displayEmoji}</Text>
-                <Text style={styles.entryTitle}>{item.entry.title}</Text>
+              {/* 1. 제목 섹션: 기분 이모티콘 + 제목 */}
+              <View style={styles.titleMoodSection}>
+                <Text style={styles.todayEntryEmoji}>{displayEmoji}</Text>
+                <Text
+                  style={[styles.todayEntryTitle, { marginLeft: 8, flex: 1 }]}
+                  numberOfLines={1}
+                >
+                  {item.entry.title}
+                </Text>
               </View>
 
-              <Text style={styles.entryContent} numberOfLines={2}>
-                {item.entry.content}
-              </Text>
+              {/* 2. 메인 콘텐츠 섹션: 일기내용 + 이미지 (좌우 분할) */}
+              <View style={styles.contentImageSection}>
+                {/* 좌측: 일기 내용 + 날씨 태그 */}
+                <View style={styles.leftContentSection}>
+                  <Text
+                    style={styles.todayEntryPreviewContent}
+                    numberOfLines={2}
+                  >
+                    {item.entry.content}
+                  </Text>
 
-              {/* 선택된 카테고리들 표시 */}
-              {renderSelectedCategories(item.entry)}
+                  {/* 날씨 태그와 기타 태그를 한 줄로 통합 */}
+                  <View style={styles.allTagsSection}>
+                    {/* 날씨 태그 */}
+                    {item.entry.selectedWeather &&
+                      item.entry.selectedWeather.length > 0 && (
+                        <>
+                          {item.entry.selectedWeather
+                            .slice(0, 1)
+                            .map((weather, index) => {
+                              const weatherOption = (
+                                categoryOptionsMap.weather?.options as any
+                              )?.[weather];
+                              if (weatherOption) {
+                                return (
+                                  <View
+                                    key={index}
+                                    style={[
+                                      styles.categoryTag,
+                                      {
+                                        backgroundColor: weatherOption.color,
+                                        marginRight: 6,
+                                      },
+                                    ]}
+                                  >
+                                    <Text style={styles.categoryTagIcon}>
+                                      {weatherOption.icon}
+                                    </Text>
+                                    <Text style={styles.categoryTagText}>
+                                      {weatherOption.name}
+                                    </Text>
+                                  </View>
+                                );
+                              }
+                              return null;
+                            })}
+                          {item.entry.selectedWeather.length > 1 && (
+                            <Text
+                              style={[
+                                styles.moreCategoriesText,
+                                { marginRight: 6 },
+                              ]}
+                            >
+                              +{item.entry.selectedWeather.length - 1}
+                            </Text>
+                          )}
+                        </>
+                      )}
 
-              {item.entry.tags && item.entry.tags.length > 0 && (
-                <View style={styles.tagsContainer}>
-                  {item.entry.tags.slice(0, 2).map((tag, tagIndex) => {
-                    if (typeof tag === 'string') {
-                      return (
-                        <View
-                          key={tagIndex}
-                          style={[styles.tag, { backgroundColor: '#e9ecef' }]}
-                        >
-                          <Text style={[styles.tagText, { color: '#495057' }]}>
-                            #{tag}
+                    {/* 기타 태그 */}
+                    {item.entry.tags && item.entry.tags.length > 0 && (
+                      <>
+                        {item.entry.tags.slice(0, 2).map((tag, index) => {
+                          const tagInfo =
+                            typeof tag === 'string'
+                              ? { name: tag, icon: '', color: '#e9ecef' }
+                              : tag;
+                          return (
+                            <View
+                              key={index}
+                              style={[
+                                styles.tag,
+                                {
+                                  backgroundColor: tagInfo.color + '20',
+                                  marginRight: 6,
+                                },
+                              ]}
+                            >
+                              {tagInfo.icon && (
+                                <Text style={styles.tagIcon}>
+                                  {tagInfo.icon}
+                                </Text>
+                              )}
+                              <Text style={styles.tagText} numberOfLines={1}>
+                                #{tagInfo.name}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                        {item.entry.tags.length > 2 && (
+                          <Text style={styles.moreTagsText}>
+                            +{item.entry.tags.length - 2}
                           </Text>
-                        </View>
-                      );
-                    } else {
-                      return (
-                        <View
-                          key={tagIndex}
-                          style={[styles.tag, { backgroundColor: tag.color }]}
-                        >
-                          <Text style={styles.tagIcon}>{tag.icon}</Text>
-                          <Text style={styles.tagText}>{tag.name}</Text>
-                        </View>
-                      );
-                    }
-                  })}
-                  {item.entry.tags.length > 2 && (
-                    <Text style={styles.moreTagsText}>
-                      +{item.entry.tags.length - 2}
-                    </Text>
-                  )}
+                        )}
+                      </>
+                    )}
+                  </View>
                 </View>
-              )}
+
+                {/* 우측: 이미지 (크기 줄임) */}
+                {item.entry.images && item.entry.images.length > 0 && (
+                  <View style={styles.todayEntrySmallImageSection}>
+                    <View style={styles.todayEntrySmallImageContainer}>
+                      <Image
+                        source={{ uri: item.entry.images[0] }}
+                        style={styles.todayEntrySmallImage}
+                        resizeMode="cover"
+                        onError={error => {
+                          console.log(
+                            '🚨 타임라인 이미지 로딩 오류:',
+                            error.nativeEvent.error,
+                          );
+                          console.log(
+                            '🚨 문제 이미지 URI:',
+                            item.entry.images![0],
+                          );
+                        }}
+                        onLoad={() => {
+                          console.log(
+                            '✅ 타임라인 이미지 로딩 성공:',
+                            item.entry.images![0],
+                          );
+                        }}
+                      />
+                    </View>
+                    {item.entry.images.length > 1 && (
+                      <Text style={styles.smallImageCountText}>
+                        +{item.entry.images.length - 1}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              </View>
             </View>
           </View>
         </View>
@@ -474,55 +573,147 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
       item.resultStatus ||
       (item.actualResult && item.actualResult.trim().length > 0);
 
+    // 디버깅을 위한 로그 추가
+    console.log('📱 TimelineScreen renderTodayEntry:', item.title);
+    console.log('🖼️ Images:', item.images);
+    console.log('📊 Images length:', item.images?.length);
+
     return (
       <View style={styles.todayEntryCard}>
-        <View style={styles.todayEntryHeader}>
+        {/* 1. 제목 섹션: 기분 이모티콘 + 제목 */}
+        <View style={styles.titleMoodSection}>
           <Text style={styles.todayEntryEmoji}>{displayEmoji}</Text>
-          <View style={styles.todayEntryInfo}>
-            <Text style={styles.todayEntryTitle}>{item.title}</Text>
-            <Text style={styles.todayEntryDate}>
-              {new Date(item.createdAt).toLocaleDateString('ko-KR')}에 작성
-            </Text>
-          </View>
+          <Text
+            style={[styles.todayEntryTitle, { marginLeft: 8, flex: 1 }]}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
         </View>
 
-        <Text style={styles.todayEntryContent} numberOfLines={2}>
-          {item.content}
-        </Text>
+        {/* 2. 메인 콘텐츠 섹션: 일기내용 + 이미지 (좌우 분할) */}
+        <View style={styles.contentImageSection}>
+          {/* 좌측: 일기 내용 + 날씨 태그 */}
+          <View style={styles.leftContentSection}>
+            <Text style={styles.todayEntryPreviewContent} numberOfLines={2}>
+              {item.content}
+            </Text>
 
-        {/* 선택된 카테고리들 표시 */}
-        {renderSelectedCategories(item)}
-
-        {item.tags && item.tags.length > 0 && (
-          <View style={styles.tagContainer}>
-            {item.tags.slice(0, 3).map((tag, index) => {
-              const tagInfo =
-                typeof tag === 'string'
-                  ? { name: tag, icon: '', color: '#e9ecef' }
-                  : tag;
-              return (
-                <View
-                  key={index}
-                  style={[
-                    styles.tag,
-                    { backgroundColor: tagInfo.color + '20' },
-                  ]}
-                >
-                  {tagInfo.icon && (
-                    <Text style={styles.tagIcon}>{tagInfo.icon}</Text>
+            {/* 날씨 태그와 기타 태그를 한 줄로 통합 */}
+            <View style={styles.allTagsSection}>
+              {/* 날씨 태그 */}
+              {item.selectedWeather && item.selectedWeather.length > 0 && (
+                <>
+                  {item.selectedWeather.slice(0, 1).map((weather, index) => {
+                    const weatherOption = (
+                      categoryOptionsMap.weather?.options as any
+                    )?.[weather];
+                    if (weatherOption) {
+                      return (
+                        <View
+                          key={index}
+                          style={[
+                            styles.categoryTag,
+                            {
+                              backgroundColor: weatherOption.color,
+                              marginRight: 6,
+                            },
+                          ]}
+                        >
+                          <Text style={styles.categoryTagIcon}>
+                            {weatherOption.icon}
+                          </Text>
+                          <Text style={styles.categoryTagText}>
+                            {weatherOption.name}
+                          </Text>
+                        </View>
+                      );
+                    }
+                    return null;
+                  })}
+                  {item.selectedWeather.length > 1 && (
+                    <Text
+                      style={[styles.moreCategoriesText, { marginRight: 6 }]}
+                    >
+                      +{item.selectedWeather.length - 1}
+                    </Text>
                   )}
-                  <Text style={styles.tagText}>{tagInfo.name}</Text>
-                </View>
-              );
-            })}
-            {item.tags.length > 3 && (
-              <Text style={styles.moreTagsText}>+{item.tags.length - 3}</Text>
-            )}
-          </View>
-        )}
+                </>
+              )}
 
-        {hasResult ? (
-          <View style={styles.resultContainer}>
+              {/* 기타 태그 */}
+              {item.tags && item.tags.length > 0 && (
+                <>
+                  {item.tags.slice(0, 2).map((tag, index) => {
+                    const tagInfo =
+                      typeof tag === 'string'
+                        ? { name: tag, icon: '', color: '#e9ecef' }
+                        : tag;
+                    return (
+                      <View
+                        key={index}
+                        style={[
+                          styles.tag,
+                          {
+                            backgroundColor: tagInfo.color + '20',
+                            marginRight: 6,
+                          },
+                        ]}
+                      >
+                        {tagInfo.icon && (
+                          <Text style={styles.tagIcon}>{tagInfo.icon}</Text>
+                        )}
+                        <Text style={styles.tagText} numberOfLines={1}>
+                          #{tagInfo.name}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                  {item.tags.length > 2 && (
+                    <Text style={styles.moreTagsText}>
+                      +{item.tags.length - 2}
+                    </Text>
+                  )}
+                </>
+              )}
+            </View>
+          </View>
+
+          {/* 우측: 이미지 (크기 줄임) */}
+          {item.images && item.images.length > 0 && (
+            <View style={styles.todayEntrySmallImageSection}>
+              <View style={styles.todayEntrySmallImageContainer}>
+                <Image
+                  source={{ uri: item.images![0] }}
+                  style={styles.todayEntrySmallImage}
+                  resizeMode="cover"
+                  onError={error => {
+                    console.log(
+                      '🚨 TimelineScreen 이미지 로딩 오류:',
+                      error.nativeEvent.error,
+                    );
+                    console.log('🚨 문제 이미지 URI:', item.images![0]);
+                  }}
+                  onLoad={() => {
+                    console.log(
+                      '✅ TimelineScreen 이미지 로딩 성공:',
+                      item.images![0],
+                    );
+                  }}
+                />
+              </View>
+              {item.images.length > 1 && (
+                <Text style={styles.smallImageCountText}>
+                  +{item.images.length - 1}
+                </Text>
+              )}
+            </View>
+          )}
+        </View>
+
+        {/* 4. 결과 표시 (있을 경우) */}
+        {hasResult && (
+          <View style={styles.resultSection}>
             <Text style={styles.resultLabel}>실제 결과:</Text>
             <View
               style={[
@@ -555,81 +746,29 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
                   </Text>
                 )}
             </View>
+          </View>
+        )}
+
+        {/* 5. 버튼 섹션 (전체 너비) */}
+        <View style={styles.buttonSection}>
+          {hasResult ? (
             <TouchableOpacity
               style={styles.editResultButton}
               onPress={() => handleAddResult(item)}
             >
-              <Text style={styles.editResultButtonText}>변경</Text>
+              <Text style={styles.editResultButtonText}>결과 변경</Text>
             </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={styles.addResultButton}
-            onPress={() => handleAddResult(item)}
-          >
-            <Text style={styles.addResultButtonText}>🤔 어떻게 되었나요?</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  };
-
-  // 선택된 카테고리들을 렌더링하는 함수
-  const renderSelectedCategories = (entry: DiaryEntry) => {
-    const categories = [
-      { key: 'selectedWeather', mapKey: 'weather' },
-      { key: 'selectedPeople', mapKey: 'people' },
-      { key: 'selectedSchool', mapKey: 'school' },
-      { key: 'selectedCompany', mapKey: 'company' },
-      { key: 'selectedTravel', mapKey: 'travel' },
-      { key: 'selectedFood', mapKey: 'food' },
-      { key: 'selectedDessert', mapKey: 'dessert' },
-      { key: 'selectedDrink', mapKey: 'drink' },
-    ];
-
-    const selectedItems: Array<{ icon: string; name: string; color: string }> =
-      [];
-
-    categories.forEach(({ key, mapKey }) => {
-      const selectedValues = entry[key as keyof DiaryEntry] as
-        | string[]
-        | undefined;
-      if (selectedValues && selectedValues.length > 0) {
-        selectedValues.forEach(value => {
-          const categoryMap =
-            categoryOptionsMap[mapKey as keyof typeof categoryOptionsMap];
-          if (categoryMap && categoryMap.options) {
-            const option = (categoryMap.options as any)[value];
-            if (option && option.icon && option.name && option.color) {
-              selectedItems.push({
-                icon: option.icon,
-                name: option.name,
-                color: option.color,
-              });
-            }
-          }
-        });
-      }
-    });
-
-    if (selectedItems.length === 0) return null;
-
-    return (
-      <View style={styles.categoriesContainer}>
-        {selectedItems.slice(0, 3).map((item, index) => (
-          <View
-            key={index}
-            style={[styles.categoryTag, { backgroundColor: item.color }]}
-          >
-            <Text style={styles.categoryTagIcon}>{item.icon}</Text>
-            <Text style={styles.categoryTagText}>{item.name}</Text>
-          </View>
-        ))}
-        {selectedItems.length > 3 && (
-          <Text style={styles.moreCategoriesText}>
-            +{selectedItems.length - 3}
-          </Text>
-        )}
+          ) : (
+            <TouchableOpacity
+              style={styles.addResultButton}
+              onPress={() => handleAddResult(item)}
+            >
+              <Text style={styles.addResultButtonText}>
+                🤔 어떻게 되었나요?
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     );
   };
@@ -649,16 +788,20 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
           styles.container,
           {
             backgroundColor: currentTheme.colors.background,
-            paddingTop: safeAreaInsets.top,
           },
         ]}
       >
+        {/* Safe Area Spacer */}
+        <View style={{ height: safeAreaInsets.top }} />
+
+        {/* 헤더 섹션 - 15% */}
         <View
           style={[
             styles.header,
             {
               backgroundColor: currentTheme.colors.surface,
               borderBottomColor: currentTheme.colors.border,
+              flex: 0.15,
             },
           ]}
         >
@@ -667,6 +810,7 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
+              flex: 1,
             }}
           >
             <View
@@ -711,104 +855,143 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
                 onError={error => console.log('enhasu.png 로드 실패:', error)}
               />
             )}
+
+            {/* 로즈골드 테마일 때만 romance.png 이미지 표시 */}
+            {currentTheme.id === 'rosegold-love' && (
+              <Image
+                source={require('../images/romance.png')}
+                style={styles.romanceImage}
+                resizeMode="contain"
+                onError={error => console.log('romance.png 로드 실패:', error)}
+              />
+            )}
+
+            {/* 달빛 세레나데 테마일 때만 moonra.png 이미지 표시 */}
+            {currentTheme.id === 'moonlight-serenade' && (
+              <Image
+                source={require('../images/moonra.png')}
+                style={styles.moonraImage}
+                resizeMode="contain"
+                onError={error => console.log('moonra.png 로드 실패:', error)}
+              />
+            )}
           </View>
         </View>
 
-        {/* 오늘 일어날 일 섹션 */}
-        {todayEntries.length > 0 && (
-          <View
-            style={[
-              styles.todaySection,
-              { backgroundColor: currentTheme.colors.surface },
-            ]}
-          >
-            <View style={styles.todaySectionTitleContainer}>
+        {/* 오늘 일어날 일 섹션 - 42.5% */}
+        <View
+          style={[
+            styles.todaySection,
+            {
+              backgroundColor: currentTheme.colors.surface,
+              flex: 0.425,
+            },
+          ]}
+        >
+          {todayEntries.length > 0 ? (
+            <>
+              <View style={styles.todaySectionTitleContainer}>
+                <Text
+                  style={[
+                    styles.todaySectionTitle,
+                    { color: currentTheme.colors.text },
+                  ]}
+                >
+                  ☀️ 오늘 일어날 일!
+                </Text>
+                <Text
+                  style={[
+                    styles.todayBadge,
+                    {
+                      backgroundColor: currentTheme.colors.primary,
+                      color: currentTheme.colors.background,
+                    },
+                  ]}
+                >
+                  Today
+                </Text>
+              </View>
               <Text
                 style={[
-                  styles.todaySectionTitle,
-                  { color: currentTheme.colors.text },
+                  styles.todaySectionSubtitle,
+                  { color: currentTheme.colors.textSecondary },
                 ]}
               >
-                ☀️ 오늘 일어날 일!
+                과거에 작성했던 오늘의 예상 일정들입니다
               </Text>
+              <FlatList
+                data={todayEntries}
+                renderItem={renderTodayEntry}
+                keyExtractor={item => item.id}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.todayEntriesContainer}
+                ItemSeparatorComponent={() => (
+                  <View style={styles.todayEntrySeparator} />
+                )}
+              />
+            </>
+          ) : (
+            <View style={styles.emptyTodayContainer}>
               <Text
                 style={[
-                  styles.todayBadge,
-                  {
-                    backgroundColor: currentTheme.colors.primary,
-                    color: currentTheme.colors.background,
-                  },
+                  styles.emptyTodayText,
+                  { color: currentTheme.colors.textSecondary },
                 ]}
               >
-                Today
+                오늘 일어날 예정인 일기가 없습니다
               </Text>
             </View>
-            <Text
-              style={[
-                styles.todaySectionSubtitle,
-                { color: currentTheme.colors.textSecondary },
-              ]}
-            >
-              과거에 작성했던 오늘의 예상 일정들입니다
-            </Text>
-            <FlatList
-              data={todayEntries}
-              renderItem={renderTodayEntry}
-              keyExtractor={item => item.id}
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.todayEntriesContainer}
-              ItemSeparatorComponent={() => (
-                <View style={styles.todayEntrySeparator} />
-              )}
-            />
-          </View>
-        )}
+          )}
+        </View>
 
-        {timelineItems.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text
-              style={[styles.emptyText, { color: currentTheme.colors.text }]}
-            >
-              아직 작성된 일기가 없습니다.
-            </Text>
-            <Text
-              style={[
-                styles.emptySubText,
-                { color: currentTheme.colors.textSecondary },
-              ]}
-            >
-              미래의 나에게 보낼 첫 번째 일기를 작성해보세요!
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.emptyButton,
-                { backgroundColor: currentTheme.colors.primary },
-              ]}
-              onPress={() => navigation.navigate('WriteEntry', {})}
-            >
+        {/* 미래 일기 타임라인 섹션 - 42.5% */}
+        <View style={[styles.timelineSection, { flex: 0.425 }]}>
+          {timelineItems.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text
+                style={[styles.emptyText, { color: currentTheme.colors.text }]}
+              >
+                아직 작성된 일기가 없습니다.
+              </Text>
               <Text
                 style={[
-                  styles.emptyButtonText,
-                  { color: currentTheme.colors.background },
+                  styles.emptySubText,
+                  { color: currentTheme.colors.textSecondary },
                 ]}
               >
-                미래일기 쓰기
+                미래의 나에게 보낼 첫 번째 일기를 작성해보세요!
               </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <FlatList
-            data={timelineItems}
-            renderItem={renderTimelineItem}
-            keyExtractor={item => item.entry.id}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            contentContainerStyle={styles.listContainer}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
+              <TouchableOpacity
+                style={[
+                  styles.emptyButton,
+                  { backgroundColor: currentTheme.colors.primary },
+                ]}
+                onPress={() => navigation.navigate('WriteEntry', {})}
+              >
+                <Text
+                  style={[
+                    styles.emptyButtonText,
+                    { color: currentTheme.colors.background },
+                  ]}
+                >
+                  미래일기 쓰기
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <FlatList
+              data={timelineItems}
+              renderItem={renderTimelineItem}
+              keyExtractor={item => item.entry.id}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              contentContainerStyle={styles.listContainer}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
+        </View>
 
         {/* 실제 결과 선택 모달 */}
         <Modal
@@ -969,9 +1152,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
+    flex: 0.15,
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 24,
@@ -1071,6 +1256,42 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderLeftWidth: 4,
   },
+  entryCardContent: {
+    flexDirection: 'row',
+  },
+  entryLeftContent: {
+    flex: 1,
+  },
+  entryRightContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  entryImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  entryImage: {
+    width: '100%',
+    height: '100%',
+  },
+  timelineImageCountBadge: {
+    backgroundColor: '#343a40',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: 4,
+  },
+  timelineImageCountText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
   entryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1094,18 +1315,19 @@ const styles = StyleSheet.create({
   },
   tagsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   tag: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#e9ecef',
-    borderRadius: 10,
+    borderRadius: 16,
     paddingHorizontal: 8,
     paddingVertical: 4,
     marginRight: 6,
-    marginBottom: 4,
+    flexShrink: 0,
   },
   tagText: {
     fontSize: 12,
@@ -1121,12 +1343,16 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   todaySection: {
+    flex: 0.425,
     paddingTop: 20,
     paddingBottom: 20,
     paddingHorizontal: 0,
     backgroundColor: '#fff8e1',
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
+  },
+  timelineSection: {
+    flex: 0.425,
   },
   todaySectionTitleContainer: {
     flexDirection: 'row',
@@ -1174,8 +1400,9 @@ const styles = StyleSheet.create({
   todayEntryCard: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     width: 280,
+    minHeight: 160,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -1186,6 +1413,59 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderLeftWidth: 4,
     borderLeftColor: '#f57c00',
+  },
+  todayEntryCardContent: {
+    flexDirection: 'row',
+  },
+  todayEntryLeftContent: {
+    flex: 1,
+  },
+  // 새로운 레이아웃 스타일들
+  titleSection: {
+    width: '100%',
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  metaImageSection: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  metaDataSection: {
+    flex: 1,
+    paddingRight: 16,
+  },
+  dateSection: {
+    marginBottom: 8,
+  },
+  moodSection: {
+    marginBottom: 8,
+    alignItems: 'flex-start',
+  },
+
+  todayEntryImageSection: {
+    width: 120,
+    alignItems: 'center',
+  },
+  contentSection: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  todayEntryFullContent: {
+    fontSize: 16,
+    color: '#495057',
+    lineHeight: 24,
+    marginBottom: 12,
+  },
+  resultSection: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  buttonSection: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 4,
   },
   todayEntryHeader: {
     flexDirection: 'row',
@@ -1200,10 +1480,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   todayEntryTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#343a40',
-    marginBottom: 4,
+    textAlign: 'center',
+    lineHeight: 28,
   },
   todayEntryDate: {
     fontSize: 12,
@@ -1272,10 +1553,10 @@ const styles = StyleSheet.create({
   addResultButton: {
     backgroundColor: '#28a745',
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 4,
   },
   addResultButtonText: {
     color: '#ffffff',
@@ -1407,9 +1688,10 @@ const styles = StyleSheet.create({
   },
   tagContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     marginTop: 8,
     marginBottom: 8,
+    overflow: 'hidden',
   },
   categoriesContainer: {
     flexDirection: 'row',
@@ -1440,6 +1722,13 @@ const styles = StyleSheet.create({
     color: '#6c757d',
     fontStyle: 'italic',
   },
+  // 로즈골드 테마 기준으로 모든 이미지 크기 통일
+  themeImageBase: {
+    width: 120,
+    height: 120,
+    opacity: 0.7,
+    backgroundColor: 'transparent',
+  },
   angelImage: {
     width: 120,
     height: 120,
@@ -1447,10 +1736,124 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   enhasuImage: {
-    width: 180,
-    height: 180,
+    width: 120,
+    height: 120,
     opacity: 0.7,
     backgroundColor: 'transparent',
+  },
+  romanceImage: {
+    width: 120,
+    height: 120,
+    opacity: 0.7,
+    backgroundColor: 'transparent',
+  },
+  moonraImage: {
+    width: 120,
+    height: 120,
+    opacity: 0.7,
+    backgroundColor: 'transparent',
+  },
+  todayEntryRightContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  todayEntryImageContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  todayEntryImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imageCountBadge: {
+    backgroundColor: '#343a40',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#fff',
+  },
+  imageCountText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  emptyTodayContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyTodayText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  moodWeatherSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+  },
+  titleMoodSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  contentImageSection: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  leftContentSection: {
+    flex: 1,
+    marginRight: 12,
+  },
+  todayEntryPreviewContent: {
+    fontSize: 14,
+    color: '#495057',
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  weatherTagsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  allTagsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'nowrap',
+    marginBottom: 6,
+    overflow: 'hidden',
+  },
+  todayEntrySmallImageSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  todayEntrySmallImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  todayEntrySmallImage: {
+    width: '100%',
+    height: '100%',
+  },
+  smallImageCountText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#6c757d',
+    marginTop: 4,
   },
 });
 

@@ -8,10 +8,17 @@ import {
   ScrollView,
   Alert,
   Modal,
+  Image,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import {
+  launchImageLibrary,
+  ImagePickerResponse,
+  MediaType,
+} from 'react-native-image-picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import RNFS from 'react-native-fs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DiaryEntry, RootStackParamList, TagInfo } from '../types';
 import { saveDiaryEntry, generateId } from '../utils/storage';
@@ -77,6 +84,11 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
   );
   const [selectedDrink, setSelectedDrink] = useState<string[]>(
     entry?.selectedDrink || [],
+  );
+
+  // 사진 첨부 상태 추가
+  const [selectedImages, setSelectedImages] = useState<string[]>(
+    entry?.images || [],
   );
 
   // 기존 태그를 TagInfo 형태로 변환
@@ -264,9 +276,16 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
         selectedDessert:
           selectedDessert.length > 0 ? selectedDessert : undefined,
         selectedDrink: selectedDrink.length > 0 ? selectedDrink : undefined,
+        images: selectedImages.length > 0 ? selectedImages : undefined,
         createdAt: entry?.createdAt || now,
         updatedAt: now,
       };
+
+      // 디버깅을 위한 로그 추가
+      console.log('💾 Saving entry with images:', selectedImages);
+      console.log('📊 Selected images length:', selectedImages.length);
+      console.log('📝 Full entry data:', newEntry);
+      console.log('🖼️ Images in entry:', newEntry.images);
 
       await saveDiaryEntry(newEntry);
       Alert.alert(
@@ -293,6 +312,7 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
     selectedFood,
     selectedDessert,
     selectedDrink,
+    selectedImages,
     entry,
     isEdit,
     navigation,
@@ -422,6 +442,70 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
     };
   };
 
+  // 이미지를 Base64로 인코딩하는 함수
+  const convertImageToBase64 = async (uri: string): Promise<string> => {
+    try {
+      const base64String = await RNFS.readFile(uri, 'base64');
+      const base64Uri = `data:image/jpeg;base64,${base64String}`;
+      console.log('✅ 이미지 Base64 변환 성공');
+      return base64Uri;
+    } catch (error) {
+      console.error('🚨 이미지 Base64 변환 실패:', error);
+      throw error;
+    }
+  };
+
+  // 사진 선택 함수
+  const handleImageSelection = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo' as MediaType,
+        includeBase64: false,
+        maxHeight: 2000,
+        maxWidth: 2000,
+        quality: 0.7,
+        selectionLimit: 5, // 최대 5장까지 선택 가능
+      },
+      async (response: ImagePickerResponse) => {
+        if (response.didCancel || response.errorMessage) {
+          console.log('📷 이미지 선택 취소 또는 오류:', response.errorMessage);
+          return;
+        }
+
+        if (response.assets && response.assets.length > 0) {
+          try {
+            const tempImages = response.assets
+              .filter(asset => asset.uri)
+              .map(asset => asset.uri!);
+
+            console.log('📷 선택된 임시 이미지 URI들:', tempImages);
+
+            // 각 이미지를 Base64로 변환
+            const base64Images: string[] = [];
+            for (const tempUri of tempImages) {
+              const base64Uri = await convertImageToBase64(tempUri);
+              base64Images.push(base64Uri);
+            }
+
+            console.log('📷 Base64 변환된 이미지 개수:', base64Images.length);
+            setSelectedImages(prev => [...prev, ...base64Images]);
+          } catch (error) {
+            console.error('🚨 이미지 저장 오류:', error);
+            Alert.alert('오류', '이미지 저장 중 문제가 발생했습니다.');
+          }
+        }
+      },
+    );
+  };
+
+  // 이미지 삭제 함수
+  const removeImage = async (indexToRemove: number) => {
+    console.log('🗑️ 이미지 삭제:', indexToRemove);
+    setSelectedImages(prev =>
+      prev.filter((_, index) => index !== indexToRemove),
+    );
+  };
+
   return (
     <View style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
       {/* 자체 헤더 */}
@@ -545,6 +629,59 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
             autoCapitalize="none"
             keyboardType="default"
           />
+        </View>
+
+        {/* 사진 첨부 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>사진 첨부</Text>
+          <TouchableOpacity
+            style={[
+              styles.photoButton,
+              { backgroundColor: currentTheme.colors.primary },
+            ]}
+            onPress={handleImageSelection}
+          >
+            <Text style={styles.photoButtonText}>📷 사진 선택</Text>
+          </TouchableOpacity>
+
+          {selectedImages.length > 0 && (
+            <View style={styles.selectedImagesContainer}>
+              <Text style={styles.selectedImagesTitle}>
+                선택된 사진 ({selectedImages.length})
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.imagesScrollView}
+              >
+                {selectedImages.map((imageUri, index) => (
+                  <View key={index} style={styles.imagePreviewContainer}>
+                    <Image
+                      source={{ uri: imageUri }}
+                      style={styles.imagePreview}
+                      resizeMode="cover"
+                      onError={error => {
+                        console.log(
+                          '🚨 이미지 로딩 오류:',
+                          error.nativeEvent.error,
+                        );
+                        console.log('🚨 문제 이미지 URI:', imageUri);
+                      }}
+                      onLoad={() => {
+                        console.log('✅ 이미지 로딩 성공:', imageUri);
+                      }}
+                    />
+                    <TouchableOpacity
+                      style={styles.removeImageButton}
+                      onPress={() => removeImage(index)}
+                    >
+                      <Text style={styles.removeImageText}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
 
         {/* 기분 선택 */}
@@ -823,8 +960,8 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#e1e8ed',
   },
@@ -841,15 +978,15 @@ const styles = StyleSheet.create({
   calendarContainer: {
     marginTop: 12,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#e1e8ed',
   },
   titleInput: {
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#e1e8ed',
     fontSize: 16,
@@ -857,8 +994,8 @@ const styles = StyleSheet.create({
   },
   contentInput: {
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#e1e8ed',
     fontSize: 16,
@@ -904,10 +1041,10 @@ const styles = StyleSheet.create({
   tagButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginBottom: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 25,
+    marginBottom: 10,
   },
   selectedTag: {
     borderWidth: 2,
@@ -989,14 +1126,14 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: '#007AFF',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 25,
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
     shadowRadius: 8,
     elevation: 6,
   },
@@ -1135,6 +1272,69 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  photoButton: {
+    padding: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e1e8ed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  selectedImagesContainer: {
+    marginTop: 16,
+  },
+  selectedImagesTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+    marginBottom: 8,
+  },
+  imagesScrollView: {
+    marginHorizontal: -4,
+  },
+  imagePreviewContainer: {
+    position: 'relative',
+    marginHorizontal: 4,
+    borderRadius: 12,
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    overflow: 'hidden',
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#ff4757',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  removeImageText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: 'bold',
+    lineHeight: 12,
   },
 });
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {DiaryEntry} from '../types';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { DiaryEntry } from '../types';
 
 interface Props {
   entry: DiaryEntry;
@@ -9,7 +9,12 @@ interface Props {
   onDelete: () => void;
 }
 
-const DiaryCard: React.FC<Props> = ({entry, onPress, onEdit, onDelete}) => {
+const DiaryCard: React.FC<Props> = ({ entry, onPress, onEdit, onDelete }) => {
+  // 디버깅을 위한 로그 추가
+  console.log('📱 DiaryCard entry:', entry.title);
+  console.log('🖼️ Images:', entry.images);
+  console.log('📊 Images length:', entry.images?.length);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
@@ -71,70 +76,114 @@ const DiaryCard: React.FC<Props> = ({entry, onPress, onEdit, onDelete}) => {
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <View style={styles.header}>
-        <View style={styles.leftHeader}>
-          <Text style={styles.emoji}>{displayEmoji}</Text>
-          <View>
-            <Text style={styles.title}>{entry.title}</Text>
-            <Text style={styles.date}>{formatDate(entry.date)}</Text>
+      <View style={styles.cardContent}>
+        <View style={styles.leftContent}>
+          <View style={styles.header}>
+            <View style={styles.leftHeader}>
+              <Text style={styles.emoji}>{displayEmoji}</Text>
+              <View>
+                <Text style={styles.title}>{entry.title}</Text>
+                <Text style={styles.date}>{formatDate(entry.date)}</Text>
+              </View>
+            </View>
+            {!(entry.images && entry.images.length > 0) && (
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={e => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                >
+                  <Text style={styles.actionText}>✏️</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={e => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                >
+                  <Text style={styles.actionText}>🗑️</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-        </View>
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={e => {
-              e.stopPropagation();
-              onEdit();
-            }}>
-            <Text style={styles.actionText}>✏️</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={e => {
-              e.stopPropagation();
-              onDelete();
-            }}>
-            <Text style={styles.actionText}>🗑️</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
 
-      <Text style={styles.content}>{truncateContent(entry.content)}</Text>
+          <Text style={styles.content}>{truncateContent(entry.content)}</Text>
 
-      {entry.tags && entry.tags.length > 0 && (
-        <View style={styles.tagsContainer}>
-          {entry.tags.slice(0, 3).map((tag, index) => {
-            if (typeof tag === 'string') {
-              return (
-                <View
-                  key={index}
-                  style={[styles.tag, {backgroundColor: '#e9ecef'}]}>
-                  <Text style={[styles.tagText, {color: '#495057'}]}>
-                    #{tag}
-                  </Text>
-                </View>
-              );
-            } else {
-              return (
-                <View
-                  key={index}
-                  style={[styles.tag, {backgroundColor: tag.color}]}>
-                  <Text style={styles.tagIcon}>{tag.icon}</Text>
-                  <Text style={styles.tagText}>{tag.name}</Text>
-                </View>
-              );
-            }
-          })}
-          {entry.tags.length > 3 && (
-            <Text style={styles.moreTagsText}>+{entry.tags.length - 3}</Text>
+          {entry.tags && entry.tags.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {entry.tags.slice(0, 3).map((tag, index) => {
+                if (typeof tag === 'string') {
+                  return (
+                    <View
+                      key={index}
+                      style={[styles.tag, { backgroundColor: '#e9ecef' }]}
+                    >
+                      <Text style={[styles.tagText, { color: '#495057' }]}>
+                        #{tag}
+                      </Text>
+                    </View>
+                  );
+                } else {
+                  return (
+                    <View
+                      key={index}
+                      style={[styles.tag, { backgroundColor: tag.color }]}
+                    >
+                      <Text style={styles.tagIcon}>{tag.icon}</Text>
+                      <Text style={styles.tagText}>{tag.name}</Text>
+                    </View>
+                  );
+                }
+              })}
+              {entry.tags.length > 3 && (
+                <Text style={styles.moreTagsText}>
+                  +{entry.tags.length - 3}
+                </Text>
+              )}
+            </View>
           )}
         </View>
-      )}
+
+        {entry.images && entry.images.length > 0 && (
+          <View style={styles.rightContent}>
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ uri: entry.images[0] }}
+                style={styles.diaryImage}
+                resizeMode="cover"
+              />
+            </View>
+            <View style={styles.imageActions}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={e => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+              >
+                <Text style={styles.actionText}>✏️</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={e => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                <Text style={styles.actionText}>🗑️</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </View>
 
       <View
         style={[
           styles.moodIndicator,
-          {backgroundColor: getMoodColor(entry.mood)},
+          { backgroundColor: getMoodColor(entry.mood) },
         ]}
       />
     </TouchableOpacity>
@@ -144,18 +193,24 @@ const DiaryCard: React.FC<Props> = ({entry, onPress, onEdit, onDelete}) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
     position: 'relative',
+  },
+  cardContent: {
+    flexDirection: 'row',
+  },
+  leftContent: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -206,11 +261,11 @@ const styles = StyleSheet.create({
   tag: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginRight: 6,
-    marginBottom: 4,
+    borderRadius: 25,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginRight: 8,
+    marginBottom: 6,
   },
   tagIcon: {
     fontSize: 16,
@@ -226,14 +281,37 @@ const styles = StyleSheet.create({
     color: '#6c757d',
     fontStyle: 'italic',
   },
+  rightContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  imageContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    marginBottom: 8,
+  },
+  diaryImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imageActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
   moodIndicator: {
     position: 'absolute',
     top: 0,
     right: 0,
-    width: 4,
+    width: 6,
     height: '100%',
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
+    borderTopRightRadius: 24,
+    borderBottomRightRadius: 24,
   },
 });
 

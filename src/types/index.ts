@@ -69,6 +69,7 @@ export interface DiaryEntry {
     | 'angry'
     | 'anxious';
   emoji?: string;
+  images?: string[];
   tags?: (string | TagInfo)[];
   selectedWeather?: string[];
   selectedPeople?: string[];

@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { loadDiaryEntries } from '../utils/storage';
@@ -374,13 +375,49 @@ const MyDiaryScreen: React.FC = () => {
         {/* 선택된 카테고리들 표시 */}
         {entry.originalEntry && renderSelectedCategories(entry.originalEntry)}
 
-        {/* 타임라인에서 입력한 실제 결과 표시 */}
+        {/* 첨부된 이미지들 표시 - 피드백 위에 배치 */}
+        {entry.originalEntry?.images &&
+          entry.originalEntry.images.length > 0 && (
+            <View style={styles.imageContainer}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.imagesScrollView}
+              >
+                {entry.originalEntry.images.map((imageUri, index) => (
+                  <View key={index} style={styles.imageWrapper}>
+                    <Image
+                      source={{ uri: imageUri }}
+                      style={styles.diaryImage}
+                      resizeMode="cover"
+                      onError={error => {
+                        console.log(
+                          '🚨 MyDiary 이미지 로딩 오류:',
+                          error.nativeEvent.error,
+                        );
+                        console.log('🚨 문제 이미지 URI:', imageUri);
+                      }}
+                      onLoad={() => {
+                        console.log('✅ MyDiary 이미지 로딩 성공:', imageUri);
+                      }}
+                    />
+                    {entry.originalEntry!.images!.length > 1 && (
+                      <View style={styles.imageCounter}>
+                        <Text style={styles.imageCounterText}>
+                          {index + 1}/{entry.originalEntry!.images!.length}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+        {/* 타임라인에서 입력한 실제 결과 표시 - 이미지 아래에 배치 */}
         {entry.actualResult && (
           <View
-            style={[
-              styles.resultContainer,
-              { backgroundColor: currentTheme.colors.background },
-            ]}
+            style={[styles.resultContainer, { backgroundColor: '#FFFFFF' }]}
           >
             <View style={styles.resultHeader}>
               <Text style={[styles.resultLabel, { color: '#000000' }]}>
@@ -400,21 +437,6 @@ const MyDiaryScreen: React.FC = () => {
             <Text style={[styles.resultText, { color: '#333333' }]}>
               {entry.actualResult}
             </Text>
-          </View>
-        )}
-
-        {entry.image && (
-          <View style={styles.imageContainer}>
-            <View
-              style={[
-                styles.placeholderImage,
-                { backgroundColor: currentTheme.colors.background },
-              ]}
-            >
-              <Text style={[styles.imageText, { color: '#666666' }]}>
-                📸 서울 타워 사진
-              </Text>
-            </View>
           </View>
         )}
       </TouchableOpacity>
@@ -583,19 +605,35 @@ const styles = StyleSheet.create({
     color: '#8B8B8B',
   },
   imageContainer: {
+    marginTop: 16,
     marginBottom: 16,
   },
-  placeholderImage: {
-    height: 200,
-    backgroundColor: '#E8F4FD',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+  imagesScrollView: {
+    marginHorizontal: -4,
   },
-  imageText: {
-    fontSize: 16,
-    color: '#5A9FD4',
-    fontWeight: '500',
+  imageWrapper: {
+    position: 'relative',
+    marginHorizontal: 4,
+  },
+  diaryImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    backgroundColor: '#f8f9fa',
+  },
+  imageCounter: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  imageCounterText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#ffffff',
   },
   contentText: {
     fontSize: 16,
@@ -628,9 +666,11 @@ const styles = StyleSheet.create({
   },
   resultContainer: {
     marginTop: 16,
-    padding: 12,
-    backgroundColor: '#E8F4FD',
-    borderRadius: 8,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E8F0',
   },
   resultHeader: {
     flexDirection: 'row',
@@ -644,7 +684,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   resultStatusIcon: {
-    padding: 4,
+    padding: 6,
     borderRadius: 8,
     backgroundColor: '#4CAF50',
   },
@@ -654,8 +694,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   resultText: {
-    fontSize: 16,
-    color: '#2D3142',
+    fontSize: 15,
+    color: '#1A202C',
+    lineHeight: 22,
+    fontWeight: '500',
   },
   categoriesContainer: {
     marginTop: 16,
@@ -723,7 +765,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   notRealizedIcon: {
-    backgroundColor: '#FF9800',
+    backgroundColor: '#E53E3E',
   },
 });
 

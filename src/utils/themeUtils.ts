@@ -243,16 +243,16 @@ export const moonlightSerenadeTheme: Theme = {
   colors: {
     primary: '#3F51B5', // 인디고
     secondary: '#C5CAE9', // 라이트인디고
-    background: '#E8EAF6', // 연한인디고
-    surface: '#F3F4FB', // 매우연한인디고
-    text: '#1A237E', // 다크인디고
-    textSecondary: '#303F9F', // 인디고700
+    background: '#283593', // 진한 인디고 (더 선명함)
+    surface: '#3949AB', // 인디고 600
+    text: '#E8EAF6', // 연한 인디고 (텍스트는 밝게)
+    textSecondary: '#C5CAE9', // 라이트인디고
     accent: '#536DFE', // 인디고액센트
     success: '#4CAF50', // 그린
     warning: '#FF9800', // 오렌지
     error: '#F44336', // 레드
-    border: '#9FA8DA', // 인디고300
-    shadow: '#7986CB', // 인디고400
+    border: '#5C6BC0', // 인디고400
+    shadow: '#1A237E', // 다크인디고
   },
   icons: {
     home: '🌙',

@@ -333,7 +333,10 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
                   {tagInfo.icon && (
                     <Text style={styles.tagIcon}>{tagInfo.icon}</Text>
                   )}
-                  <Text style={[styles.tagText, { color: '#333333' }]}>
+                  <Text
+                    style={[styles.tagText, { color: '#333333' }]}
+                    numberOfLines={1}
+                  >
                     {tagInfo.name}
                   </Text>
                 </View>
@@ -346,7 +349,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
                   { color: currentTheme.colors.textSecondary },
                 ]}
               >
-                +{item.tags.length - 3}
+                ...
               </Text>
             )}
           </View>
@@ -707,9 +710,9 @@ const styles = StyleSheet.create({
   keywordInput: {
     borderWidth: 1,
     borderColor: '#e9ecef',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#f8f9fa',
   },
@@ -729,9 +732,9 @@ const styles = StyleSheet.create({
   dateInput: {
     borderWidth: 1,
     borderColor: '#e9ecef',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     fontSize: 14,
     backgroundColor: '#f8f9fa',
   },
@@ -743,8 +746,9 @@ const styles = StyleSheet.create({
   },
   tagContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     gap: 8,
+    overflow: 'hidden',
   },
   tagButton: {
     backgroundColor: '#f8f9fa',
@@ -774,8 +778,8 @@ const styles = StyleSheet.create({
   searchButton: {
     flex: 1,
     backgroundColor: '#007bff',
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 16,
+    borderRadius: 24,
     alignItems: 'center',
   },
   searchButtonText: {
@@ -786,8 +790,8 @@ const styles = StyleSheet.create({
   clearButton: {
     flex: 1,
     backgroundColor: '#6c757d',
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 16,
+    borderRadius: 24,
     alignItems: 'center',
   },
   clearButtonText: {
@@ -830,17 +834,17 @@ const styles = StyleSheet.create({
   },
   resultCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   resultHeader: {
     flexDirection: 'row',
@@ -872,18 +876,19 @@ const styles = StyleSheet.create({
   },
   resultTags: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   resultTag: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#e9ecef',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 6,
-    marginBottom: 4,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
+    marginBottom: 6,
   },
   tagIcon: {
     fontSize: 10,

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
@@ -220,6 +221,19 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const loadEntries = async () => {
     try {
       const loadedEntries = await loadDiaryEntries();
+      console.log('📚 전체 일기 개수:', loadedEntries.length);
+      loadedEntries.forEach((entry, index) => {
+        console.log(`📖 일기 ${index + 1}:`, entry.title);
+        console.log(`📅 작성일:`, entry.createdAt);
+        console.log(`🖼️ 이미지 필드 존재:`, 'images' in entry);
+        console.log(`🖼️ 이미지 값:`, entry.images);
+        console.log(`🖼️ 이미지 타입:`, typeof entry.images);
+        console.log(`🖼️ 이미지 개수:`, entry.images?.length || 0);
+        if (entry.images && entry.images.length > 0) {
+          console.log(`🔗 첫 번째 이미지 URI:`, entry.images[0]);
+        }
+        console.log('---');
+      });
       setEntries(loadedEntries);
     } catch (error) {
       Alert.alert('오류', '일기를 불러오는 중 문제가 발생했습니다.');
@@ -261,88 +275,189 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     const displayEmoji = item.emoji || getMoodEmoji(item.mood);
     const borderColor = getBorderColor(item.date);
 
+    // 디버깅을 위한 로그 추가
+    console.log('📱 HomeScreen renderEntry:', item.title);
+    console.log('🖼️ Images:', item.images);
+    console.log('📊 Images length:', item.images?.length);
+
+    // 이미지 표시 여부 확인
+    console.log('🤔 Item images:', item.images);
+    console.log('🤔 Images length:', item.images?.length);
+    if (item.images && item.images.length > 0) {
+      console.log('🔍 First image URI:', item.images[0]);
+      console.log('🔍 URI type:', typeof item.images[0]);
+      console.log('🔍 URI length:', item.images[0]?.length);
+    }
+
     return (
       <TouchableOpacity
         style={[styles.entryCard, { borderLeftColor: borderColor }]}
         onPress={() => handleViewEntry(item)}
       >
-        <View style={styles.entryHeader}>
-          <Text style={styles.entryMood}>{displayEmoji}</Text>
-          <Text style={[styles.entryTitle, { color: '#343a40', flex: 1 }]}>
-            {item.title}
-          </Text>
-          <View style={styles.entryActions}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => handleEditEntry(item)}
-            >
-              <Icon name="edit-3" size={16} color="#6c757d" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => {
-                Alert.alert('일기 삭제', '정말로 이 일기를 삭제하시겠습니까?', [
-                  { text: '취소', style: 'cancel' },
-                  {
-                    text: '삭제',
-                    style: 'destructive',
-                    onPress: () => handleDeleteEntry(item.id),
-                  },
-                ]);
-              }}
-            >
-              <Icon name="trash-2" size={16} color="#dc3545" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <Text style={styles.entryContent} numberOfLines={2}>
-          {item.content}
-        </Text>
-
-        {/* 선택된 카테고리들 표시 */}
-        {renderSelectedCategories(item)}
-
-        {/* 태그 표시 */}
-        {item.tags && item.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {item.tags.slice(0, 2).map((tag, tagIndex) => {
-              if (typeof tag === 'string') {
-                return (
-                  <View
-                    key={tagIndex}
-                    style={[styles.tag, { backgroundColor: '#e9ecef' }]}
+        <View style={styles.entryCardContent}>
+          <View style={styles.entryLeftContent}>
+            <View style={styles.entryHeader}>
+              <Text style={styles.entryMood}>{displayEmoji}</Text>
+              <Text style={[styles.entryTitle, { color: '#343a40', flex: 1 }]}>
+                {item.title}
+              </Text>
+              {/* 이미지가 없을 때만 헤더에 액션 버튼 표시 */}
+              {!(item.images && item.images.length > 0) && (
+                <View style={styles.entryActions}>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleEditEntry(item)}
                   >
-                    <Text style={[styles.tagText, { color: '#495057' }]}>
-                      #{tag}
-                    </Text>
-                  </View>
-                );
-              } else {
-                return (
-                  <View
-                    key={tagIndex}
-                    style={[styles.tag, { backgroundColor: tag.color }]}
+                    <Icon name="edit-3" size={16} color="#6c757d" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => {
+                      Alert.alert(
+                        '일기 삭제',
+                        '정말로 이 일기를 삭제하시겠습니까?',
+                        [
+                          { text: '취소', style: 'cancel' },
+                          {
+                            text: '삭제',
+                            style: 'destructive',
+                            onPress: () => handleDeleteEntry(item.id),
+                          },
+                        ],
+                      );
+                    }}
                   >
-                    <Text style={styles.tagIcon}>{tag.icon}</Text>
-                    <Text style={styles.tagText}>{tag.name}</Text>
-                  </View>
-                );
-              }
-            })}
-            {item.tags.length > 2 && (
-              <Text style={styles.moreTagsText}>+{item.tags.length - 2}</Text>
+                    <Icon name="trash-2" size={16} color="#dc3545" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
+            <Text style={styles.entryContent} numberOfLines={2}>
+              {item.content}
+            </Text>
+
+            {/* 선택된 카테고리들 표시 */}
+            {renderSelectedCategories(item)}
+
+            {/* 태그 표시 - 한 줄 제한 */}
+            {item.tags && item.tags.length > 0 && (
+              <View style={styles.tagsContainer}>
+                {item.tags.slice(0, 2).map((tag, tagIndex) => {
+                  if (typeof tag === 'string') {
+                    return (
+                      <View
+                        key={tagIndex}
+                        style={[styles.tag, { backgroundColor: '#e9ecef' }]}
+                      >
+                        <Text
+                          style={[styles.tagText, { color: '#495057' }]}
+                          numberOfLines={1}
+                        >
+                          #{tag}
+                        </Text>
+                      </View>
+                    );
+                  } else {
+                    return (
+                      <View
+                        key={tagIndex}
+                        style={[styles.tag, { backgroundColor: tag.color }]}
+                      >
+                        <Text style={styles.tagIcon}>{tag.icon}</Text>
+                        <Text style={styles.tagText} numberOfLines={1}>
+                          {tag.name}
+                        </Text>
+                      </View>
+                    );
+                  }
+                })}
+                {item.tags.length > 2 && (
+                  <Text style={styles.moreTagsText}>...</Text>
+                )}
+              </View>
             )}
-          </View>
-        )}
 
-        <View style={styles.entryFooter}>
-          <Text style={styles.entryDate}>
-            {new Date(item.date).toLocaleDateString('ko-KR')}
-          </Text>
-          <Text style={styles.createdDate}>
-            {new Date(item.createdAt).toLocaleDateString('ko-KR')}에 작성
-          </Text>
+            <View style={styles.entryFooter}>
+              <Text style={styles.entryDate}>
+                {new Date(item.date).toLocaleDateString('ko-KR')}
+              </Text>
+              <Text style={styles.createdDate}>
+                {new Date(item.createdAt).toLocaleDateString('ko-KR')}에 작성
+              </Text>
+            </View>
+          </View>
+
+          {/* 이미지가 있을 때 오른쪽에 이미지 표시 */}
+          {item.images && item.images.length > 0 && (
+            <View style={styles.entryRightContent}>
+              <View style={styles.entryImageContainer}>
+                <Image
+                  source={{ uri: item.images![0] }}
+                  style={styles.entryImage}
+                  resizeMode="cover"
+                  onError={error => {
+                    console.log(
+                      '🚨 HomeScreen 이미지 로딩 오류:',
+                      error.nativeEvent.error,
+                    );
+                    console.log('🚨 문제 이미지 URI:', item.images![0]);
+                    console.log('🚨 이미지 URI 형식 확인:', {
+                      uri: item.images![0],
+                      startsWithFile: item.images![0].startsWith('file://'),
+                      isValid: item.images![0] && item.images![0].length > 0,
+                    });
+                  }}
+                  onLoad={() => {
+                    console.log(
+                      '✅ HomeScreen 이미지 로딩 성공:',
+                      item.images![0],
+                    );
+                  }}
+                />
+                {/* 이미지 로딩 실패 시에만 플레이스홀더 표시 */}
+                {false && (
+                  <View style={styles.imagePlaceholder}>
+                    <Text style={styles.imagePlaceholderText}>📷</Text>
+                  </View>
+                )}
+              </View>
+              {/* 이미지 개수 표시 */}
+              {item.images.length > 1 && (
+                <Text style={styles.imageCount}>
+                  +{item.images.length - 1}장
+                </Text>
+              )}
+
+              <View style={styles.entryImageActions}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => handleEditEntry(item)}
+                >
+                  <Icon name="edit-3" size={16} color="#6c757d" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => {
+                    Alert.alert(
+                      '일기 삭제',
+                      '정말로 이 일기를 삭제하시겠습니까?',
+                      [
+                        { text: '취소', style: 'cancel' },
+                        {
+                          text: '삭제',
+                          style: 'destructive',
+                          onPress: () => handleDeleteEntry(item.id),
+                        },
+                      ],
+                    );
+                  }}
+                >
+                  <Icon name="trash-2" size={16} color="#dc3545" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -516,8 +631,8 @@ const styles = StyleSheet.create({
   },
   emptyButton: {
     paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 25,
+    paddingVertical: 16,
+    borderRadius: 30,
   },
   emptyButtonText: {
     fontSize: 16,
@@ -532,34 +647,40 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30,
     right: 30,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 12,
   },
   floatingButtonText: {
     fontSize: 24,
   },
   entryCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-    borderLeftWidth: 4,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    borderLeftWidth: 6,
+  },
+  entryCardContent: {
+    flexDirection: 'row',
+  },
+  entryLeftContent: {
+    flex: 1,
   },
   entryHeader: {
     flexDirection: 'row',
@@ -606,11 +727,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#e9ecef',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 6,
-    marginBottom: 4,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
+    marginBottom: 6,
   },
   categoryTagIcon: {
     fontSize: 12,
@@ -627,18 +748,19 @@ const styles = StyleSheet.create({
   },
   tagsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   tag: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#e9ecef',
-    borderRadius: 10,
+    borderRadius: 16,
     paddingHorizontal: 8,
     paddingVertical: 4,
     marginRight: 6,
-    marginBottom: 4,
+    flexShrink: 0,
   },
   tagIcon: {
     fontSize: 12,
@@ -658,6 +780,49 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 4,
+  },
+  entryRightContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  entryImageContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    marginBottom: 8,
+  },
+  entryImage: {
+    width: '100%',
+    height: '100%',
+  },
+  entryImageActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  imageCount: {
+    fontSize: 11,
+    color: '#6c757d',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  imagePlaceholder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  imagePlaceholderText: {
+    fontSize: 24,
+    color: '#6c757d',
   },
 });
 

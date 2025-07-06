@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -163,7 +164,54 @@ const ViewEntryScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
 
           <View style={styles.body}>
-            <Text style={styles.contentText}>{entry.content}</Text>
+            <View style={styles.contentContainer}>
+              {/* 텍스트 영역 */}
+              <View style={styles.textArea}>
+                <Text
+                  style={[
+                    styles.contentText,
+                    { color: currentTheme.colors.text },
+                  ]}
+                >
+                  {entry.content}
+                </Text>
+              </View>
+
+              {/* 이미지 영역 */}
+              {entry.images && entry.images.length > 0 && (
+                <View style={styles.imageArea}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.imagesScrollView}
+                    contentContainerStyle={styles.imagesScrollContent}
+                  >
+                    {entry.images.map((imageUri, index) => (
+                      <View key={index} style={styles.imageContainer}>
+                        <Image
+                          source={{ uri: imageUri }}
+                          style={styles.image}
+                          resizeMode="cover"
+                          onError={error => {
+                            console.log(
+                              '🚨 ViewEntry 이미지 로딩 오류:',
+                              error.nativeEvent.error,
+                            );
+                            console.log('🚨 문제 이미지 URI:', imageUri);
+                          }}
+                          onLoad={() => {
+                            console.log(
+                              '✅ ViewEntry 이미지 로딩 성공:',
+                              imageUri,
+                            );
+                          }}
+                        />
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+            </View>
           </View>
 
           {entry.tags && entry.tags.length > 0 && (
@@ -294,6 +342,17 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  textArea: {
+    flex: 1,
+    marginRight: 16,
+  },
+  imageArea: {
+    alignItems: 'flex-end',
+  },
   contentText: {
     fontSize: 16,
     color: '#495057',
@@ -310,15 +369,20 @@ const styles = StyleSheet.create({
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '100%',
   },
   tag: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginRight: 8,
-    marginBottom: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginRight: 6,
+    marginBottom: 4,
+    maxWidth: '48%',
+    minWidth: 60,
   },
   tagIcon: {
     fontSize: 16,
@@ -351,6 +415,23 @@ const styles = StyleSheet.create({
   deleteButton: {},
   deleteButtonText: {
     color: '#dc3545',
+  },
+  imagesScrollView: {
+    flexDirection: 'row',
+  },
+  imagesScrollContent: {
+    paddingLeft: 8,
+  },
+  imageContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
   },
 });
 

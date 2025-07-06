@@ -1,5 +1,6 @@
 {
   "name": "FutureDiary",
+  "displayName": "위시어리",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -18,7 +19,9 @@
     "react": "19.1.0",
     "react-native": "0.80.0",
     "react-native-calendars": "^1.1313.0",
+    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.26.0",
+    "react-native-image-picker": "^8.2.1",
     "react-native-paper": "^5.14.5",
     "react-native-safe-area-context": "^5.5.0",
     "react-native-screens": "^4.11.1",
