@@ -372,35 +372,37 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
       <TouchableOpacity
-        style={styles.timelineItem}
+        style={styles.timelineItemHorizontal}
         onPress={() => navigation.navigate('ViewEntry', { entry: item.entry })}
       >
-        <View style={styles.timelineContent}>
-          <View style={styles.timelineLeft}>
+        <View style={styles.timelineContentHorizontal}>
+          {/* 위쪽: 아이콘과 연결선 */}
+          <View style={styles.timelineTopHorizontal}>
             <View
               style={[
-                styles.timelineIcon,
+                styles.timelineIconHorizontal,
                 { backgroundColor: getStatusColor(item.status) },
               ]}
             >
-              <Text style={styles.timelineIconText}>
+              <Text style={styles.timelineIconTextHorizontal}>
                 {getStatusIcon(item.status)}
               </Text>
             </View>
             {!isLast && (
               <View
                 style={[
-                  styles.timelineLine,
+                  styles.timelineLineHorizontal,
                   { backgroundColor: getStatusColor(item.status) },
                 ]}
               />
             )}
           </View>
 
-          <View style={styles.timelineRight}>
+          {/* 아래쪽: 날짜와 카드 */}
+          <View style={styles.timelineBottomHorizontal}>
             <Text
               style={[
-                styles.timelineDate,
+                styles.timelineDateHorizontal,
                 { color: getStatusColor(item.status) },
               ]}
             >
@@ -409,155 +411,143 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
 
             <View
               style={[
-                styles.entryCard,
+                styles.entryCardHorizontal,
                 {
-                  borderLeftColor: getStatusColor(item.status),
+                  borderTopColor: getStatusColor(item.status),
                   backgroundColor: '#FFFFFF',
                 },
               ]}
             >
               {/* 1. 제목 섹션: 기분 이모티콘 + 제목 */}
-              <View style={styles.titleMoodSection}>
-                <Text style={styles.todayEntryEmoji}>{displayEmoji}</Text>
+              <View style={styles.titleMoodSectionHorizontal}>
+                <Text style={styles.todayEntryEmojiHorizontal}>
+                  {displayEmoji}
+                </Text>
                 <Text
-                  style={[styles.todayEntryTitle, { marginLeft: 8, flex: 1 }]}
+                  style={[styles.todayEntryTitleHorizontal, { flex: 1 }]}
                   numberOfLines={1}
                 >
                   {item.entry.title}
                 </Text>
               </View>
 
-              {/* 2. 메인 콘텐츠 섹션: 일기내용 + 이미지 (좌우 분할) */}
-              <View style={styles.contentImageSection}>
-                {/* 좌측: 일기 내용 + 날씨 태그 */}
-                <View style={styles.leftContentSection}>
-                  <Text
-                    style={styles.todayEntryPreviewContent}
-                    numberOfLines={2}
-                  >
-                    {item.entry.content}
-                  </Text>
+              {/* 2. 일기 내용 */}
+              <Text
+                style={styles.todayEntryContentHorizontal}
+                numberOfLines={2}
+              >
+                {item.entry.content}
+              </Text>
 
-                  {/* 날씨 태그와 기타 태그를 한 줄로 통합 */}
-                  <View style={styles.allTagsSection}>
-                    {/* 날씨 태그 */}
-                    {item.entry.selectedWeather &&
-                      item.entry.selectedWeather.length > 0 && (
-                        <>
-                          {item.entry.selectedWeather
-                            .slice(0, 1)
-                            .map((weather, index) => {
-                              const weatherOption = (
-                                categoryOptionsMap.weather?.options as any
-                              )?.[weather];
-                              if (weatherOption) {
-                                return (
-                                  <View
-                                    key={index}
-                                    style={[
-                                      styles.categoryTag,
-                                      {
-                                        backgroundColor: weatherOption.color,
-                                        marginRight: 6,
-                                      },
-                                    ]}
-                                  >
-                                    <Text style={styles.categoryTagIcon}>
-                                      {weatherOption.icon}
-                                    </Text>
-                                    <Text style={styles.categoryTagText}>
-                                      {weatherOption.name}
-                                    </Text>
-                                  </View>
-                                );
-                              }
-                              return null;
-                            })}
-                          {item.entry.selectedWeather.length > 1 && (
-                            <Text
-                              style={[
-                                styles.moreCategoriesText,
-                                { marginRight: 6 },
-                              ]}
-                            >
-                              +{item.entry.selectedWeather.length - 1}
+              {/* 3. 이미지 (있을 경우) */}
+              {item.entry.images && item.entry.images.length > 0 && (
+                <View style={styles.imageContainerHorizontal}>
+                  <Image
+                    source={{ uri: item.entry.images[0] }}
+                    style={styles.entryImageHorizontal}
+                    resizeMode="cover"
+                    onError={error => {
+                      console.log(
+                        '🚨 타임라인 이미지 로딩 오류:',
+                        error.nativeEvent.error,
+                      );
+                      console.log('🚨 문제 이미지 URI:', item.entry.images![0]);
+                    }}
+                    onLoad={() => {
+                      console.log(
+                        '✅ 타임라인 이미지 로딩 성공:',
+                        item.entry.images![0],
+                      );
+                    }}
+                  />
+                  {item.entry.images.length > 1 && (
+                    <Text style={styles.imageCountHorizontal}>
+                      +{item.entry.images.length - 1}
+                    </Text>
+                  )}
+                </View>
+              )}
+
+              {/* 4. 태그 */}
+              <View style={styles.tagsContainerHorizontal}>
+                {/* 날씨 태그 */}
+                {item.entry.selectedWeather &&
+                  item.entry.selectedWeather.length > 0 && (
+                    <>
+                      {item.entry.selectedWeather
+                        .slice(0, 1)
+                        .map((weather, index) => {
+                          const weatherOption = (
+                            categoryOptionsMap.weather?.options as any
+                          )?.[weather];
+                          if (weatherOption) {
+                            return (
+                              <View
+                                key={index}
+                                style={[
+                                  styles.categoryTagHorizontal,
+                                  {
+                                    backgroundColor: weatherOption.color,
+                                  },
+                                ]}
+                              >
+                                <Text style={styles.categoryTagIconHorizontal}>
+                                  {weatherOption.icon}
+                                </Text>
+                                <Text style={styles.categoryTagTextHorizontal}>
+                                  {weatherOption.name}
+                                </Text>
+                              </View>
+                            );
+                          }
+                          return null;
+                        })}
+                      {item.entry.selectedWeather.length > 1 && (
+                        <Text style={styles.moreCategoriesTextHorizontal}>
+                          +{item.entry.selectedWeather.length - 1}
+                        </Text>
+                      )}
+                    </>
+                  )}
+
+                {/* 기타 태그 */}
+                {item.entry.tags && item.entry.tags.length > 0 && (
+                  <>
+                    {item.entry.tags.slice(0, 1).map((tag, index) => {
+                      const tagInfo =
+                        typeof tag === 'string'
+                          ? { name: tag, icon: '', color: '#e9ecef' }
+                          : tag;
+                      return (
+                        <View
+                          key={index}
+                          style={[
+                            styles.tagHorizontal,
+                            {
+                              backgroundColor: tagInfo.color + '20',
+                            },
+                          ]}
+                        >
+                          {tagInfo.icon && (
+                            <Text style={styles.tagIconHorizontal}>
+                              {tagInfo.icon}
                             </Text>
                           )}
-                        </>
-                      )}
-
-                    {/* 기타 태그 */}
-                    {item.entry.tags && item.entry.tags.length > 0 && (
-                      <>
-                        {item.entry.tags.slice(0, 2).map((tag, index) => {
-                          const tagInfo =
-                            typeof tag === 'string'
-                              ? { name: tag, icon: '', color: '#e9ecef' }
-                              : tag;
-                          return (
-                            <View
-                              key={index}
-                              style={[
-                                styles.tag,
-                                {
-                                  backgroundColor: tagInfo.color + '20',
-                                  marginRight: 6,
-                                },
-                              ]}
-                            >
-                              {tagInfo.icon && (
-                                <Text style={styles.tagIcon}>
-                                  {tagInfo.icon}
-                                </Text>
-                              )}
-                              <Text style={styles.tagText} numberOfLines={1}>
-                                #{tagInfo.name}
-                              </Text>
-                            </View>
-                          );
-                        })}
-                        {item.entry.tags.length > 2 && (
-                          <Text style={styles.moreTagsText}>
-                            +{item.entry.tags.length - 2}
+                          <Text
+                            style={styles.tagTextHorizontal}
+                            numberOfLines={1}
+                          >
+                            #{tagInfo.name}
                           </Text>
-                        )}
-                      </>
-                    )}
-                  </View>
-                </View>
-
-                {/* 우측: 이미지 (크기 줄임) */}
-                {item.entry.images && item.entry.images.length > 0 && (
-                  <View style={styles.todayEntrySmallImageSection}>
-                    <View style={styles.todayEntrySmallImageContainer}>
-                      <Image
-                        source={{ uri: item.entry.images[0] }}
-                        style={styles.todayEntrySmallImage}
-                        resizeMode="cover"
-                        onError={error => {
-                          console.log(
-                            '🚨 타임라인 이미지 로딩 오류:',
-                            error.nativeEvent.error,
-                          );
-                          console.log(
-                            '🚨 문제 이미지 URI:',
-                            item.entry.images![0],
-                          );
-                        }}
-                        onLoad={() => {
-                          console.log(
-                            '✅ 타임라인 이미지 로딩 성공:',
-                            item.entry.images![0],
-                          );
-                        }}
-                      />
-                    </View>
-                    {item.entry.images.length > 1 && (
-                      <Text style={styles.smallImageCountText}>
-                        +{item.entry.images.length - 1}
+                        </View>
+                      );
+                    })}
+                    {item.entry.tags.length > 1 && (
+                      <Text style={styles.moreTagsTextHorizontal}>
+                        +{item.entry.tags.length - 1}
                       </Text>
                     )}
-                  </View>
+                  </>
                 )}
               </View>
             </View>
@@ -988,7 +978,8 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               contentContainerStyle={styles.listContainer}
-              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+              horizontal={true}
             />
           )}
         </View>
@@ -1854,6 +1845,153 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#6c757d',
     marginTop: 4,
+  },
+  // 가로 타임라인 스타일들
+  timelineItemHorizontal: {
+    marginRight: 16,
+    width: 220,
+  },
+  timelineContentHorizontal: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  timelineTopHorizontal: {
+    alignItems: 'center',
+    marginBottom: 12,
+    flexDirection: 'row',
+  },
+  timelineIconHorizontal: {
+    minWidth: 60,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    paddingHorizontal: 8,
+  },
+  timelineIconTextHorizontal: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  timelineLineHorizontal: {
+    height: 2,
+    width: 228,
+    marginLeft: 8,
+    opacity: 0.3,
+  },
+  timelineBottomHorizontal: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  timelineDateHorizontal: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  entryCardHorizontal: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    borderTopWidth: 4,
+    width: '100%',
+  },
+  titleMoodSectionHorizontal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  todayEntryEmojiHorizontal: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+  todayEntryTitleHorizontal: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#343a40',
+  },
+  todayEntryContentHorizontal: {
+    fontSize: 12,
+    color: '#495057',
+    lineHeight: 16,
+    marginBottom: 8,
+  },
+  imageContainerHorizontal: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  entryImageHorizontal: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+  },
+  imageCountHorizontal: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#6c757d',
+    marginTop: 4,
+  },
+  tagsContainerHorizontal: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryTagHorizontal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e9ecef',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  categoryTagIconHorizontal: {
+    fontSize: 10,
+    marginRight: 2,
+  },
+  categoryTagTextHorizontal: {
+    fontSize: 10,
+    color: '#495057',
+  },
+  moreCategoriesTextHorizontal: {
+    fontSize: 10,
+    color: '#6c757d',
+    fontStyle: 'italic',
+    marginRight: 4,
+  },
+  tagHorizontal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e9ecef',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  tagIconHorizontal: {
+    fontSize: 10,
+    marginRight: 2,
+  },
+  tagTextHorizontal: {
+    fontSize: 10,
+    color: '#495057',
+  },
+  moreTagsTextHorizontal: {
+    fontSize: 10,
+    color: '#6c757d',
+    fontStyle: 'italic',
   },
 });
 
