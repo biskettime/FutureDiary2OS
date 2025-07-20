@@ -71,9 +71,33 @@ target 'FutureDiary' do
       end
     end
     
-    # Patch SocketRocket source code directly to fix typeof and sself issues
-    system("find #{installer.sandbox.root}/SocketRocket -name '*.m' -exec sed -i '' 's/__weak typeof(/__weak __typeof__(/g' {} \\;")
-    system("find #{installer.sandbox.root}/SocketRocket -name '*.m' -exec sed -i '' 's/__strong typeof(/__strong __typeof__(/g' {} \\;")
-    system("find #{installer.sandbox.root}/SocketRocket -name '*.m' -exec sed -i '' 's/sself = self;/sself = wself;/g' {} \\;")
+    # SocketRocket typeof/wself 소스 코드 직접 패치 (Ruby 방식)
+    puts "🔧 SocketRocket typeof/wself 패치 적용 중..."
+    socketrocket_files = [
+      "#{installer.sandbox.root}/SocketRocket/SocketRocket/SRWebSocket.m",
+      "#{installer.sandbox.root}/SocketRocket/SocketRocket/Internal/Proxy/SRProxyConnect.m"
+    ]
+    
+    socketrocket_files.each do |file_path|
+      if File.exist?(file_path)
+        puts "  📝 패치 적용: #{File.basename(file_path)}"
+        content = File.read(file_path)
+        
+        # typeof -> __typeof__ 변환
+        content.gsub!(/__weak typeof\(/, '__weak __typeof__(')
+        content.gsub!(/__strong typeof\(/, '__strong __typeof__(')
+        content.gsub!(/typeof\(/, '__typeof__(')
+        
+        # wself/sself 문제 해결
+        content.gsub!(/\bwself\b/, 'weakSelf')
+        content.gsub!(/\bsself\b/, 'strongSelf')
+        
+        File.write(file_path, content)
+        puts "  ✅ 패치 완료: #{File.basename(file_path)}"
+      else
+        puts "  ⚠️  파일 없음: #{file_path}"
+      end
+    end
+    puts "🎉 SocketRocket 패치 완료!"
   end
 end
