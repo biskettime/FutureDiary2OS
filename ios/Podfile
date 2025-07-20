@@ -45,12 +45,16 @@ target 'FutureDiary' do
         config.build_settings['CLANG_WARN_EVERYTHING'] = 'NO'
         config.build_settings['WARNING_CFLAGS'] = '-w'
         config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+        config.build_settings['CLANG_WARN_DEPRECATED_DECLARATIONS'] = 'NO'
+        config.build_settings['GCC_WARN_DEPRECATED_FUNCTIONS'] = 'NO'
         
         # 전역 typeof 매크로 정의 (모든 타겟에 적용)
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'typeof=__typeof__'
         config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_CFLAGS'] << '-Dtypeof=__typeof__'
+        config.build_settings['OTHER_CFLAGS'] << '-Dtypeof=__typeof__' << '-Wno-deprecated-declarations'
+        
+
         
         # Specific settings for SocketRocket with maximum compatibility
         if target.name == 'SocketRocket'
@@ -68,9 +72,13 @@ target 'FutureDiary' do
           config.build_settings['CLANG_WARN_OBJC_ROOT_CLASS'] = 'NO'
           config.build_settings['GCC_WARN_UNDECLARED_SELECTOR'] = 'NO'
           config.build_settings['CLANG_WARN_UNGUARDED_AVAILABILITY'] = 'NO'
+          config.build_settings['CLANG_WARN_DEPRECATED_DECLARATIONS'] = 'NO'
+          config.build_settings['GCC_WARN_DEPRECATED_FUNCTIONS'] = 'NO'
           
-          # SocketRocket 전용 추가 플래그
-          config.build_settings['OTHER_CFLAGS'] << '-w' << '-fno-strict-aliasing'
+          # SocketRocket 전용 추가 플래그 - 더 강력한 경고 억제
+          config.build_settings['OTHER_CFLAGS'] << '-w' << '-fno-strict-aliasing' << '-Wno-deprecated-declarations' << '-Wno-error' << '-Wno-duplicate-enum'
+          config.build_settings['SWIFT_SUPPRESS_WARNINGS'] = 'YES'
+          config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
         end
       end
     end
