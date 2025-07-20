@@ -70,5 +70,10 @@ target 'FutureDiary' do
         end
       end
     end
+    
+    # Patch SocketRocket source code directly to fix typeof and sself issues
+    system("find #{installer.sandbox.root}/SocketRocket -name '*.m' -exec sed -i '' 's/__weak typeof(/__weak __typeof__(/g' {} \\;")
+    system("find #{installer.sandbox.root}/SocketRocket -name '*.m' -exec sed -i '' 's/__strong typeof(/__strong __typeof__(/g' {} \\;")
+    system("find #{installer.sandbox.root}/SocketRocket -name '*.m' -exec sed -i '' 's/sself = self;/sself = wself;/g' {} \\;")
   end
 end
