@@ -46,11 +46,15 @@ target 'FutureDiary' do
         config.build_settings['WARNING_CFLAGS'] = '-w'
         config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
         
+        # 전역 typeof 매크로 정의 (모든 타겟에 적용)
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'typeof=__typeof__'
+        config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+        config.build_settings['OTHER_CFLAGS'] << '-Dtypeof=__typeof__'
+        
         # Specific settings for SocketRocket with maximum compatibility
         if target.name == 'SocketRocket'
-          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
           config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'SR_ENABLE_LOG=1'
-          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'typeof=__typeof__'
           config.build_settings['CLANG_ENABLE_OBJC_WEAK'] = 'YES'
           config.build_settings['GCC_C_LANGUAGE_STANDARD'] = 'gnu99'
           config.build_settings['CLANG_ENABLE_OBJC_ARC'] = 'YES'
@@ -65,37 +69,36 @@ target 'FutureDiary' do
           config.build_settings['GCC_WARN_UNDECLARED_SELECTOR'] = 'NO'
           config.build_settings['CLANG_WARN_UNGUARDED_AVAILABILITY'] = 'NO'
           
-          # Force C89 compatibility for typeof
-          config.build_settings['OTHER_CFLAGS'] = '-Dtypeof=__typeof__ -w'
+          # SocketRocket 전용 추가 플래그
+          config.build_settings['OTHER_CFLAGS'] << '-w' << '-fno-strict-aliasing'
         end
       end
     end
     
-    # SocketRocket typeof/wself 소스 코드 직접 패치 (Ruby 방식)
-    puts "🔧 SocketRocket typeof/wself 패치 적용 중..."
-    socketrocket_files = [
-      "#{installer.sandbox.root}/SocketRocket/SocketRocket/SRWebSocket.m",
-      "#{installer.sandbox.root}/SocketRocket/SocketRocket/Internal/Proxy/SRProxyConnect.m"
-    ]
+    # SocketRocket typeof/wself 소스 코드 직접 패치 (강화된 Ruby 방식)
+    puts "🔧 SocketRocket typeof 강력 패치 적용 중..."
+    
+    # 모든 SocketRocket 파일 찾기
+    socketrocket_files = Dir.glob("#{installer.sandbox.root}/SocketRocket/**/*.{m,h}")
     
     socketrocket_files.each do |file_path|
-      if File.exist?(file_path)
-        puts "  📝 패치 적용: #{File.basename(file_path)}"
+      if File.exist?(file_path) && File.readable?(file_path)
         content = File.read(file_path)
+        original_content = content.dup
         
-        # typeof -> __typeof__ 변환 (변수명은 그대로 유지)
-        content.gsub!(/__weak typeof\(/, '__weak __typeof__(')
-        content.gsub!(/__strong typeof\(/, '__strong __typeof__(')
-        content.gsub!(/typeof\(/, '__typeof__(')
+        # 모든 가능한 typeof 패턴 변환
+        content.gsub!(/\btypeof\s*\(/, '__typeof__(')
+        content.gsub!(/__weak\s+typeof\s*\(/, '__weak __typeof__(')
+        content.gsub!(/__strong\s+typeof\s*\(/, '__strong __typeof__(')
+        content.gsub!(/\s+typeof\s*\(/, ' __typeof__(')
         
-        # wself/sself는 원래 변수명 유지 (typeof만 수정하면 해결됨)
-        
-        File.write(file_path, content)
-        puts "  ✅ 패치 완료: #{File.basename(file_path)}"
-      else
-        puts "  ⚠️  파일 없음: #{file_path}"
+        # 내용이 변경된 경우에만 파일 쓰기
+        if content != original_content
+          File.write(file_path, content)
+          puts "  ✅ 패치 적용: #{File.basename(file_path)}"
+        end
       end
     end
-    puts "🎉 SocketRocket 패치 완료!"
+    puts "🎉 SocketRocket 강력 패치 완료!"
   end
 end
