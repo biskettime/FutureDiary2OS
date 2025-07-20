@@ -83,14 +83,12 @@ target 'FutureDiary' do
         puts "  📝 패치 적용: #{File.basename(file_path)}"
         content = File.read(file_path)
         
-        # typeof -> __typeof__ 변환
+        # typeof -> __typeof__ 변환 (변수명은 그대로 유지)
         content.gsub!(/__weak typeof\(/, '__weak __typeof__(')
         content.gsub!(/__strong typeof\(/, '__strong __typeof__(')
         content.gsub!(/typeof\(/, '__typeof__(')
         
-        # wself/sself 문제 해결
-        content.gsub!(/\bwself\b/, 'weakSelf')
-        content.gsub!(/\bsself\b/, 'strongSelf')
+        # wself/sself는 원래 변수명 유지 (typeof만 수정하면 해결됨)
         
         File.write(file_path, content)
         puts "  ✅ 패치 완료: #{File.basename(file_path)}"
