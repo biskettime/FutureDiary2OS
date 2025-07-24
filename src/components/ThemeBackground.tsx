@@ -73,9 +73,6 @@ const ThemeBackground: React.FC<ThemeBackgroundProps> = ({ children }) => {
     if (themeId === 'galaxy-dream') {
       duration = 3000 + Math.random() * 2000; // 별똥별은 빠르게
       swayDistance = 200 + Math.random() * 100; // 크게 휩쓸림
-    } else if (themeId === 'aurora-vision') {
-      duration = 8000 + Math.random() * 4000; // 오로라는 천천히
-      swayDistance = 150 + Math.random() * 100; // 넓게 움직임
     }
 
     const animations = Animated.parallel([
@@ -209,16 +206,6 @@ const ThemeBackground: React.FC<ThemeBackgroundProps> = ({ children }) => {
         ]);
         break;
 
-      case 'cherry-blossom':
-        console.log('🌸 벚꽃 환상 테마 - 벚꽃 파티클 효과 시작!');
-        startParticleAnimations('cherry-blossom', [
-          { emoji: '🌸', color: '#FFB6C1' },
-          { emoji: '🌺', color: '#FFC0CB' },
-          { emoji: '✨', color: '#F8BBD9' },
-          { emoji: '💮', color: '#FFE4E1' },
-        ]);
-        break;
-
       case 'galaxy-dream':
         console.log('🌌 은하수 꿈 테마 - 별똥별 효과 시작!');
         startParticleAnimations('galaxy-dream', [
@@ -239,16 +226,6 @@ const ThemeBackground: React.FC<ThemeBackgroundProps> = ({ children }) => {
         ]);
         break;
 
-      case 'aurora-vision':
-        console.log('🌈 오로라 비전 테마 - 오로라 빛 효과 시작!');
-        startParticleAnimations('aurora-vision', [
-          { emoji: '✨', color: '#00FFFF' },
-          { emoji: '💎', color: '#87CEEB' },
-          { emoji: '🔮', color: '#40E0D0' },
-          { emoji: '💫', color: '#00CED1' },
-        ]);
-        break;
-
       case 'moonlight-serenade':
         console.log('🌙 달빛 세레나데 테마 - 달빛 입자 효과 시작!');
         startParticleAnimations('moonlight-serenade', [
@@ -256,26 +233,6 @@ const ThemeBackground: React.FC<ThemeBackgroundProps> = ({ children }) => {
           { emoji: '⭐', color: '#E6E6FA' },
           { emoji: '✨', color: '#D3D3D3' },
           { emoji: '💫', color: '#B6B6B6' },
-        ]);
-        break;
-
-      case 'lavender-dream':
-        console.log('💜 라벤더 드림 테마 - 라벤더 입자 효과 시작!');
-        startParticleAnimations('lavender-dream', [
-          { emoji: '🌿', color: '#DDA0DD' },
-          { emoji: '💜', color: '#9370DB' },
-          { emoji: '✨', color: '#E1BEE7' },
-          { emoji: '🦋', color: '#BA55D3' },
-        ]);
-        break;
-
-      case 'golden-sunset':
-        console.log('🌅 황금 일몰 테마 - 황금 입자 효과 시작!');
-        startParticleAnimations('golden-sunset', [
-          { emoji: '✨', color: '#FFD700' },
-          { emoji: '🌟', color: '#FFA500' },
-          { emoji: '💫', color: '#FF8C00' },
-          { emoji: '🔥', color: '#FF6347' },
         ]);
         break;
 
@@ -469,19 +426,11 @@ const ThemeBackground: React.FC<ThemeBackgroundProps> = ({ children }) => {
   switch (currentTheme.id) {
     case 'angel':
       return renderAngelTheme();
-    case 'cherry-blossom':
-      return renderThemeWithParticles(currentTheme.colors.background);
     case 'galaxy-dream':
       return renderThemeWithParticles(currentTheme.colors.background);
     case 'rosegold-love':
       return renderThemeWithParticles(currentTheme.colors.background);
-    case 'aurora-vision':
-      return renderThemeWithParticles(currentTheme.colors.background);
     case 'moonlight-serenade':
-      return renderThemeWithParticles(currentTheme.colors.background);
-    case 'lavender-dream':
-      return renderThemeWithParticles(currentTheme.colors.background);
-    case 'golden-sunset':
       return renderThemeWithParticles(currentTheme.colors.background);
     default:
       return (

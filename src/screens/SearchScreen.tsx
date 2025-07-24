@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
-  ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -29,7 +28,6 @@ interface SearchFilters {
   keyword: string;
   startDate: string;
   endDate: string;
-  selectedTags: string[];
 }
 
 const SearchScreen: React.FC<Props> = ({ navigation }) => {
@@ -42,9 +40,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
     keyword: '',
     startDate: '',
     endDate: '',
-    selectedTags: [],
   });
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
 
   // 카테고리 옵션 매핑 (MyDiaryScreen과 동일)
   const categoryOptionsMap = {
@@ -112,21 +108,6 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
       const entries = await loadDiaryEntries();
       setAllEntries(entries);
       setFilteredEntries([]);
-
-      // 사용 가능한 모든 태그 추출
-      const tags = new Set<string>();
-      entries.forEach(entry => {
-        if (entry.tags) {
-          entry.tags.forEach(tag => {
-            if (typeof tag === 'string') {
-              tags.add(tag);
-            } else {
-              tags.add(tag.name);
-            }
-          });
-        }
-      });
-      setAvailableTags(Array.from(tags));
     } catch (error) {
       console.error('일기 로딩 중 오류:', error);
     } finally {
@@ -213,21 +194,6 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
       });
     }
 
-    // 태그 검색
-    if (filters.selectedTags.length > 0) {
-      filtered = filtered.filter(entry => {
-        if (!entry.tags) return false;
-
-        const entryTags = entry.tags.map(tag =>
-          typeof tag === 'string' ? tag : tag.name,
-        );
-
-        return filters.selectedTags.some(selectedTag =>
-          entryTags.includes(selectedTag),
-        );
-      });
-    }
-
     setFilteredEntries(filtered);
   };
 
@@ -239,21 +205,11 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
     setFilters(prev => ({ ...prev, [field]: value }));
   };
 
-  const toggleTag = (tag: string) => {
-    setFilters(prev => ({
-      ...prev,
-      selectedTags: prev.selectedTags.includes(tag)
-        ? prev.selectedTags.filter(t => t !== tag)
-        : [...prev.selectedTags, tag],
-    }));
-  };
-
   const clearFilters = () => {
     setFilters({
       keyword: '',
       startDate: '',
       endDate: '',
-      selectedTags: [],
     });
     setFilteredEntries([]);
   };
@@ -262,8 +218,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
     return (
       filters.keyword.trim() !== '' ||
       filters.startDate !== '' ||
-      filters.endDate !== '' ||
-      filters.selectedTags.length > 0
+      filters.endDate !== ''
     );
   };
 
@@ -415,12 +370,11 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
         </View>
 
-        <ScrollView
+        <View
           style={[
             styles.filterContainer,
             { backgroundColor: currentTheme.colors.surface },
           ]}
-          showsVerticalScrollIndicator={false}
         >
           {/* 키워드 검색 */}
           <View
@@ -450,6 +404,28 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
             />
           </View>
 
+          {/* 검색 버튼 */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[
+                styles.searchButton,
+                { backgroundColor: currentTheme.colors.primary },
+              ]}
+              onPress={applyFilters}
+            >
+              <Text style={styles.searchButtonText}>🔍 검색하기</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.clearButton,
+                { backgroundColor: currentTheme.colors.textSecondary },
+              ]}
+              onPress={clearFilters}
+            >
+              <Text style={styles.clearButtonText}>🗑️ 초기화</Text>
+            </TouchableOpacity>
+          </View>
+
           {/* 날짜 범위 검색 */}
           <View
             style={[
@@ -460,7 +436,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
             <Text
               style={[styles.filterTitle, { color: currentTheme.colors.text }]}
             >
-              📅 날짜 범위
+              📅 날짜 범위 (선택사항)
             </Text>
             <View style={styles.dateRow}>
               <View style={styles.dateInputContainer}>
@@ -521,80 +497,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
           </View>
-
-          {/* 태그 검색 */}
-          {availableTags.length > 0 && (
-            <View
-              style={[
-                styles.filterSection,
-                { borderBottomColor: currentTheme.colors.border },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.filterTitle,
-                  { color: currentTheme.colors.text },
-                ]}
-              >
-                🏷️ 태그 선택
-              </Text>
-              <View style={styles.tagContainer}>
-                {availableTags.map((tag, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.tagButton,
-                      {
-                        backgroundColor: filters.selectedTags.includes(tag)
-                          ? currentTheme.colors.primary
-                          : currentTheme.colors.background,
-                        borderColor: filters.selectedTags.includes(tag)
-                          ? currentTheme.colors.primary
-                          : currentTheme.colors.border,
-                      },
-                    ]}
-                    onPress={() => toggleTag(tag)}
-                  >
-                    <Text
-                      style={[
-                        styles.tagButtonText,
-                        {
-                          color: filters.selectedTags.includes(tag)
-                            ? '#ffffff'
-                            : currentTheme.colors.textSecondary,
-                        },
-                      ]}
-                    >
-                      #{tag}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* 검색 버튼 */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[
-                styles.searchButton,
-                { backgroundColor: currentTheme.colors.primary },
-              ]}
-              onPress={applyFilters}
-            >
-              <Text style={styles.searchButtonText}>🔍 검색하기</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.clearButton,
-                { backgroundColor: currentTheme.colors.textSecondary },
-              ]}
-              onPress={clearFilters}
-            >
-              <Text style={styles.clearButtonText}>🗑️ 초기화</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        </View>
 
         {/* 검색 결과 */}
         <View style={styles.resultsContainer}>
@@ -693,7 +596,6 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     backgroundColor: '#ffffff',
-    maxHeight: 300,
   },
   filterSection: {
     paddingHorizontal: 20,
@@ -744,31 +646,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
   },
-  tagContainer: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    gap: 8,
-    overflow: 'hidden',
-  },
-  tagButton: {
-    backgroundColor: '#f8f9fa',
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  selectedTagButton: {
-    backgroundColor: '#007bff',
-    borderColor: '#007bff',
-  },
-  tagButtonText: {
-    fontSize: 12,
-    color: '#6c757d',
-  },
-  selectedTagButtonText: {
-    color: '#ffffff',
-  },
+
   buttonContainer: {
     flexDirection: 'row',
     paddingHorizontal: 20,

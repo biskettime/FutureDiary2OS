@@ -9,6 +9,7 @@ import {
   Alert,
   Modal,
   Image,
+  Keyboard,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import {
@@ -628,6 +629,11 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
             autoCorrect={false}
             autoCapitalize="none"
             keyboardType="default"
+            returnKeyType="done"
+            blurOnSubmit={true}
+            onSubmitEditing={() => {
+              Keyboard.dismiss();
+            }}
           />
         </View>
 

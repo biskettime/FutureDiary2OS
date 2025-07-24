@@ -10,6 +10,8 @@ import {
   TextInput,
   Alert,
   Image,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -388,7 +390,7 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
                 {getStatusIcon(item.status)}
               </Text>
             </View>
-            {!isLast && (
+            {!isLast && item.status !== 'future' && (
               <View
                 style={[
                   styles.timelineLineHorizontal,
@@ -991,142 +993,153 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
           transparent={true}
           onRequestClose={() => setShowResultModal(false)}
         >
-          <View style={styles.modalContainer}>
-            <View
-              style={[
-                styles.modalContent,
-                { backgroundColor: currentTheme.colors.surface },
-              ]}
-            >
-              <Text
-                style={[styles.modalTitle, { color: currentTheme.colors.text }]}
-              >
-                실제 결과 기록
-              </Text>
-              <Text
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={styles.modalContainer}>
+              <View
                 style={[
-                  styles.modalSubtitle,
-                  { color: currentTheme.colors.textSecondary },
+                  styles.modalContent,
+                  { backgroundColor: currentTheme.colors.surface },
                 ]}
               >
-                "{selectedEntry?.title}"에 대한 결과를 기록해주세요
-              </Text>
-
-              <View style={styles.resultOptionContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.resultOption,
-                    styles.realizedOption,
-                    selectedStatus === 'realized' && styles.selectedOption,
-                  ]}
-                  onPress={() => handleSelectStatus('realized')}
-                >
-                  <Text style={styles.resultOptionEmoji}>✅</Text>
-                  <Text
-                    style={[
-                      styles.resultOptionText,
-                      { color: currentTheme.colors.text },
-                    ]}
-                  >
-                    이루어졌어요! 😊
-                  </Text>
-                  <Text
-                    style={[
-                      styles.resultOptionDescription,
-                      { color: currentTheme.colors.textSecondary },
-                    ]}
-                  >
-                    예상했던 일이 실제로 일어났어요
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.resultOption,
-                    styles.notRealizedOption,
-                    selectedStatus === 'not_realized' && styles.selectedOption,
-                  ]}
-                  onPress={() => handleSelectStatus('not_realized')}
-                >
-                  <Text style={styles.resultOptionEmoji}>❌</Text>
-                  <Text
-                    style={[
-                      styles.resultOptionText,
-                      { color: currentTheme.colors.text },
-                    ]}
-                  >
-                    아직 실현되지 않았어요:(
-                  </Text>
-                  <Text
-                    style={[
-                      styles.resultOptionDescription,
-                      { color: currentTheme.colors.textSecondary },
-                    ]}
-                  >
-                    예상과 다르게 일어나지 않았어요
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.detailInputContainer}>
                 <Text
                   style={[
-                    styles.detailInputLabel,
+                    styles.modalTitle,
                     { color: currentTheme.colors.text },
                   ]}
                 >
-                  실제로 일어난 일을 기록해주세요
+                  실제 결과 기록
                 </Text>
-                <TextInput
+                <Text
                   style={[
-                    styles.detailInput,
-                    {
-                      backgroundColor: currentTheme.colors.background,
-                      borderColor: currentTheme.colors.border,
-                      color: currentTheme.colors.text,
-                    },
+                    styles.modalSubtitle,
+                    { color: currentTheme.colors.textSecondary },
                   ]}
-                  value={actualResultDetail}
-                  onChangeText={setActualResultDetail}
-                  placeholder="자세한 내용을 입력해주세요... (선택사항)"
-                  placeholderTextColor={currentTheme.colors.textSecondary}
-                  multiline
-                  textAlignVertical="top"
-                  maxLength={500}
-                />
-              </View>
+                >
+                  "{selectedEntry?.title}"에 대한 결과를 기록해주세요
+                </Text>
 
-              <View style={styles.modalButtonContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.cancelButton,
-                    { backgroundColor: currentTheme.colors.textSecondary },
-                  ]}
-                  onPress={() => setShowResultModal(false)}
-                >
-                  <Text style={styles.cancelButtonText}>취소</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.saveButton,
-                    { backgroundColor: currentTheme.colors.success },
-                    !selectedStatus && styles.disabledButton,
-                  ]}
-                  onPress={handleSaveResult}
-                  disabled={!selectedStatus}
-                >
+                <View style={styles.resultOptionContainer}>
+                  <TouchableOpacity
+                    style={[
+                      styles.resultOption,
+                      styles.realizedOption,
+                      selectedStatus === 'realized' && styles.selectedOption,
+                    ]}
+                    onPress={() => handleSelectStatus('realized')}
+                  >
+                    <Text style={styles.resultOptionEmoji}>✅</Text>
+                    <Text
+                      style={[
+                        styles.resultOptionText,
+                        { color: currentTheme.colors.text },
+                      ]}
+                    >
+                      이루어졌어요! 😊
+                    </Text>
+                    <Text
+                      style={[
+                        styles.resultOptionDescription,
+                        { color: currentTheme.colors.textSecondary },
+                      ]}
+                    >
+                      예상했던 일이 실제로 일어났어요
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.resultOption,
+                      styles.notRealizedOption,
+                      selectedStatus === 'not_realized' &&
+                        styles.selectedOption,
+                    ]}
+                    onPress={() => handleSelectStatus('not_realized')}
+                  >
+                    <Text style={styles.resultOptionEmoji}>❌</Text>
+                    <Text
+                      style={[
+                        styles.resultOptionText,
+                        { color: currentTheme.colors.text },
+                      ]}
+                    >
+                      아직 실현되지 않았어요:(
+                    </Text>
+                    <Text
+                      style={[
+                        styles.resultOptionDescription,
+                        { color: currentTheme.colors.textSecondary },
+                      ]}
+                    >
+                      예상과 다르게 일어나지 않았어요
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.detailInputContainer}>
                   <Text
                     style={[
-                      styles.saveButtonText,
-                      !selectedStatus && styles.disabledButtonText,
+                      styles.detailInputLabel,
+                      { color: currentTheme.colors.text },
                     ]}
                   >
-                    저장
+                    실제로 일어난 일을 기록해주세요
                   </Text>
-                </TouchableOpacity>
+                  <TextInput
+                    style={[
+                      styles.detailInput,
+                      {
+                        backgroundColor: currentTheme.colors.background,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      },
+                    ]}
+                    value={actualResultDetail}
+                    onChangeText={setActualResultDetail}
+                    placeholder="자세한 내용을 입력해주세요... (선택사항)"
+                    placeholderTextColor={currentTheme.colors.textSecondary}
+                    multiline
+                    textAlignVertical="top"
+                    maxLength={500}
+                    returnKeyType="done"
+                    blurOnSubmit={true}
+                    onSubmitEditing={() => {
+                      Keyboard.dismiss();
+                    }}
+                  />
+                </View>
+
+                <View style={styles.modalButtonContainer}>
+                  <TouchableOpacity
+                    style={[
+                      styles.cancelButton,
+                      { backgroundColor: currentTheme.colors.textSecondary },
+                    ]}
+                    onPress={() => setShowResultModal(false)}
+                  >
+                    <Text style={styles.cancelButtonText}>취소</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.saveButton,
+                      { backgroundColor: currentTheme.colors.success },
+                      !selectedStatus && styles.disabledButton,
+                    ]}
+                    onPress={handleSaveResult}
+                    disabled={!selectedStatus}
+                  >
+                    <Text
+                      style={[
+                        styles.saveButtonText,
+                        !selectedStatus && styles.disabledButtonText,
+                      ]}
+                    >
+                      저장
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </Modal>
       </View>
     </ThemeBackground>
