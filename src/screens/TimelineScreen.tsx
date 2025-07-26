@@ -12,6 +12,7 @@ import {
   Image,
   Keyboard,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -575,7 +576,19 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
     console.log('📊 Images length:', item.images?.length);
 
     return (
-      <View style={styles.todayEntryCard}>
+      <TouchableOpacity
+        style={styles.todayEntryCard}
+        onPress={() => {
+          console.log('🔥 iOS 오늘 일기 카드 클릭됨:', item.title);
+          navigation.navigate('ViewEntry', { entry: item });
+        }}
+        activeOpacity={0.8}
+        // iOS 전용 터치 설정
+        delayPressIn={0}
+        delayPressOut={0}
+        delayLongPress={500}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
         {/* 1. 제목 섹션: 기분 이모티콘 + 제목 */}
         <View style={styles.titleMoodSection}>
           <Text style={styles.todayEntryEmoji}>{displayEmoji}</Text>
@@ -765,7 +778,7 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
             </TouchableOpacity>
           )}
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -925,6 +938,28 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
                 ItemSeparatorComponent={() => (
                   <View style={styles.todayEntrySeparator} />
                 )}
+                // iOS 기본 설정 (미래 일기와 동일)
+                bounces={true}
+                alwaysBounceHorizontal={true}
+                scrollEnabled={true}
+                // iOS와 동일한 snap back 효과
+                snapToStart={true}
+                snapToAlignment="start"
+                snapToInterval={Platform.OS === 'android' ? 316 : undefined}
+                // iOS 전용 터치 간섭 방지 설정
+                scrollEventThrottle={16}
+                canCancelContentTouches={false}
+                delaysContentTouches={false}
+                // Android에서 iOS와 동일한 경험 제공
+                {...(Platform.OS === 'android' && {
+                  overScrollMode: 'always',
+                  nestedScrollEnabled: true,
+                  removeClippedSubviews: false,
+                  decelerationRate: 0.9, // 더 부드러운 감속
+                  bouncesZoom: false,
+                })}
+                // iOS와 동일한 스크롤 특성
+                automaticallyAdjustContentInsets={false}
               />
             </>
           ) : (
@@ -1399,17 +1434,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   todayEntriesContainer: {
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    // iOS와 완전히 동일한 레이아웃 제공
+    ...Platform.select({
+      ios: {
+        paddingRight: 50, // iOS 기본 여백
+      },
+      android: {
+        paddingRight: 50, // iOS와 동일한 여백으로 변경
+        // snap back을 위한 정확한 크기 설정
+        flexGrow: 0,
+        alignItems: 'flex-start',
+      },
+    }),
   },
   todayEntrySeparator: {
-    width: 12,
+    width: 16,
   },
   todayEntryCard: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 14,
-    width: 280,
+    width: 300, // iOS와 동일한 카드 크기
     minHeight: 160,
     shadowColor: '#000',
     shadowOffset: {
