@@ -2,8 +2,8 @@ import Foundation
 import React
 import WidgetKit
 
-@objc(FutureDiaryWidget)
-class FutureDiaryWidget: NSObject {
+@objc(FutureDiaryWidgetModule)
+class FutureDiaryWidgetModule: NSObject {
   
   static let appGroupIdentifier = "group.com.futurediary.shared"
   static let widgetDataKey = "WidgetData"
@@ -17,12 +17,12 @@ class FutureDiaryWidget: NSObject {
   func updateWidgetData(_ data: String, 
                        resolver: @escaping RCTPromiseResolveBlock,
                        rejecter: @escaping RCTPromiseRejectBlock) {
-    guard let userDefaults = UserDefaults(suiteName: FutureDiaryWidget.appGroupIdentifier) else {
+    guard let userDefaults = UserDefaults(suiteName: FutureDiaryWidgetModule.appGroupIdentifier) else {
       rejecter("ERROR", "Failed to access shared UserDefaults", nil)
       return
     }
     
-    userDefaults.set(data, forKey: FutureDiaryWidget.widgetDataKey)
+    userDefaults.set(data, forKey: FutureDiaryWidgetModule.widgetDataKey)
     userDefaults.synchronize()
     
     print("📱 위젯 데이터 저장 완료: \(data)")
@@ -57,14 +57,14 @@ class FutureDiaryWidgetBridge: RCTEventEmitter {
   func updateWidgetData(_ data: String,
                        resolver: @escaping RCTPromiseResolveBlock,
                        rejecter: @escaping RCTPromiseRejectBlock) {
-    let widget = FutureDiaryWidget()
+    let widget = FutureDiaryWidgetModule()
     widget.updateWidgetData(data, resolver: resolver, rejecter: rejecter)
   }
   
   @objc
   func refreshWidgets(_ resolver: @escaping RCTPromiseResolveBlock,
                      rejecter: @escaping RCTPromiseRejectBlock) {
-    let widget = FutureDiaryWidget()
+    let widget = FutureDiaryWidgetModule()
     widget.refreshWidgets(resolver, rejecter: rejecter)
   }
 } 

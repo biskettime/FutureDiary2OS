@@ -11,8 +11,6 @@ import SwiftUI
 @main
 struct FutureDiaryWidgetBundle: WidgetBundle {
     var body: some Widget {
-        FutureDiaryWidget()
-        FutureDiaryWidgetControl()
-        FutureDiaryWidgetLiveActivity()
+        DiaryWidget()
     }
 }
