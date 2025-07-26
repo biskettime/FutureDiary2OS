@@ -21,6 +21,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { DiaryEntry, RootStackParamList } from '../types';
 import { loadDiaryEntries, saveDiaryEntry } from '../utils/storage';
 import ThemeBackground from '../components/ThemeBackground';
+import { WidgetService } from '../services/WidgetService';
 
 type TimelineScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -206,6 +207,9 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
       items.sort((a, b) => a.daysFromNow - b.daysFromNow);
 
       setTimelineItems(items);
+
+      // 위젯 데이터 업데이트
+      await WidgetService.updateWidgetData(entries, currentTheme);
     } catch (error) {
       console.error('타임라인 로딩 중 오류:', error);
     } finally {

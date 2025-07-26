@@ -17,6 +17,7 @@ import { RootStackParamList, DiaryEntry } from '../types';
 import { loadDiaryEntries, deleteDiaryEntry } from '../utils/storage';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemeBackground from '../components/ThemeBackground';
+import { WidgetService } from '../services/WidgetService';
 
 type HomeScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -235,6 +236,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         console.log('---');
       });
       setEntries(loadedEntries);
+
+      // 위젯 데이터 업데이트
+      await WidgetService.updateWidgetData(loadedEntries, currentTheme);
     } catch (error) {
       Alert.alert('오류', '일기를 불러오는 중 문제가 발생했습니다.');
     } finally {
@@ -251,7 +255,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const handleDeleteEntry = async (id: string) => {
     try {
       await deleteDiaryEntry(id);
-      setEntries(prev => prev.filter(entry => entry.id !== id));
+      const updatedEntries = entries.filter(entry => entry.id !== id);
+      setEntries(updatedEntries);
+
+      // 위젯 데이터 업데이트
+      await WidgetService.updateWidgetData(updatedEntries, currentTheme);
     } catch (error) {
       Alert.alert('오류', '일기 삭제 중 문제가 발생했습니다.');
     }

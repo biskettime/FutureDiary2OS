@@ -22,7 +22,7 @@ import { RouteProp } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DiaryEntry, RootStackParamList, TagInfo } from '../types';
-import { saveDiaryEntry, generateId } from '../utils/storage';
+import { saveDiaryEntry, generateId, loadDiaryEntries } from '../utils/storage';
 import {
   getTodayString,
   getRelativeDateString,
@@ -31,6 +31,7 @@ import {
   getDaysLater,
 } from '../utils/dateUtils';
 import { useTheme } from '../contexts/ThemeContext';
+import { WidgetService } from '../services/WidgetService';
 
 type WriteEntryScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -289,6 +290,15 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
       console.log('🖼️ Images in entry:', newEntry.images);
 
       await saveDiaryEntry(newEntry);
+
+      // 위젯 데이터 업데이트
+      try {
+        const allEntries = await loadDiaryEntries();
+        await WidgetService.updateWidgetData(allEntries, currentTheme);
+      } catch (error) {
+        console.error('위젯 데이터 업데이트 실패:', error);
+      }
+
       Alert.alert(
         '성공',
         isEdit ? '일기가 수정되었습니다.' : '일기가 저장되었습니다.',
