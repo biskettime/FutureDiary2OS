@@ -4,6 +4,7 @@ import SwiftUI
 // 위젯 데이터 모델
 struct WidgetData: Codable {
     let todayEntries: [TodayEntry]
+    let futureEntries: [FutureEntry]
     let futureCount: Int
     let totalEntries: Int
     let currentTheme: ThemeInfo
@@ -14,6 +15,14 @@ struct WidgetData: Codable {
         let title: String
         let emoji: String
         let status: String?
+    }
+    
+    struct FutureEntry: Codable, Identifiable {
+        let id: String
+        let title: String
+        let content: String
+        let emoji: String
+        let date: String
     }
     
     struct ThemeInfo: Codable {
@@ -88,68 +97,89 @@ struct FutureDiaryWidgetView: View {
     
     var body: some View {
         if let data = entry.widgetData {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 // 헤더
                 HStack {
                     Text("🌟 미래일기")
-                        .font(.headline)
+                        .font(.subheadline)
                         .fontWeight(.bold)
                         .foregroundColor(Color(hex: data.currentTheme.colors.text))
                     
                     Spacer()
                     
-                    VStack {
-                        Text("\(data.futureCount)")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color(hex: data.currentTheme.colors.primary))
-                        Text("Future")
-                            .font(.caption2)
-                            .foregroundColor(Color(hex: data.currentTheme.colors.text))
-                    }
+                    Text("Total: \(data.totalEntries)")
+                        .font(.caption2)
+                        .foregroundColor(Color(hex: data.currentTheme.colors.text))
+                        .opacity(0.6)
                 }
                 
-                // 오늘 일어날 일
+                // 오늘 일어날 일 섹션
+                Text("☀️ 오늘 일어날 일")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(Color(hex: data.currentTheme.colors.text))
+                
                 if !data.todayEntries.isEmpty {
-                    Text("☀️ 오늘 일어날 일")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                    Text("\(data.todayEntries[0].emoji) \(data.todayEntries[0].title) \(data.todayEntries[0].status == "realized" ? "✅" : "⏳")")
+                        .font(.caption2)
+                        .lineLimit(1)
                         .foregroundColor(Color(hex: data.currentTheme.colors.text))
-                    
-                    ForEach(data.todayEntries.prefix(2)) { entry in
-                        HStack {
-                            Text(entry.emoji)
-                                .font(.caption)
-                            
-                            Text(entry.title)
-                                .font(.caption)
-                                .lineLimit(1)
-                                .foregroundColor(Color(hex: data.currentTheme.colors.text))
-                            
-                            Spacer()
-                            
-                            if let status = entry.status {
-                                Text(status == "realized" ? "✅" : "⏳")
-                                    .font(.caption2)
-                            }
-                        }
-                        .padding(.horizontal, 4)
-                    }
+                        .opacity(0.8)
                 } else {
                     Text("📝 오늘 계획된 일정이 없습니다")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundColor(Color(hex: data.currentTheme.colors.text))
-                        .opacity(0.7)
+                        .opacity(0.6)
+                }
+                
+                // 미래 일기 섹션
+                Text("🔮 미래 일기")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(Color(hex: data.currentTheme.colors.text))
+                    .padding(.top, 4)
+                
+                if !data.futureEntries.isEmpty {
+                    ForEach(data.futureEntries.prefix(2)) { futureEntry in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text(formatDateForWidget(futureEntry.date))
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color(hex: data.currentTheme.colors.text))
+                                    .opacity(0.7)
+                                
+                                Text("\(futureEntry.emoji) \(futureEntry.title)")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(Color(hex: data.currentTheme.colors.primary))
+                                    .lineLimit(1)
+                                
+                                Spacer()
+                            }
+                            
+                            Text(futureEntry.content.count > 25 ? String(futureEntry.content.prefix(25)) + "..." : futureEntry.content)
+                                .font(.caption2)
+                                .foregroundColor(Color(hex: data.currentTheme.colors.text))
+                                .opacity(0.6)
+                                .lineLimit(1)
+                                .padding(.leading, 12)
+                        }
+                    }
+                } else {
+                    Text("🔮 아직 미래 일기가 없습니다")
+                        .font(.caption2)
+                        .foregroundColor(Color(hex: data.currentTheme.colors.text))
+                        .opacity(0.6)
                 }
                 
                 Spacer()
                 
                 // 하단 정보
                 HStack {
-                    Text("전체 \(data.totalEntries)개")
+                    Text("Future: \(data.futureCount)")
                         .font(.caption2)
-                        .foregroundColor(Color(hex: data.currentTheme.colors.text))
-                        .opacity(0.6)
+                        .foregroundColor(Color(hex: data.currentTheme.colors.primary))
                     
                     Spacer()
                     
@@ -159,7 +189,7 @@ struct FutureDiaryWidgetView: View {
                         .opacity(0.6)
                 }
             }
-            .padding()
+            .padding(12)
             .background(Color(hex: data.currentTheme.colors.background))
             .cornerRadius(12)
         } else {
@@ -189,6 +219,27 @@ struct FutureDiaryWidgetView: View {
         displayFormatter.locale = Locale(identifier: "ko_KR")
         
         return displayFormatter.string(from: date)
+    }
+    
+    private func formatDateForWidget(_ dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let date = inputFormatter.date(from: dateString) else {
+            // fallback: "2025-07-31" -> "7/31"
+            if dateString.count >= 10 {
+                let monthStr = String(dateString.dropFirst(5).prefix(2))
+                let dayStr = String(dateString.dropFirst(8).prefix(2))
+                if let month = Int(monthStr), let day = Int(dayStr) {
+                    return "\(month)/\(day)"
+                }
+            }
+            return dateString
+        }
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "M/d"
+        return outputFormatter.string(from: date)
     }
 }
 
@@ -221,9 +272,8 @@ extension Color {
 }
 
 // 위젯 메인 구조체
-@main
-struct FutureDiaryWidget: Widget {
-    let kind: String = "FutureDiaryWidget"
+struct DiaryWidget: Widget {
+    let kind: String = "DiaryWidget"
     
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: FutureDiaryWidgetProvider()) { entry in
