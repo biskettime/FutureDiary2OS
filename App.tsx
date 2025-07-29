@@ -24,6 +24,7 @@ import MyDiaryScreen from './src/screens/MyDiaryScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import ThemeStoreScreen from './src/screens/ThemeStoreScreen';
 import SecretStoreScreen from './src/screens/SecretStoreScreen';
+import HowToUseScreen from './src/screens/HowToUseScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -167,6 +168,13 @@ const AppContent: React.FC = () => {
             component={SecretStoreScreen}
             options={{
               headerTitle: '비밀 일기 스토어',
+            }}
+          />
+          <Stack.Screen
+            name="HowToUse"
+            component={HowToUseScreen}
+            options={{
+              headerShown: false,
             }}
           />
         </Stack.Navigator>

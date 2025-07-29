@@ -31,6 +31,10 @@ const SettingsScreen: React.FC = () => {
     navigation.navigate('ThemeStore');
   };
 
+  const handleHowToUse = () => {
+    navigation.navigate('HowToUse');
+  };
+
   const handleAbout = () => {
     Alert.alert(
       '미래일기 정보',
@@ -106,6 +110,18 @@ const SettingsScreen: React.FC = () => {
           subtitle: '특별한 일기를 안전하게 보관하세요',
           icon: '🔒',
           onPress: handleSecretStore,
+        },
+      ],
+    },
+    {
+      title: '📚 도움말',
+      items: [
+        {
+          id: 'how-to-use',
+          title: '사용방법',
+          subtitle: '미래일기를 더 잘 활용하는 방법을 알아보세요',
+          icon: '📖',
+          onPress: handleHowToUse,
         },
       ],
     },

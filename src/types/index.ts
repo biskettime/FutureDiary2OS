@@ -101,6 +101,7 @@ export type RootStackParamList = {
   Login: undefined;
   ThemeStore: undefined;
   SecretStore: undefined;
+  HowToUse: undefined;
 };
 
 export type TabParamList = {

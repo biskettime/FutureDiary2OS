@@ -439,7 +439,8 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const getMaxDate = () => {
-    return getDaysLater(30);
+    // 100년 후까지 선택 가능 (윤년 포함하여 약 36,525일)
+    return getDaysLater(36525);
   };
 
   const getMarkedDates = () => {
