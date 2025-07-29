@@ -14,9 +14,10 @@ class AuthService {
   private authStateListeners: ((user: User | null) => void)[] = [];
 
   constructor() {
-    // Google Sign-In 설정 (실제 프로젝트에서는 실제 웹 클라이언트 ID 사용)
+    // Google Sign-In 설정
     GoogleSignin.configure({
-      webClientId: 'YOUR_WEB_CLIENT_ID', // Firebase 콘솔에서 얻을 수 있음
+      webClientId:
+        '179993011809-gkqofk3jmifoub8vte855e6d7be55vk6.apps.googleusercontent.com',
     });
 
     // 인증 상태 변경 리스너

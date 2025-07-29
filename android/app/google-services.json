@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "179993011809",
+    "project_id": "futurediarym-59f4a",
+    "storage_bucket": "futurediarym-59f4a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:179993011809:android:7a1fbc3a75dbf4159c6c20",
+        "android_client_info": {
+          "package_name": "com.futurediary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "179993011809-ek5ukf33irn0galn755mrhcka8n67jr4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.futurediary",
+            "certificate_hash": "d8ad991185c54c757c0287a49e73e6a53cc957e5"
+          }
+        },
+        {
+          "client_id": "179993011809-t677fao6upfg9kv99r4fgb8nb8qrdlun.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.futurediary",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "179993011809-gkqofk3jmifoub8vte855e6d7be55vk6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1A_Ne6tR2WTzim6Qb7TS6WMv_OeeqNcg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "179993011809-gkqofk3jmifoub8vte855e6d7be55vk6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
