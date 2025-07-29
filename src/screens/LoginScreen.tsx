@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useTheme } from '../contexts/ThemeContext';
 import authService from '../services/AuthService';
 import firestoreService from '../services/FirestoreService';
@@ -22,7 +23,9 @@ interface LoginScreenProps {
   navigation: any;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({
+  navigation: _navigation,
+}) => {
   const { currentTheme } = useTheme();
   const safeAreaInsets = useSafeAreaInsets();
 
@@ -36,16 +39,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    // 이미 로그인된 상태인지 확인
-    const unsubscribe = authService.onAuthStateChanged(user => {
-      if (user) {
-        console.log('✅ 이미 로그인된 사용자:', user.displayName || user.email);
-        navigation.replace('MainTabs');
-      }
-    });
-
-    return unsubscribe;
-  }, [navigation]);
+    // AuthContext가 이미 로그인 상태를 관리하므로
+    // 여기서는 별도의 상태 체크가 필요하지 않음
+    console.log('🔐 LoginScreen 마운트됨');
+  }, []);
 
   // 로컬 데이터를 Firebase로 마이그레이션
   const migrateLocalData = async () => {
@@ -113,7 +110,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         [
           {
             text: '확인',
-            onPress: () => navigation.replace('MainTabs'),
+            // AuthContext가 자동으로 MainTabs로 전환함
           },
         ],
       );
@@ -143,7 +140,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       Alert.alert('성공!', 'Google 로그인이 완료되었습니다!', [
         {
           text: '확인',
-          onPress: () => navigation.replace('MainTabs'),
+          // AuthContext가 자동으로 MainTabs로 전환함
         },
       ]);
     } catch (error: any) {
@@ -154,28 +151,76 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     }
   };
 
+  // 애플 로그인 (Apple Sign-In)
+  const handleAppleLogin = async () => {
+    Alert.alert(
+      '🍎 Apple로 로그인',
+      'Apple Sign-In 기능은 현재 개발 중입니다.\n곧 업데이트 예정입니다!',
+      [{ text: '확인' }],
+    );
+    // TODO: Apple Sign-In 구현
+    // setLoading(true);
+    // try {
+    //   console.log('🍎 Apple 로그인 시도...');
+    //   const user = await authService.signInWithApple();
+    //   await firestoreService.saveUserProfile(user);
+    //   await migrateLocalData();
+    //   console.log('✅ Apple 로그인 성공:', user.displayName || user.email);
+    //   Alert.alert('성공!', 'Apple 로그인이 완료되었습니다!', [{ text: '확인' }]);
+    // } catch (error: any) {
+    //   console.error('❌ Apple 로그인 실패:', error);
+    //   Alert.alert('Apple 로그인 실패', error.toString());
+    // } finally {
+    //   setLoading(false);
+    // }
+  };
+
+  // 페이스북 로그인 (Facebook Login)
+  const handleFacebookLogin = async () => {
+    Alert.alert(
+      '📘 Facebook으로 로그인',
+      'Facebook 로그인 기능은 현재 개발 중입니다.\n곧 업데이트 예정입니다!',
+      [{ text: '확인' }],
+    );
+    // TODO: Facebook Login 구현
+    // setLoading(true);
+    // try {
+    //   console.log('📘 Facebook 로그인 시도...');
+    //   const user = await authService.signInWithFacebook();
+    //   await firestoreService.saveUserProfile(user);
+    //   await migrateLocalData();
+    //   console.log('✅ Facebook 로그인 성공:', user.displayName || user.email);
+    //   Alert.alert('성공!', 'Facebook 로그인이 완료되었습니다!', [{ text: '확인' }]);
+    // } catch (error: any) {
+    //   console.error('❌ Facebook 로그인 실패:', error);
+    //   Alert.alert('Facebook 로그인 실패', error.toString());
+    // } finally {
+    //   setLoading(false);
+    // }
+  };
+
   // 익명 로그인
   const handleAnonymousLogin = async () => {
     setLoading(true);
     try {
       console.log('👤 익명 로그인 시도...');
-      const user = await authService.signInAnonymously();
+      await authService.signInAnonymously();
 
-      // 사용자 프로필 저장
-      await firestoreService.saveUserProfile(user);
+      // 익명 사용자는 Firestore에 프로필을 저장하지 않음 (로컬에서만 관리)
+      console.log('🎨 익명 사용자 - 로컬에서만 관리');
 
-      // 로컬 데이터 마이그레이션
-      await migrateLocalData();
+      // 로컬 데이터는 유지 (마이그레이션 불필요)
+      console.log('💾 익명 사용자 - 로컬 데이터 유지');
 
       console.log('✅ 익명 로그인 성공');
 
       Alert.alert(
-        '성공!',
-        '익명 로그인이 완료되었습니다!\n나중에 계정을 생성하여 데이터를 보존할 수 있습니다.',
+        '🎉 익명 로그인 성공!',
+        '익명으로 미래일기를 시작합니다!\n\n💡 팁:\n• 기본 테마 사용 가능\n• 이메일 가입 시 프리미엄 테마 구매 가능\n• 데이터는 로컬에만 저장됩니다',
         [
           {
-            text: '확인',
-            onPress: () => navigation.replace('MainTabs'),
+            text: '시작하기',
+            // AuthContext가 자동으로 MainTabs로 전환함
           },
         ],
       );
@@ -209,7 +254,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     <KeyboardAvoidingView
       style={[
         styles.container,
-        { backgroundColor: currentTheme.colors.background },
+        { backgroundColor: '#FFFEF7' }, // 천사의 일기 테마 아이보리 배경색 고정
       ]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
@@ -242,13 +287,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         <View
           style={[
             styles.tabContainer,
-            { backgroundColor: currentTheme.colors.surface },
+            { backgroundColor: '#FEFEFE' }, // 천사의 일기 테마 순백 색상 고정
           ]}
         >
           <TouchableOpacity
             style={[
               styles.tab,
-              isLogin && { backgroundColor: currentTheme.colors.primary },
+              isLogin && { backgroundColor: '#FFD700' }, // 천사의 일기 테마 골드 색상 고정
             ]}
             onPress={() => setIsLogin(true)}
           >
@@ -257,7 +302,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 styles.tabText,
                 {
                   color: isLogin
-                    ? currentTheme.colors.background
+                    ? '#FFFFFF'
                     : currentTheme.colors.textSecondary,
                 },
               ]}
@@ -269,7 +314,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.tab,
-              !isLogin && { backgroundColor: currentTheme.colors.primary },
+              !isLogin && { backgroundColor: '#FFD700' }, // 천사의 일기 테마 골드 색상 고정
             ]}
             onPress={() => setIsLogin(false)}
           >
@@ -278,7 +323,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 styles.tabText,
                 {
                   color: !isLogin
-                    ? currentTheme.colors.background
+                    ? '#FFFFFF'
                     : currentTheme.colors.textSecondary,
                 },
               ]}
@@ -292,7 +337,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         <View
           style={[
             styles.formContainer,
-            { backgroundColor: currentTheme.colors.surface },
+            { backgroundColor: '#FEFEFE' }, // 천사의 일기 테마 순백 색상 고정
           ]}
         >
           {/* 이메일 입력 */}
@@ -453,7 +498,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               <Text
                 style={[
                   styles.forgotPasswordText,
-                  { color: currentTheme.colors.primary },
+                  { color: '#FFD700' }, // 천사의 일기 테마 골드 색상 고정
                 ]}
               >
                 비밀번호를 잊으셨나요?
@@ -465,24 +510,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.emailButton,
-              { backgroundColor: currentTheme.colors.primary },
+              { backgroundColor: '#FFD700' }, // 천사의 일기 테마 골드 색상 고정
               loading && styles.disabledButton,
             ]}
             onPress={handleEmailAuth}
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator
-                size="small"
-                color={currentTheme.colors.background}
-              />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Text
-                style={[
-                  styles.emailButtonText,
-                  { color: currentTheme.colors.background },
-                ]}
-              >
+              <Text style={[styles.emailButtonText, { color: '#FFFFFF' }]}>
                 {isLogin ? '로그인' : '회원가입'}
               </Text>
             )}
@@ -495,13 +532,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             <View
               style={[
                 styles.divider,
-                { backgroundColor: currentTheme.colors.border },
+                { backgroundColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
               ]}
             />
             <Text
               style={[
                 styles.dividerText,
-                { color: currentTheme.colors.textSecondary },
+                { color: '#8B7355' }, // 천사의 일기 테마 브론즈 색상 고정
               ]}
             >
               또는
@@ -509,7 +546,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             <View
               style={[
                 styles.divider,
-                { backgroundColor: currentTheme.colors.border },
+                { backgroundColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
               ]}
             />
           </View>
@@ -519,12 +556,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             style={[
               styles.socialButton,
               styles.googleButton,
-              { borderColor: currentTheme.colors.border },
+              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
             ]}
             onPress={handleGoogleLogin}
             disabled={loading}
           >
-            <Text style={styles.googleIcon}>🔍</Text>
+            <FontAwesome
+              name="google"
+              size={20}
+              color="#4285F4"
+              style={styles.socialIcon}
+            />
             <Text
               style={[
                 styles.socialButtonText,
@@ -535,12 +577,54 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
 
+          {/* 애플 로그인 */}
+          <TouchableOpacity
+            style={[
+              styles.socialButton,
+              styles.appleButton,
+              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
+            ]}
+            onPress={handleAppleLogin}
+            disabled={loading}
+          >
+            <FontAwesome
+              name="apple"
+              size={20}
+              color="#FFFFFF"
+              style={styles.socialIcon}
+            />
+            <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>
+              Apple로 계속하기
+            </Text>
+          </TouchableOpacity>
+
+          {/* 페이스북 로그인 */}
+          <TouchableOpacity
+            style={[
+              styles.socialButton,
+              styles.facebookButton,
+              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
+            ]}
+            onPress={handleFacebookLogin}
+            disabled={loading}
+          >
+            <FontAwesome
+              name="facebook"
+              size={20}
+              color="#FFFFFF"
+              style={styles.socialIcon}
+            />
+            <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>
+              Facebook으로 계속하기
+            </Text>
+          </TouchableOpacity>
+
           {/* 익명 로그인 */}
           <TouchableOpacity
             style={[
               styles.socialButton,
               styles.anonymousButton,
-              { borderColor: currentTheme.colors.border },
+              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
             ]}
             onPress={handleAnonymousLogin}
             disabled={loading}
@@ -699,11 +783,16 @@ const styles = StyleSheet.create({
   googleButton: {
     backgroundColor: '#fff',
   },
+  appleButton: {
+    backgroundColor: '#000',
+  },
+  facebookButton: {
+    backgroundColor: '#1877F2',
+  },
   anonymousButton: {
     backgroundColor: 'transparent',
   },
-  googleIcon: {
-    fontSize: 20,
+  socialIcon: {
     marginRight: 12,
   },
   anonymousIcon: {

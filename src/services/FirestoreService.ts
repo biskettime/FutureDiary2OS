@@ -243,14 +243,36 @@ class FirestoreService {
 
       console.log('👤 사용자 프로필 저장 중');
 
-      await userRef.set({
+      // 사용자 문서가 존재하는지 확인 (신규 사용자 판별)
+      const userDoc = await userRef.get();
+      const isNewUser = !userDoc.exists;
+
+      const profileData: any = {
         uid: user.uid,
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
         isAnonymous: user.isAnonymous,
         updatedAt: new Date().toISOString(),
-      });
+      };
+
+      // 신규 사용자인 경우 기본 테마 설정 추가
+      if (isNewUser) {
+        profileData.createdAt = new Date().toISOString();
+        profileData.currentTheme = 'default'; // 기본 테마 적용
+
+        if (user.isAnonymous) {
+          // 익명 사용자: 기본 테마만 제공 (구매 불가)
+          profileData.purchasedThemes = ['default'];
+          console.log('🎨 익명 사용자에게 기본 테마만 제공');
+        } else {
+          // 실제 가입 사용자: 기본 테마 제공 (구매 가능)
+          profileData.purchasedThemes = ['default'];
+          console.log('🎨 신규 가입 사용자에게 기본 테마 적용');
+        }
+      }
+
+      await userRef.set(profileData, { merge: true });
 
       console.log('✅ 사용자 프로필 저장 성공');
     } catch (error) {
@@ -339,6 +361,100 @@ class FirestoreService {
     } catch (error) {
       console.error('❌ Firestore 연결 실패:', error);
       return false;
+    }
+  }
+
+  // 사용자의 현재 테마 가져오기
+  async getUserCurrentTheme(): Promise<string> {
+    try {
+      const userId = this.getCurrentUserId();
+      const userRef = this.db.collection('users').doc(userId);
+      const userDoc = await userRef.get();
+
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        return (userData && userData.currentTheme) || 'default';
+      }
+
+      return 'default';
+    } catch (error) {
+      console.error('❌ 사용자 현재 테마 조회 실패:', error);
+      return 'default';
+    }
+  }
+
+  // 사용자의 구매한 테마 목록 가져오기
+  async getUserPurchasedThemes(): Promise<string[]> {
+    try {
+      const userId = this.getCurrentUserId();
+      const userRef = this.db.collection('users').doc(userId);
+      const userDoc = await userRef.get();
+
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        return (userData && userData.purchasedThemes) || ['default'];
+      }
+
+      return ['default'];
+    } catch (error) {
+      console.error('❌ 사용자 구매 테마 조회 실패:', error);
+      return ['default'];
+    }
+  }
+
+  // 테마 구매 처리
+  async purchaseTheme(themeId: string): Promise<void> {
+    try {
+      const userId = this.getCurrentUserId();
+      const userRef = this.db.collection('users').doc(userId);
+
+      // 현재 구매한 테마 목록 가져오기
+      const purchasedThemes = await this.getUserPurchasedThemes();
+
+      // 이미 구매한 테마인지 확인
+      if (purchasedThemes.includes(themeId)) {
+        console.log('⚠️ 이미 구매한 테마입니다:', themeId);
+        return;
+      }
+
+      // 새로운 테마를 구매 목록에 추가
+      const updatedPurchasedThemes = [...purchasedThemes, themeId];
+
+      await userRef.update({
+        purchasedThemes: updatedPurchasedThemes,
+        currentTheme: themeId, // 구매 후 바로 적용
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('✅ 테마 구매 및 적용 완료:', themeId);
+    } catch (error) {
+      console.error('❌ 테마 구매 실패:', error);
+      throw error;
+    }
+  }
+
+  // 테마 적용 (구매한 테마만 적용 가능)
+  async applyTheme(themeId: string): Promise<void> {
+    try {
+      const userId = this.getCurrentUserId();
+      const userRef = this.db.collection('users').doc(userId);
+
+      // 구매한 테마인지 확인
+      const purchasedThemes = await this.getUserPurchasedThemes();
+
+      if (!purchasedThemes.includes(themeId)) {
+        throw new Error('구매하지 않은 테마는 적용할 수 없습니다.');
+      }
+
+      await userRef.update({
+        currentTheme: themeId,
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('✅ 테마 적용 완료:', themeId);
+    } catch (error) {
+      console.error('❌ 테마 적용 실패:', error);
+      throw error;
     }
   }
 }

@@ -4,11 +4,22 @@ import firestore from '@react-native-firebase/firestore';
 
 // Firebase 앱이 이미 초기화되었는지 확인
 const initializeFirebase = () => {
-  if (getApps().length === 0) {
-    // Firebase 앱이 초기화되지 않은 경우에만 초기화
-    console.log('🔥 Firebase 초기화 중...');
-  } else {
-    console.log('🔥 Firebase가 이미 초기화되어 있습니다.');
+  try {
+    const apps = getApps();
+    if (apps.length === 0) {
+      console.log('🔥 Firebase 초기화 시작...');
+      // Firebase가 자동으로 google-services.json에서 설정을 읽어옵니다
+      // React Native Firebase는 자동 초기화를 지원합니다
+      console.log('🔥 Firebase 자동 초기화 완료');
+    } else {
+      console.log('🔥 Firebase가 이미 초기화되어 있습니다.');
+      console.log(`🔥 등록된 앱 수: ${apps.length}`);
+    }
+  } catch (error) {
+    console.error('❌ Firebase 초기화 실패:', error);
+    console.error(
+      '💡 google-services.json 파일이 올바른 위치(android/app/)에 있는지 확인하세요',
+    );
   }
 };
 

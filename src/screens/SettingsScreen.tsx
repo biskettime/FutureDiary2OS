@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import authService from '../services/AuthService';
 
 interface SettingItem {
   id: string;
@@ -22,6 +24,7 @@ interface SettingItem {
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { currentTheme } = useTheme();
+  const { user } = useAuth();
 
   const handleSecretStore = () => {
     navigation.navigate('SecretStore');
@@ -41,6 +44,30 @@ const SettingsScreen: React.FC = () => {
       '버전: 1.0.0\n개발자: 미래일기 팀\n\n더 나은 일기 경험을 위해 계속 업데이트됩니다.',
       [{ text: '확인' }],
     );
+  };
+
+  const handleLogout = () => {
+    const userName = user?.displayName || user?.email || '사용자';
+
+    Alert.alert('로그아웃', `${userName}님, 정말 로그아웃하시겠습니까?`, [
+      {
+        text: '취소',
+        style: 'cancel',
+      },
+      {
+        text: '로그아웃',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await authService.signOut();
+            console.log('✅ 로그아웃 완료');
+          } catch (error) {
+            console.error('❌ 로그아웃 실패:', error);
+            Alert.alert('오류', '로그아웃에 실패했습니다.');
+          }
+        },
+      },
+    ]);
   };
 
   const renderSettingItem = (item: SettingItem) => (
@@ -134,6 +161,26 @@ const SettingsScreen: React.FC = () => {
           subtitle: '버전 및 개발자 정보',
           icon: 'ℹ️',
           onPress: handleAbout,
+        },
+      ],
+    },
+    {
+      title: '🔐 계정',
+      items: [
+        {
+          id: 'user-info',
+          title: user?.displayName || user?.email || '익명 사용자',
+          subtitle: user?.isAnonymous ? '익명 계정' : '로그인된 계정',
+          icon: user?.isAnonymous ? '👤' : '👨‍💻',
+          onPress: () => {},
+          showArrow: false,
+        },
+        {
+          id: 'logout',
+          title: '로그아웃',
+          subtitle: '현재 계정에서 로그아웃합니다',
+          icon: '🚪',
+          onPress: handleLogout,
         },
       ],
     },

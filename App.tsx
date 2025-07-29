@@ -12,8 +12,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
+// Firebase 초기화
+import './src/services/FirebaseConfig';
+
 import { RootStackParamList, TabParamList } from './src/types';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import TimelineScreen from './src/screens/TimelineScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import WriteEntryScreen from './src/screens/WriteEntryScreen';
@@ -101,6 +105,31 @@ const MainTabs = () => {
 
 const AppContent: React.FC = () => {
   const { currentTheme } = useTheme();
+  const { isAuthenticated, loading } = useAuth();
+
+  console.log('🔍 앱 상태 체크:', { isAuthenticated, loading });
+
+  // 인증 상태 확인 중일 때는 로딩 화면을 보여줄 수 있음
+  if (loading) {
+    // 간단한 로딩 화면 (선택사항)
+    return (
+      <>
+        <StatusBar
+          barStyle={
+            currentTheme.colors.text === '#000000'
+              ? 'dark-content'
+              : 'light-content'
+          }
+          backgroundColor={currentTheme.colors.background}
+        />
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login" component={LoginScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </>
+    );
+  }
 
   return (
     <>
@@ -113,71 +142,75 @@ const AppContent: React.FC = () => {
         backgroundColor={currentTheme.colors.background}
       />
       <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: currentTheme.colors.surface,
-              borderBottomColor: currentTheme.colors.border,
-              borderBottomWidth: 1,
-            },
-            headerTintColor: currentTheme.colors.text,
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-            headerBackTitle: '돌아가기',
-          }}
-        >
-          <Stack.Screen
-            name="MainTabs"
-            component={MainTabs}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="WriteEntry"
-            component={WriteEntryScreen}
-            options={{
-              presentation: 'modal',
-              headerTitle: '새 일기',
+        {!isAuthenticated ? (
+          // 🔐 로그인되지 않은 경우: 로그인 화면만 표시
+          <Stack.Navigator
+            screenOptions={{
               headerShown: false,
             }}
-          />
-          <Stack.Screen
-            name="ViewEntry"
-            component={ViewEntryScreen}
-            options={{
-              headerTitle: '일기 보기',
+          >
+            <Stack.Screen name="Login" component={LoginScreen} />
+          </Stack.Navigator>
+        ) : (
+          // ✅ 로그인된 경우: 전체 앱 네비게이션
+          <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: currentTheme.colors.surface,
+                borderBottomColor: currentTheme.colors.border,
+                borderBottomWidth: 1,
+              },
+              headerTintColor: currentTheme.colors.text,
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
+              headerBackTitle: '돌아가기',
             }}
-          />
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{
-              presentation: 'modal',
-              headerTitle: '로그인',
-            }}
-          />
-          <Stack.Screen
-            name="ThemeStore"
-            component={ThemeStoreScreen}
-            options={{
-              headerTitle: '테마 스토어',
-            }}
-          />
-          <Stack.Screen
-            name="SecretStore"
-            component={SecretStoreScreen}
-            options={{
-              headerTitle: '비밀 일기 스토어',
-            }}
-          />
-          <Stack.Screen
-            name="HowToUse"
-            component={HowToUseScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
-        </Stack.Navigator>
+          >
+            <Stack.Screen
+              name="MainTabs"
+              component={MainTabs}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="WriteEntry"
+              component={WriteEntryScreen}
+              options={{
+                presentation: 'modal',
+                headerTitle: '새 일기',
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="ViewEntry"
+              component={ViewEntryScreen}
+              options={{
+                headerTitle: '일기 보기',
+              }}
+            />
+            <Stack.Screen
+              name="ThemeStore"
+              component={ThemeStoreScreen}
+              options={{
+                headerTitle: '테마 스토어',
+              }}
+            />
+            <Stack.Screen
+              name="SecretStore"
+              component={SecretStoreScreen}
+              options={{
+                headerTitle: '비밀 일기 스토어',
+              }}
+            />
+            <Stack.Screen
+              name="HowToUse"
+              component={HowToUseScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+          </Stack.Navigator>
+        )}
       </NavigationContainer>
     </>
   );
@@ -186,7 +219,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </ThemeProvider>
   );
 };
