@@ -12,12 +12,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
-// Firebase 초기화
-import './src/services/FirebaseConfig';
+// Supabase 초기화
+import './src/services/SupabaseConfig';
 
 import { RootStackParamList, TabParamList } from './src/types';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
-import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import {
+  SupabaseAuthProvider,
+  useSupabaseAuth,
+} from './src/contexts/SupabaseAuthContext';
 import TimelineScreen from './src/screens/TimelineScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import WriteEntryScreen from './src/screens/WriteEntryScreen';
@@ -105,7 +108,7 @@ const MainTabs = () => {
 
 const AppContent: React.FC = () => {
   const { currentTheme } = useTheme();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useSupabaseAuth();
 
   console.log('🔍 앱 상태 체크:', { isAuthenticated, loading });
 
@@ -219,9 +222,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <AuthProvider>
+      <SupabaseAuthProvider>
         <AppContent />
-      </AuthProvider>
+      </SupabaseAuthProvider>
     </ThemeProvider>
   );
 };

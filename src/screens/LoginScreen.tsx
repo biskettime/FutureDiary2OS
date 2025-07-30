@@ -15,8 +15,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useTheme } from '../contexts/ThemeContext';
-import authService from '../services/AuthService';
-import firestoreService from '../services/FirestoreService';
+import supabaseAuthService from '../services/SupabaseAuthService';
+import supabaseService from '../services/SupabaseService';
+import { supabase } from '../services/SupabaseConfig';
 import { loadDiaryEntries } from '../utils/storage';
 
 interface LoginScreenProps {
@@ -44,18 +45,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     console.log('🔐 LoginScreen 마운트됨');
   }, []);
 
-  // 로컬 데이터를 Firebase로 마이그레이션
+  // 로컬 데이터를 Supabase로 마이그레이션
   const migrateLocalData = async () => {
     try {
-      console.log('🔄 로컬 데이터 마이그레이션 시작...');
+      console.log('🔄 로컬 데이터 Supabase 마이그레이션 시작...');
       const localEntries = await loadDiaryEntries();
 
       if (localEntries.length > 0) {
-        await firestoreService.migrateLocalDataToFirebase(localEntries);
-        console.log('✅ 로컬 데이터 마이그레이션 완료');
+        await supabaseService.migrateLocalDataToSupabase(localEntries);
+        console.log('✅ 로컬 데이터 Supabase 마이그레이션 완료');
       }
     } catch (error) {
-      console.error('❌ 로컬 데이터 마이그레이션 실패:', error);
+      console.error('❌ 로컬 데이터 Supabase 마이그레이션 실패:', error);
       // 마이그레이션 실패해도 로그인은 계속 진행
     }
   };
@@ -89,18 +90,52 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
       let user;
 
       if (isLogin) {
-        console.log('📧 이메일 로그인 시도...');
-        user = await authService.signInWithEmail(email, password);
+        console.log('📧 Supabase 이메일 로그인 시도...');
+        user = await supabaseAuthService.signInWithEmail(email, password);
       } else {
-        console.log('📧 이메일 회원가입 시도...');
-        user = await authService.signUpWithEmail(email, password, displayName);
+        console.log('📧 Supabase 이메일 회원가입 시도...');
+        user = await supabaseAuthService.signUpWithEmail(
+          email,
+          password,
+          displayName,
+        );
       }
 
-      // 사용자 프로필 저장
-      await firestoreService.saveUserProfile(user);
+      // 이메일 확인이 필요한 경우 처리
+      if (!isLogin && user.email && !user.isAnonymous) {
+        // 회원가입 성공했지만 이메일 확인이 필요할 수 있음
+        console.log('📧 회원가입 완료 - 이메일 확인 상태 체크');
 
-      // 로컬 데이터 마이그레이션 (회원가입/첫 로그인 시)
-      await migrateLocalData();
+        // 현재 세션 확인
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          console.log('📧 이메일 확인 필요');
+          Alert.alert(
+            '🎉 회원가입 완료!',
+            `📧 ${user.email}로 인증 이메일을 발송했습니다.\n\n이메일을 확인하고 인증 링크를 클릭한 후 다시 로그인해주세요.`,
+            [{ text: '확인', style: 'default' }],
+          );
+          return;
+        }
+      }
+
+      // 사용자 프로필 저장 (로그인된 경우에만)
+      try {
+        await supabaseService.saveUserProfile(user);
+        // 로컬 데이터 마이그레이션 (회원가입/첫 로그인 시)
+        await migrateLocalData();
+      } catch (profileError: any) {
+        console.log('⚠️ 프로필 저장 실패 (세션 없음):', profileError.message);
+        if (profileError.message?.includes('로그인이 필요')) {
+          Alert.alert(
+            '🎉 회원가입 완료!',
+            `📧 ${user.email}로 인증 이메일을 발송했습니다.\n\n이메일을 확인하고 인증 링크를 클릭한 후 다시 로그인해주세요.`,
+            [{ text: '확인', style: 'default' }],
+          );
+          return;
+        }
+        throw profileError;
+      }
 
       console.log('✅ 인증 성공:', user.displayName || user.email);
 
@@ -115,8 +150,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
         ],
       );
     } catch (error: any) {
-      console.error('❌ 인증 실패:', error);
-      Alert.alert('인증 실패', error.toString());
+      console.error('❌ 인증 실패 상세:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        error: error,
+      });
+
+      const errorMessage =
+        error.message ||
+        error.toString() ||
+        '인증 과정에서 오류가 발생했습니다.';
+      console.error('📱 사용자에게 표시할 에러:', errorMessage);
+
+      // 이메일 확인 관련 에러는 이미 위에서 처리됨
+      // 기타 에러만 여기서 처리
+      const title = isLogin ? '로그인 실패' : '회원가입 오류';
+      Alert.alert(title, errorMessage);
     } finally {
       setLoading(false);
     }
@@ -126,11 +176,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      console.log('🔍 Google 로그인 시도...');
-      const user = await authService.signInWithGoogle();
+      console.log('🔍 Supabase Google 로그인 시도...');
+      const user = await supabaseAuthService.signInWithGoogle();
 
       // 사용자 프로필 저장
-      await firestoreService.saveUserProfile(user);
+      await supabaseService.saveUserProfile(user);
 
       // 로컬 데이터 마이그레이션
       await migrateLocalData();
@@ -145,7 +195,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
       ]);
     } catch (error: any) {
       console.error('❌ Google 로그인 실패:', error);
-      Alert.alert('Google 로그인 실패', error.toString());
+      Alert.alert(
+        'Google 로그인 오류',
+        'Google 로그인 설정을 확인해주세요.\n잠시 후 다시 시도해주세요.',
+      );
     } finally {
       setLoading(false);
     }
@@ -199,39 +252,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     // }
   };
 
-  // 익명 로그인
-  const handleAnonymousLogin = async () => {
-    setLoading(true);
-    try {
-      console.log('👤 익명 로그인 시도...');
-      await authService.signInAnonymously();
-
-      // 익명 사용자는 Firestore에 프로필을 저장하지 않음 (로컬에서만 관리)
-      console.log('🎨 익명 사용자 - 로컬에서만 관리');
-
-      // 로컬 데이터는 유지 (마이그레이션 불필요)
-      console.log('💾 익명 사용자 - 로컬 데이터 유지');
-
-      console.log('✅ 익명 로그인 성공');
-
-      Alert.alert(
-        '🎉 익명 로그인 성공!',
-        '익명으로 미래일기를 시작합니다!\n\n💡 팁:\n• 기본 테마 사용 가능\n• 이메일 가입 시 프리미엄 테마 구매 가능\n• 데이터는 로컬에만 저장됩니다',
-        [
-          {
-            text: '시작하기',
-            // AuthContext가 자동으로 MainTabs로 전환함
-          },
-        ],
-      );
-    } catch (error: any) {
-      console.error('❌ 익명 로그인 실패:', error);
-      Alert.alert('익명 로그인 실패', error.toString());
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // 비밀번호 재설정
   const handleForgotPassword = async () => {
     if (!email.trim()) {
@@ -240,7 +260,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     }
 
     try {
-      await authService.sendPasswordResetEmail(email);
+      await supabaseAuthService.sendPasswordResetEmail(email);
       Alert.alert(
         '이메일 전송 완료',
         '비밀번호 재설정 이메일이 전송되었습니다. 이메일을 확인해주세요.',
@@ -618,40 +638,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
               Facebook으로 계속하기
             </Text>
           </TouchableOpacity>
-
-          {/* 익명 로그인 */}
-          <TouchableOpacity
-            style={[
-              styles.socialButton,
-              styles.anonymousButton,
-              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
-            ]}
-            onPress={handleAnonymousLogin}
-            disabled={loading}
-          >
-            <Text style={styles.anonymousIcon}>👤</Text>
-            <Text
-              style={[
-                styles.socialButtonText,
-                { color: currentTheme.colors.text },
-              ]}
-            >
-              익명으로 시작하기
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 안내 메시지 */}
-        <View style={styles.infoContainer}>
-          <Text
-            style={[
-              styles.infoText,
-              { color: currentTheme.colors.textSecondary },
-            ]}
-          >
-            💡 익명 로그인 시에도 나중에 계정을 생성하여{'\n'}
-            데이터를 안전하게 보존할 수 있습니다.
-          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -789,28 +775,14 @@ const styles = StyleSheet.create({
   facebookButton: {
     backgroundColor: '#1877F2',
   },
-  anonymousButton: {
-    backgroundColor: 'transparent',
-  },
+
   socialIcon: {
     marginRight: 12,
   },
-  anonymousIcon: {
-    fontSize: 20,
-    marginRight: 12,
-  },
+
   socialButtonText: {
     fontSize: 16,
     fontWeight: '500',
-  },
-  infoContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  infoText: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
   },
 });
 

@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
-import authService from '../services/AuthService';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import supabaseAuthService from '../services/SupabaseAuthService';
 
 interface SettingItem {
   id: string;
@@ -24,7 +24,7 @@ interface SettingItem {
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { currentTheme } = useTheme();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   const handleSecretStore = () => {
     navigation.navigate('SecretStore');
@@ -59,10 +59,10 @@ const SettingsScreen: React.FC = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            await authService.signOut();
-            console.log('✅ 로그아웃 완료');
+            await supabaseAuthService.signOut();
+            console.log('✅ Supabase 로그아웃 완료');
           } catch (error) {
-            console.error('❌ 로그아웃 실패:', error);
+            console.error('❌ Supabase 로그아웃 실패:', error);
             Alert.alert('오류', '로그아웃에 실패했습니다.');
           }
         },

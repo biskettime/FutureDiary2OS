@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme } from '../types';
-import firestoreService from '../services/FirestoreService';
-import authService from '../services/AuthService';
+import supabaseService from '../services/SupabaseService';
+import supabaseAuthService from '../services/SupabaseAuthService';
 
 const THEMES_KEY = 'THEMES';
 const ACTIVE_THEME_KEY = 'ACTIVE_THEME';
@@ -257,12 +257,12 @@ export const saveThemes = async (themes: Theme[]): Promise<void> => {
 // 테마 불러오기
 export const loadThemes = async (): Promise<Theme[]> => {
   try {
-    // Firebase에서 사용자 로그인 상태 확인
-    const currentUser = authService.getCurrentUser();
+    // Supabase에서 사용자 로그인 상태 확인
+    const currentUser = supabaseAuthService.getCurrentUser();
     if (currentUser && !currentUser.isAnonymous) {
       // 실제 로그인된 사용자 (익명 제외): 구매 상태 반영
-      const purchasedThemes = await firestoreService.getUserPurchasedThemes();
-      const userCurrentTheme = await firestoreService.getUserCurrentTheme();
+      const purchasedThemes = await supabaseService.getUserPurchasedThemes();
+      const userCurrentTheme = await supabaseService.getUserCurrentTheme();
 
       const updatedThemes = allThemes.map(theme => ({
         ...theme,
@@ -313,11 +313,11 @@ export const loadActiveTheme = async (): Promise<string> => {
 export const getCurrentTheme = async (): Promise<Theme> => {
   try {
     // Firebase에서 사용자 로그인 상태 확인
-    const currentUser = authService.getCurrentUser();
+    const currentUser = supabaseAuthService.getCurrentUser();
     if (currentUser && !currentUser.isAnonymous) {
-      // 실제 로그인된 사용자 (익명 제외): Firebase에서 테마 가져오기
-      const userThemeId = await firestoreService.getUserCurrentTheme();
-      const purchasedThemes = await firestoreService.getUserPurchasedThemes();
+      // 실제 로그인된 사용자 (익명 제외): Supabase에서 테마 가져오기
+      const userThemeId = await supabaseService.getUserCurrentTheme();
+      const purchasedThemes = await supabaseService.getUserPurchasedThemes();
 
       // 테마 목록 로드하고 사용자 구매 상태 반영
       const themes = await loadThemes();
@@ -344,10 +344,10 @@ export const getCurrentTheme = async (): Promise<Theme> => {
 // 테마 구매 처리 (구매 후 바로 적용)
 export const purchaseTheme = async (themeId: string): Promise<void> => {
   try {
-    const currentUser = authService.getCurrentUser();
+    const currentUser = supabaseAuthService.getCurrentUser();
     if (currentUser && !currentUser.isAnonymous) {
-      // 실제 로그인된 사용자 (익명 제외): Firebase에서 처리
-      await firestoreService.purchaseTheme(themeId);
+      // 실제 로그인된 사용자 (익명 제외): Supabase에서 처리
+      await supabaseService.purchaseTheme(themeId);
     } else {
       // 익명 사용자 또는 로그인되지 않은 사용자: 구매 차단
       if (currentUser && currentUser.isAnonymous) {
@@ -367,10 +367,10 @@ export const purchaseTheme = async (themeId: string): Promise<void> => {
 // 테마 적용
 export const applyTheme = async (themeId: string): Promise<void> => {
   try {
-    const currentUser = authService.getCurrentUser();
+    const currentUser = supabaseAuthService.getCurrentUser();
     if (currentUser && !currentUser.isAnonymous) {
-      // 실제 로그인된 사용자 (익명 제외): Firebase에서 처리 (구매 확인 포함)
-      await firestoreService.applyTheme(themeId);
+      // 실제 로그인된 사용자 (익명 제외): Supabase에서 처리 (구매 확인 포함)
+      await supabaseService.applyTheme(themeId);
     } else {
       // 익명 사용자 또는 로그인되지 않은 사용자: 기본 테마만 가능
       if (themeId !== 'default') {

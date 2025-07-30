@@ -1,23 +1,28 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DiaryEntry } from '../types';
-import authService from '../services/AuthService';
-import firestoreService from '../services/FirestoreService';
+import supabaseAuthService from '../services/SupabaseAuthService';
+import supabaseService from '../services/SupabaseService';
 
 const ENTRIES_KEY = 'diary_entries';
-const SYNC_STATUS_KEY = 'firebase_sync_status';
+const SYNC_STATUS_KEY = 'supabase_sync_status';
 
-// Firebase 사용 가능 여부 확인
-const isFirebaseAvailable = (): boolean => {
+// ID 생성 함수
+export const generateId = (): string => {
+  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// Supabase 사용 가능 여부 확인
+const isSupabaseAvailable = (): boolean => {
   try {
-    const user = authService.getCurrentUser();
+    const user = supabaseAuthService.getCurrentUser();
     return user !== null;
   } catch (error) {
-    console.log('Firebase 사용 불가:', error);
+    console.log('Supabase 사용 불가:', error);
     return false;
   }
 };
 
-// 일기 목록 저장 (Firebase + 로컬)
+// 일기 목록 저장 (Supabase + 로컬)
 export const saveDiaryEntries = async (
   entries: DiaryEntry[],
 ): Promise<void> => {
@@ -26,19 +31,19 @@ export const saveDiaryEntries = async (
     await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
     console.log('✅ 로컬 스토리지 저장 완료:', entries.length, '개');
 
-    // Firebase 사용 가능한 경우 Firebase에도 저장
-    if (isFirebaseAvailable()) {
+    // Supabase 사용 가능한 경우 Supabase에도 저장
+    if (isSupabaseAvailable()) {
       try {
-        await firestoreService.saveDiaryEntries(entries);
+        await supabaseService.saveDiaryEntries(entries);
         await AsyncStorage.setItem(SYNC_STATUS_KEY, 'synced');
-        console.log('✅ Firebase 동기화 완료');
-      } catch (firebaseError) {
-        console.warn('⚠️ Firebase 저장 실패, 로컬만 저장됨:', firebaseError);
+        console.log('✅ Supabase 동기화 완료');
+      } catch (supabaseError) {
+        console.warn('⚠️ Supabase 저장 실패, 로컬만 저장됨:', supabaseError);
         await AsyncStorage.setItem(SYNC_STATUS_KEY, 'pending');
       }
     } else {
       await AsyncStorage.setItem(SYNC_STATUS_KEY, 'local_only');
-      console.log('📱 로컬 전용 모드 - Firebase 비활성화');
+      console.log('📱 로컬 전용 모드 - Supabase 비활성화');
     }
   } catch (error) {
     console.error('❌ 일기 저장 실패:', error);
@@ -68,13 +73,13 @@ export const saveDiaryEntry = async (entry: DiaryEntry): Promise<void> => {
     // 저장
     await saveDiaryEntries(entries);
 
-    // Firebase 개별 저장 시도
-    if (isFirebaseAvailable()) {
+    // Supabase 개별 저장 시도
+    if (isSupabaseAvailable()) {
       try {
-        await firestoreService.saveDiaryEntry(entry);
-        console.log('✅ Firebase 개별 저장 완료:', entry.title);
-      } catch (firebaseError) {
-        console.warn('⚠️ Firebase 개별 저장 실패:', firebaseError);
+        await supabaseService.saveDiaryEntry(entry);
+        console.log('✅ Supabase 개별 저장 완료:', entry.title);
+      } catch (supabaseError) {
+        console.warn('⚠️ Supabase 개별 저장 실패:', supabaseError);
       }
     }
   } catch (error) {
@@ -83,26 +88,26 @@ export const saveDiaryEntry = async (entry: DiaryEntry): Promise<void> => {
   }
 };
 
-// 일기 목록 로드 (Firebase 우선, 로컬 백업)
+// 일기 목록 로드 (Supabase 우선, 로컬 백업)
 export const loadDiaryEntries = async (): Promise<DiaryEntry[]> => {
   try {
     let entries: DiaryEntry[] = [];
 
-    // Firebase 먼저 시도
-    if (isFirebaseAvailable()) {
+    // Supabase 먼저 시도
+    if (isSupabaseAvailable()) {
       try {
-        console.log('🔥 Firebase에서 일기 로딩 시도...');
-        entries = await firestoreService.loadDiaryEntries();
+        console.log('📊 Supabase에서 일기 로딩 시도...');
+        entries = await supabaseService.loadDiaryEntries();
 
         if (entries.length > 0) {
-          console.log('✅ Firebase에서 로딩 완료:', entries.length, '개');
-          // Firebase 데이터를 로컬에 백업
+          console.log('✅ Supabase에서 로딩 완료:', entries.length, '개');
+          // Supabase 데이터를 로컬에 백업
           await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
           await AsyncStorage.setItem(SYNC_STATUS_KEY, 'synced');
           return entries;
         }
-      } catch (firebaseError) {
-        console.warn('⚠️ Firebase 로딩 실패, 로컬에서 시도:', firebaseError);
+      } catch (supabaseError) {
+        console.warn('⚠️ Supabase 로딩 실패, 로컬에서 시도:', supabaseError);
       }
     }
 
@@ -135,13 +140,13 @@ export const deleteDiaryEntry = async (entryId: string): Promise<void> => {
     await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(filteredEntries));
     console.log('✅ 로컬에서 일기 삭제 완료');
 
-    // Firebase에서도 삭제
-    if (isFirebaseAvailable()) {
+    // Supabase에서도 삭제
+    if (isSupabaseAvailable()) {
       try {
-        await firestoreService.deleteDiaryEntry(entryId);
-        console.log('✅ Firebase에서 일기 삭제 완료');
-      } catch (firebaseError) {
-        console.warn('⚠️ Firebase 삭제 실패:', firebaseError);
+        await supabaseService.deleteDiaryEntry(entryId);
+        console.log('✅ Supabase에서 일기 삭제 완료');
+      } catch (supabaseError) {
+        console.warn('⚠️ Supabase 삭제 실패:', supabaseError);
       }
     }
   } catch (error) {
@@ -155,14 +160,14 @@ export const searchDiaryEntries = async (
   searchTerm: string,
 ): Promise<DiaryEntry[]> => {
   try {
-    // Firebase 검색 우선 시도
-    if (isFirebaseAvailable()) {
+    // Supabase 검색 우선 시도
+    if (isSupabaseAvailable()) {
       try {
-        const results = await firestoreService.searchDiaryEntries(searchTerm);
-        console.log('✅ Firebase 검색 완료:', results.length, '개 발견');
+        const results = await supabaseService.searchDiaryEntries(searchTerm);
+        console.log('✅ Supabase 검색 완료:', results.length, '개 발견');
         return results;
-      } catch (firebaseError) {
-        console.warn('⚠️ Firebase 검색 실패, 로컬 검색 시도:', firebaseError);
+      } catch (supabaseError) {
+        console.warn('⚠️ Supabase 검색 실패, 로컬 검색 시도:', supabaseError);
       }
     }
 
@@ -203,14 +208,14 @@ export const getSyncStatus = async (): Promise<
   }
 };
 
-// 수동 동기화 (로컬 → Firebase)
-export const syncToFirebase = async (): Promise<void> => {
+// 수동 동기화 (로컬 → Supabase)
+export const syncToSupabase = async (): Promise<void> => {
   try {
-    if (!isFirebaseAvailable()) {
-      throw new Error('Firebase에 로그인되어 있지 않습니다.');
+    if (!isSupabaseAvailable()) {
+      throw new Error('Supabase에 로그인되어 있지 않습니다.');
     }
 
-    console.log('🔄 Firebase 동기화 시작...');
+    console.log('🔄 Supabase 동기화 시작...');
 
     // 로컬 데이터 로드
     const localEntries = await loadDiaryEntries();
@@ -220,41 +225,41 @@ export const syncToFirebase = async (): Promise<void> => {
       return;
     }
 
-    // Firebase에 마이그레이션
-    await firestoreService.migrateLocalDataToFirebase(localEntries);
+    // Supabase에 마이그레이션
+    await supabaseService.migrateLocalDataToSupabase(localEntries);
     await AsyncStorage.setItem(SYNC_STATUS_KEY, 'synced');
 
-    console.log('✅ Firebase 동기화 완료');
+    console.log('✅ Supabase 동기화 완료');
   } catch (error) {
-    console.error('❌ Firebase 동기화 실패:', error);
+    console.error('❌ Supabase 동기화 실패:', error);
     await AsyncStorage.setItem(SYNC_STATUS_KEY, 'pending');
     throw error;
   }
 };
 
-// Firebase에서 로컬로 동기화 (수동)
-export const syncFromFirebase = async (): Promise<void> => {
+// Supabase에서 로컬로 동기화 (수동)
+export const syncFromSupabase = async (): Promise<void> => {
   try {
-    if (!isFirebaseAvailable()) {
-      throw new Error('Firebase에 로그인되어 있지 않습니다.');
+    if (!isSupabaseAvailable()) {
+      throw new Error('Supabase에 로그인되어 있지 않습니다.');
     }
 
-    console.log('⬇️ Firebase에서 로컬로 동기화 시작...');
+    console.log('⬇️ Supabase에서 로컬로 동기화 시작...');
 
-    // Firebase에서 데이터 로드
-    const firebaseEntries = await firestoreService.loadDiaryEntries();
+    // Supabase에서 데이터 로드
+    const supabaseEntries = await supabaseService.loadDiaryEntries();
 
     // 로컬에 저장
-    await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(firebaseEntries));
+    await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(supabaseEntries));
     await AsyncStorage.setItem(SYNC_STATUS_KEY, 'synced');
 
     console.log(
-      '✅ Firebase → 로컬 동기화 완료:',
-      firebaseEntries.length,
+      '✅ Supabase → 로컬 동기화 완료:',
+      supabaseEntries.length,
       '개',
     );
   } catch (error) {
-    console.error('❌ Firebase → 로컬 동기화 실패:', error);
+    console.error('❌ Supabase → 로컬 동기화 실패:', error);
     throw error;
   }
 };
@@ -262,26 +267,24 @@ export const syncFromFirebase = async (): Promise<void> => {
 // 앱 시작 시 자동 동기화 설정
 export const setupAutoSync = (): (() => void) | null => {
   try {
-    if (!isFirebaseAvailable()) {
+    if (!isSupabaseAvailable()) {
       console.log('📱 로컬 전용 모드로 실행');
       return null;
     }
 
     console.log('🔄 실시간 동기화 설정 중...');
 
-    // Firebase 실시간 리스너 등록
-    const unsubscribe = firestoreService.onDiaryEntriesChanged(
-      async entries => {
-        try {
-          // Firebase 데이터를 로컬에 백업
-          await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
-          await AsyncStorage.setItem(SYNC_STATUS_KEY, 'synced');
-          console.log('📡 실시간 동기화 완료:', entries.length, '개');
-        } catch (error) {
-          console.error('❌ 실시간 동기화 실패:', error);
-        }
-      },
-    );
+    // Supabase 실시간 리스너 등록
+    const unsubscribe = supabaseService.onDiaryEntriesChanged(async entries => {
+      try {
+        // Supabase 데이터를 로컬에 백업
+        await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+        await AsyncStorage.setItem(SYNC_STATUS_KEY, 'synced');
+        console.log('📡 실시간 동기화 완료:', entries.length, '개');
+      } catch (error) {
+        console.error('❌ 실시간 동기화 실패:', error);
+      }
+    });
 
     console.log('✅ 실시간 동기화 설정 완료');
     return unsubscribe;
