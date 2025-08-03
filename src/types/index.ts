@@ -4,6 +4,28 @@ export interface TagInfo {
   color: string;
 }
 
+export interface CategoryOption {
+  name: string;
+  icon: string;
+  color: string;
+}
+
+export interface CategoryOptions {
+  title: string;
+  options: Record<string, CategoryOption>;
+}
+
+export interface CategoryOptionsMap {
+  weather: CategoryOptions;
+  people: CategoryOptions;
+  school: CategoryOptions;
+  company: CategoryOptions;
+  travel: CategoryOptions;
+  food: CategoryOptions;
+  dessert: CategoryOptions;
+  drink: CategoryOptions;
+}
+
 export interface ThemeColors {
   primary: string;
   secondary: string;
@@ -92,6 +114,12 @@ export interface DiaryFilter {
     start: string;
     end: string;
   };
+}
+
+export interface TimelineItem {
+  entry: DiaryEntry;
+  status: 'past' | 'today' | 'future';
+  daysFromNow: number;
 }
 
 export type RootStackParamList = {

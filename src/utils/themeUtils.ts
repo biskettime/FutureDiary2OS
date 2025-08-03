@@ -103,18 +103,18 @@ export const galaxyDreamTheme: Theme = {
   category: 'premium',
   price: 3900,
   colors: {
-    primary: '#4A148C', // 딥퍼플
-    secondary: '#7B1FA2', // 퍼플
-    background: '#2A2A5E', // 밝은 다크네이비
-    surface: '#1E2A4E', // 밝은 미드나잇블루
-    text: '#E8EAF6', // 라이트퍼플
-    textSecondary: '#B39DDB', // 라벤더
-    accent: '#9C27B0', // 퍼플액센트
-    success: '#00BCD4', // 시안
-    warning: '#FF9800', // 오렌지
-    error: '#F44336', // 레드
-    border: '#3F51B5', // 인디고
-    shadow: '#000051', // 다크인디고
+    primary: '#6A1B9A', // 더 밝은 딥퍼플
+    secondary: '#8E24AA', // 더 밝은 퍼플
+    background: '#1A1A3E', // 더 어두운 다크네이비
+    surface: '#2A2A4E', // 더 어두운 미드나잇블루
+    text: '#FFFFFF', // 순백
+    textSecondary: '#E1BEE7', // 더 밝은 라벤더
+    accent: '#BA68C8', // 더 밝은 퍼플액센트
+    success: '#4DD0E1', // 더 밝은 시안
+    warning: '#FFB74D', // 더 밝은 오렌지
+    error: '#EF5350', // 더 밝은 레드
+    border: '#5C6BC0', // 더 밝은 인디고
+    shadow: '#1A237E', // 더 밝은 다크인디고
   },
   icons: {
     home: '🌌',
