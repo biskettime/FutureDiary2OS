@@ -5,15 +5,16 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
-// Supabase 초기화
+// Supabase 초기화 및 연결 테스트
 import './src/services/SupabaseConfig';
+import { checkSupabaseConnection } from './src/services/SupabaseConfig';
 
 import { RootStackParamList, TabParamList } from './src/types';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
@@ -107,8 +108,18 @@ const MainTabs = () => {
 };
 
 const AppContent: React.FC = () => {
-  const { currentTheme } = useTheme();
+  const themeContext = useTheme();
   const { isAuthenticated, loading } = useSupabaseAuth();
+
+  // 테마가 로딩 중일 때는 기본값 사용
+  const currentTheme = themeContext?.currentTheme || {
+    colors: {
+      text: '#000000',
+      background: '#FFFFFF',
+      surface: '#F2F2F7',
+      border: '#C6C6C8',
+    },
+  };
 
   console.log('🔍 앱 상태 체크:', { isAuthenticated, loading });
 
@@ -220,6 +231,17 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // Supabase 연결 확인
+    checkSupabaseConnection().then(isConnected => {
+      if (isConnected) {
+        console.log('✅ Supabase 연결 성공!');
+      } else {
+        console.error('❌ Supabase 연결 실패! 설정을 확인해주세요.');
+      }
+    });
+  }, []);
+
   return (
     <ThemeProvider>
       <SupabaseAuthProvider>

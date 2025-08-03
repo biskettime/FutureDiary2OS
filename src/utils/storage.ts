@@ -265,7 +265,7 @@ export const syncFromSupabase = async (): Promise<void> => {
 };
 
 // 앱 시작 시 자동 동기화 설정
-export const setupAutoSync = (): (() => void) | null => {
+export const setupAutoSync = async (): Promise<(() => void) | null> => {
   try {
     if (!isSupabaseAvailable()) {
       console.log('📱 로컬 전용 모드로 실행');
@@ -275,16 +275,18 @@ export const setupAutoSync = (): (() => void) | null => {
     console.log('🔄 실시간 동기화 설정 중...');
 
     // Supabase 실시간 리스너 등록
-    const unsubscribe = supabaseService.onDiaryEntriesChanged(async entries => {
-      try {
-        // Supabase 데이터를 로컬에 백업
-        await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
-        await AsyncStorage.setItem(SYNC_STATUS_KEY, 'synced');
-        console.log('📡 실시간 동기화 완료:', entries.length, '개');
-      } catch (error) {
-        console.error('❌ 실시간 동기화 실패:', error);
-      }
-    });
+    const unsubscribe = await supabaseService.onDiaryEntriesChanged(
+      async entries => {
+        try {
+          // Supabase 데이터를 로컬에 백업
+          await AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+          await AsyncStorage.setItem(SYNC_STATUS_KEY, 'synced');
+          console.log('📡 실시간 동기화 완료:', entries.length, '개');
+        } catch (error) {
+          console.error('❌ 실시간 동기화 실패:', error);
+        }
+      },
+    );
 
     console.log('✅ 실시간 동기화 설정 완료');
     return unsubscribe;

@@ -7,16 +7,37 @@ class SupabaseService {
     console.log('📊 SupabaseService 초기화됨');
   }
 
-  // 현재 사용자 확인
-  private getCurrentUserId(): string {
-    const user = supabaseAuthService.getCurrentUser();
-    console.log('🔍 getCurrentUser() 결과:', user);
-    if (!user) {
-      console.error('❌ 사용자가 로그인되지 않음');
-      throw new Error('로그인이 필요합니다.');
+  // 현재 사용자 확인 (Supabase 세션에서 직접 가져오기)
+  private async getCurrentUserId(): Promise<string> {
+    try {
+      // Supabase 세션에서 직접 사용자 ID 가져오기
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error('❌ Supabase 사용자 조회 에러:', error);
+        throw new Error('인증 정보를 확인할 수 없습니다.');
+      }
+
+      if (!user) {
+        // AuthService에서도 확인
+        const authUser = supabaseAuthService.getCurrentUser();
+        if (!authUser) {
+          console.error('❌ 사용자가 로그인되지 않음');
+          throw new Error('로그인이 필요합니다.');
+        }
+        console.log('✅ AuthService 사용자 ID:', authUser.uid);
+        return authUser.uid;
+      }
+
+      console.log('✅ Supabase 사용자 ID:', user.id);
+      return user.id;
+    } catch (error) {
+      console.error('❌ 사용자 ID 가져오기 실패:', error);
+      throw error;
     }
-    console.log('✅ 현재 사용자 ID:', user.uid);
-    return user.uid;
   }
 
   // DiaryEntry를 Supabase용 데이터로 변환
@@ -97,7 +118,7 @@ class SupabaseService {
   // 일기 저장
   async saveDiaryEntry(entry: DiaryEntry): Promise<void> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
       console.log('🔍 저장할 사용자 ID:', userId);
 
       // DiaryEntry를 Supabase 형식으로 변환
@@ -134,7 +155,7 @@ class SupabaseService {
   // 여러 일기 일괄 저장
   async saveDiaryEntries(entries: DiaryEntry[]): Promise<void> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       console.log('💾 Supabase 일괄 일기 저장 중:', entries.length, '개');
 
@@ -168,7 +189,7 @@ class SupabaseService {
   // 모든 일기 가져오기
   async loadDiaryEntries(): Promise<DiaryEntry[]> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
       console.log('🔍 조회할 사용자 ID:', userId);
 
       console.log('📖 Supabase 일기 목록 로딩 중...');
@@ -199,7 +220,7 @@ class SupabaseService {
   // 특정 일기 가져오기
   async getDiaryEntry(entryId: string): Promise<DiaryEntry | null> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       console.log('📖 Supabase 일기 로딩 중:', entryId);
 
@@ -236,7 +257,7 @@ class SupabaseService {
   // 일기 삭제
   async deleteDiaryEntry(entryId: string): Promise<void> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       console.log('🗑️ Supabase 일기 삭제 중:', entryId);
 
@@ -260,7 +281,7 @@ class SupabaseService {
   // 일기 검색
   async searchDiaryEntries(searchTerm: string): Promise<DiaryEntry[]> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       console.log('🔍 Supabase 일기 검색 중:', searchTerm);
 
@@ -296,7 +317,7 @@ class SupabaseService {
     endDate: string,
   ): Promise<DiaryEntry[]> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       console.log('📅 Supabase 날짜 범위 일기 검색:', startDate, '~', endDate);
 
@@ -329,7 +350,7 @@ class SupabaseService {
   // 사용자 프로필 저장
   async saveUserProfile(user: User): Promise<void> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       console.log('👤 Supabase 사용자 프로필 저장 중');
 
@@ -427,9 +448,11 @@ class SupabaseService {
   }
 
   // 실시간 일기 목록 리스너 등록
-  onDiaryEntriesChanged(callback: (entries: DiaryEntry[]) => void): () => void {
+  async onDiaryEntriesChanged(
+    callback: (entries: DiaryEntry[]) => void,
+  ): Promise<() => void> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       console.log('👂 Supabase 실시간 일기 리스너 등록');
 
@@ -499,7 +522,7 @@ class SupabaseService {
   // 사용자의 현재 테마 가져오기
   async getUserCurrentTheme(): Promise<string> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       const { data, error } = await supabase
         .from('user_profiles')
@@ -524,7 +547,7 @@ class SupabaseService {
   // 사용자의 구매한 테마 목록 가져오기
   async getUserPurchasedThemes(): Promise<string[]> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       const { data, error } = await supabase
         .from('user_profiles')
@@ -549,7 +572,7 @@ class SupabaseService {
   // 테마 구매 처리
   async purchaseTheme(themeId: string): Promise<void> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       // 현재 구매한 테마 목록 가져오기
       const purchasedThemes = await this.getUserPurchasedThemes();
@@ -616,7 +639,7 @@ class SupabaseService {
   // 테마 적용 (구매한 테마만 적용 가능)
   async applyTheme(themeId: string): Promise<void> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = await this.getCurrentUserId();
 
       // 구매한 테마인지 확인
       const purchasedThemes = await this.getUserPurchasedThemes();

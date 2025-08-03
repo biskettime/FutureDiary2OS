@@ -174,34 +174,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
 
   // 구글 로그인
   const handleGoogleLogin = async () => {
-    setLoading(true);
-    try {
-      console.log('🔍 Supabase Google 로그인 시도...');
-      const user = await supabaseAuthService.signInWithGoogle();
-
-      // 사용자 프로필 저장
-      await supabaseService.saveUserProfile(user);
-
-      // 로컬 데이터 마이그레이션
-      await migrateLocalData();
-
-      console.log('✅ Google 로그인 성공:', user.displayName || user.email);
-
-      Alert.alert('성공!', 'Google 로그인이 완료되었습니다!', [
-        {
-          text: '확인',
-          // AuthContext가 자동으로 MainTabs로 전환함
-        },
-      ]);
-    } catch (error: any) {
-      console.error('❌ Google 로그인 실패:', error);
-      Alert.alert(
-        'Google 로그인 오류',
-        'Google 로그인 설정을 확인해주세요.\n잠시 후 다시 시도해주세요.',
-      );
-    } finally {
-      setLoading(false);
-    }
+    Alert.alert(
+      '준비 중',
+      'Google 로그인은 현재 개발 중입니다.\n\n이메일로 회원가입하거나 테스트 로그인을 사용해주세요.',
+      [{ text: '확인' }],
+    );
+    return;
+    
+    // TODO: 추후 구현 예정
+    // React Native에서 Supabase OAuth를 사용하려면:
+    // 1. react-native-inappbrowser-reborn 설치
+    // 2. Deep linking 설정
+    // 3. Supabase Dashboard에서 Google OAuth 설정
   };
 
   // 애플 로그인 (Apple Sign-In)
@@ -276,47 +260,92 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     try {
       console.log('🧪 테스트 로그인 시도...');
 
-      // 테스트 계정으로 로그인
-      const testEmail = 'test@futurediary.com';
-      const testPassword = 'test123456';
+      // 테스트 계정으로 로그인 - 더 안정적인 이메일 형식 사용
+      const testEmail = 'test.user.2024@example.com';
+      const testPassword = 'TestPassword123!';
 
-      const user = await supabaseAuthService.signInWithEmail(
-        testEmail,
-        testPassword,
-      );
-
-      if (user) {
-        console.log('✅ 테스트 로그인 성공:', user.email);
-        await migrateLocalData();
-        Alert.alert('테스트 로그인 성공', '테스트 계정으로 로그인되었습니다.');
-      }
-    } catch (error: any) {
-      console.error('❌ 테스트 로그인 실패:', error);
-
-      // 테스트 계정이 없으면 회원가입 시도
       try {
-        console.log('🔄 테스트 계정 회원가입 시도...');
-        const user = await supabaseAuthService.signUpWithEmail(
-          'test@futurediary.com',
-          'test123456',
-          '테스트 사용자',
+        // 먼저 로그인 시도
+        const user = await supabaseAuthService.signInWithEmail(
+          testEmail,
+          testPassword,
         );
 
         if (user) {
-          console.log('✅ 테스트 계정 생성 및 로그인 성공');
+          console.log('✅ 테스트 로그인 성공:', user.email);
+          
+          // 사용자 프로필 저장
+          await supabaseService.saveUserProfile(user);
+          
+          // 로컬 데이터 마이그레이션
           await migrateLocalData();
+          
           Alert.alert(
-            '테스트 계정 생성 완료',
-            '테스트 계정이 생성되고 로그인되었습니다.',
+            '✅ 테스트 로그인 성공',
+            '테스트 계정으로 로그인되었습니다.\n이제 앱의 모든 기능을 사용할 수 있습니다.',
+            [{ text: '확인' }],
           );
         }
-      } catch (signUpError: any) {
-        console.error('❌ 테스트 계정 생성 실패:', signUpError);
-        Alert.alert(
-          '테스트 로그인 실패',
-          '테스트 계정 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
-        );
+      } catch (loginError: any) {
+        console.log('⚠️ 테스트 계정 로그인 실패, 회원가입 시도...');
+        
+        // 로그인 실패 시 회원가입 시도
+        try {
+          const user = await supabaseAuthService.signUpWithEmail(
+            testEmail,
+            testPassword,
+            '테스트 사용자',
+          );
+
+          if (user) {
+            console.log('✅ 테스트 계정 생성 성공');
+            
+            // 회원가입 후 바로 로그인 시도
+            const loginUser = await supabaseAuthService.signInWithEmail(
+              testEmail,
+              testPassword,
+            );
+            
+            if (loginUser) {
+              // 사용자 프로필 저장
+              await supabaseService.saveUserProfile(loginUser);
+              
+              // 로컬 데이터 마이그레이션
+              await migrateLocalData();
+              
+              Alert.alert(
+                '✅ 테스트 계정 생성 완료',
+                '테스트 계정이 생성되고 로그인되었습니다.\n이제 앱의 모든 기능을 사용할 수 있습니다.',
+                [{ text: '확인' }],
+              );
+            }
+          }
+        } catch (signUpError: any) {
+          console.error('❌ 테스트 계정 생성 실패:', signUpError);
+          
+          // 이메일 확인이 필요한 경우
+          if (signUpError.message?.includes('이메일')) {
+            Alert.alert(
+              '⚠️ 이메일 확인 필요',
+              '일반 계정으로 회원가입하시거나 Google 로그인을 사용해주세요.',
+              [{ text: '확인' }],
+            );
+          } else {
+            Alert.alert(
+              '❌ 테스트 로그인 실패',
+              '테스트 계정 접속에 문제가 발생했습니다.\n일반 계정으로 회원가입하시거나 Google 로그인을 사용해주세요.',
+              [{ text: '확인' }],
+            );
+          }
+        }
       }
+    } catch (error: any) {
+      console.error('❌ 테스트 로그인 오류:', error);
+      Alert.alert(
+        '오류',
+        '테스트 로그인 중 문제가 발생했습니다.\n잠시 후 다시 시도해주세요.',
+        [{ text: '확인' }],
+      );
     } finally {
       setLoading(false);
     }

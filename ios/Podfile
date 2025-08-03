@@ -26,7 +26,9 @@ target 'FutureDiary' do
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    # Disable Hermes temporarily to fix build issues
+    :hermes_enabled => false
   )
 
   post_install do |installer|
@@ -45,6 +47,29 @@ target 'FutureDiary' do
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
         config.build_settings['ENABLE_BITCODE'] = 'NO'
         config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
+        
+        # UIKit 모듈 빌드 문제 해결
+        config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
+        config.build_settings['CLANG_MODULES_AUTOLINK'] = 'YES'
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
+        config.build_settings['DEFINES_MODULE'] = 'YES'
+        
+        # DarwinFoundation 모듈 빌드 문제 해결
+        config.build_settings['CLANG_MODULES_DISABLE_PRIVATE_WARNING'] = 'YES'
+        config.build_settings['CLANG_WARN_MODULE_CONFLICT'] = 'NO'
+        config.build_settings['CLANG_ENABLE_MODULE_DEBUGGING'] = 'NO'
+        config.build_settings['SWIFT_DISABLE_SAFETY_CHECKS'] = 'YES'
+        config.build_settings['CLANG_MODULES_PRUNE_INTERVAL'] = '86400'
+        config.build_settings['CLANG_MODULES_PRUNE_AFTER'] = '345600'
+        
+        # 모듈 캐시 문제 해결
+        config.build_settings['CLANG_MODULE_CACHE_PATH'] = '$(DERIVED_DATA_DIR)/ModuleCache'
+        config.build_settings['SWIFT_MODULE_CACHE_PATH'] = '$(DERIVED_DATA_DIR)/ModuleCache.swift'
+        
+        # SDK 호환성 강화
+        config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.15'
+        config.build_settings['CLANG_MODULES_BUILD_SESSION_FILE'] = '$(DERIVED_DATA_DIR)/ModuleCache/Session.modulevalidation'
       end
     end
     

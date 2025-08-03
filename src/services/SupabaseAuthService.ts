@@ -30,9 +30,18 @@ class SupabaseAuthService {
 
   private async initializeAuth() {
     try {
+      console.log('🔄 Supabase 세션 확인 중...');
       const {
         data: { session },
+        error,
       } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('❌ Supabase 세션 가져오기 실패:', error);
+        return;
+      }
+      
+      console.log('📝 Supabase 세션 상태:', session ? '세션 있음' : '세션 없음');
       this.handleAuthStateChanged(session);
     } catch (error) {
       console.error('❌ Supabase 인증 초기화 실패:', error);
@@ -105,6 +114,7 @@ class SupabaseAuthService {
             display_name: displayName,
             full_name: displayName,
           },
+          emailRedirectTo: undefined, // React Native에서는 이메일 확인 비활성화
         },
       });
 
@@ -123,6 +133,25 @@ class SupabaseAuthService {
       if (!data.user) {
         console.error('❌ 응답에 사용자 정보 없음:', data);
         throw new Error('회원가입에 실패했습니다.');
+      }
+
+      // 회원가입 후 자동 로그인 시도
+      if (data.session) {
+        console.log('✅ 세션 생성됨, 자동 로그인 성공');
+      } else {
+        console.log('⚠️ 세션 없음, 수동 로그인 필요');
+        // 이메일 확인이 필요 없는 경우 자동으로 로그인 시도
+        try {
+          const { data: loginData } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (loginData.session) {
+            console.log('✅ 자동 로그인 성공');
+          }
+        } catch (loginError) {
+          console.warn('⚠️ 자동 로그인 실패:', loginError);
+        }
       }
 
       const user: User = {
@@ -152,11 +181,27 @@ class SupabaseAuthService {
       });
 
       if (error) {
+        console.error('❌ Supabase 로그인 에러:', {
+          message: error.message,
+          status: error.status,
+          statusText: error.statusText,
+        });
+        
+        // 이메일 확인이 필요한 경우 특별 처리
+        if (error.message?.includes('Email not confirmed')) {
+          throw new Error('이메일 인증이 필요합니다. 이메일을 확인해주세요.');
+        }
+        
         throw error;
       }
 
       if (!data.user) {
         throw new Error('로그인에 실패했습니다.');
+      }
+
+      // 세션이 있는지 확인
+      if (!data.session) {
+        console.warn('⚠️ 세션이 없습니다. 이메일 확인이 필요할 수 있습니다.');
       }
 
       const user: User = {
@@ -170,7 +215,12 @@ class SupabaseAuthService {
         isAnonymous: false,
       };
 
-      console.log('✅ Supabase 이메일 로그인 성공');
+      console.log('✅ Supabase 이메일 로그인 성공:', {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+      });
+      
       return user;
     } catch (error: any) {
       console.error('❌ Supabase 이메일 로그인 실패:', error);
@@ -178,37 +228,13 @@ class SupabaseAuthService {
     }
   }
 
-  // 구글 로그인
+  // 구글 로그인 (React Native에서는 지원되지 않음)
   async signInWithGoogle(): Promise<User> {
-    try {
-      console.log('🔍 Supabase Google 로그인 시도');
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'com.futurediary://auth',
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      // OAuth 로그인은 리다이렉트 기반이므로 여기서는 성공 응답만 반환
-      console.log('✅ Supabase Google 로그인 요청 성공');
-
-      // 임시 응답 (실제 사용자 정보는 세션 콜백에서 처리됨)
-      return {
-        uid: '',
-        email: '',
-        displayName: '',
-        photoURL: '',
-        isAnonymous: false,
-      };
-    } catch (error: any) {
-      console.error('❌ Supabase Google 로그인 실패:', error);
-      throw this.getSupabaseErrorMessage(error);
-    }
+    // React Native에서 Supabase OAuth는 웹뷰나 딥링킹 설정이 필요하므로
+    // 현재는 이메일/비밀번호 로그인만 지원
+    throw new Error(
+      'Google 로그인은 현재 준비 중입니다.\n이메일로 회원가입하거나 테스트 로그인을 사용해주세요.',
+    );
   }
 
   // 로그아웃

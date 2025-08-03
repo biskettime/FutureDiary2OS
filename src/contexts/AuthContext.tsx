@@ -5,7 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import authService, { User } from '../services/AuthService';
+import supabaseAuthService, { User } from '../services/SupabaseAuthService';
 
 interface AuthContextType {
   user: User | null;
@@ -26,8 +26,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     console.log('🔐 AuthProvider 초기화 중...');
 
-    // Firebase Auth 상태 변화 감지
-    const unsubscribe = authService.onAuthStateChanged(currentUser => {
+    // Supabase Auth 상태 변화 감지
+    const unsubscribe = supabaseAuthService.onAuthStateChanged(currentUser => {
       console.log(
         '🔄 인증 상태 변화:',
         currentUser
