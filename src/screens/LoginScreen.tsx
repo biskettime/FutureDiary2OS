@@ -270,6 +270,58 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     }
   };
 
+  // 테스트 로그인 함수
+  const handleTestLogin = async () => {
+    setLoading(true);
+    try {
+      console.log('🧪 테스트 로그인 시도...');
+
+      // 테스트 계정으로 로그인
+      const testEmail = 'test@futurediary.com';
+      const testPassword = 'test123456';
+
+      const user = await supabaseAuthService.signInWithEmail(
+        testEmail,
+        testPassword,
+      );
+
+      if (user) {
+        console.log('✅ 테스트 로그인 성공:', user.email);
+        await migrateLocalData();
+        Alert.alert('테스트 로그인 성공', '테스트 계정으로 로그인되었습니다.');
+      }
+    } catch (error: any) {
+      console.error('❌ 테스트 로그인 실패:', error);
+
+      // 테스트 계정이 없으면 회원가입 시도
+      try {
+        console.log('🔄 테스트 계정 회원가입 시도...');
+        const user = await supabaseAuthService.signUpWithEmail(
+          'test@futurediary.com',
+          'test123456',
+          '테스트 사용자',
+        );
+
+        if (user) {
+          console.log('✅ 테스트 계정 생성 및 로그인 성공');
+          await migrateLocalData();
+          Alert.alert(
+            '테스트 계정 생성 완료',
+            '테스트 계정이 생성되고 로그인되었습니다.',
+          );
+        }
+      } catch (signUpError: any) {
+        console.error('❌ 테스트 계정 생성 실패:', signUpError);
+        Alert.alert(
+          '테스트 로그인 실패',
+          '테스트 계정 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={[
@@ -638,6 +690,27 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
               Facebook으로 계속하기
             </Text>
           </TouchableOpacity>
+
+          {/* 테스트 로그인 */}
+          <TouchableOpacity
+            style={[
+              styles.socialButton,
+              styles.testButton,
+              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
+            ]}
+            onPress={handleTestLogin}
+            disabled={loading}
+          >
+            <Icon
+              name="user-check"
+              size={20}
+              color="#FFFFFF"
+              style={styles.socialIcon}
+            />
+            <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>
+              🧪 테스트 로그인
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -774,6 +847,9 @@ const styles = StyleSheet.create({
   },
   facebookButton: {
     backgroundColor: '#1877F2',
+  },
+  testButton: {
+    backgroundColor: '#FF6B35', // 주황색 테스트 버튼
   },
 
   socialIcon: {

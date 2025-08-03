@@ -25,21 +25,7 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
 }) => {
   const { currentTheme } = useTheme();
 
-  // 테마별 캐릭터 이미지
-  const getThemeCharacter = () => {
-    switch (currentTheme.id) {
-      case 'angel':
-        return require('../images/angel01.png');
-      case 'galaxy-dream':
-        return require('../images/enhasu.png');
-      case 'rosegold-love':
-        return require('../images/romance.png');
-      case 'moonlight-serenade':
-        return require('../images/moonra.png');
-      default:
-        return null;
-    }
-  };
+
 
   return (
     <View style={styles.container}>
@@ -49,17 +35,6 @@ const ImageSelector: React.FC<ImageSelectorProps> = ({
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.imagesContainer}>
-          {/* 테마별 캐릭터 */}
-          {getThemeCharacter() && (
-            <View style={styles.characterContainer}>
-              <Image
-                source={getThemeCharacter()}
-                style={styles.characterImage}
-                resizeMode="contain"
-              />
-            </View>
-          )}
-
           {/* 이미지 추가 버튼 */}
           {selectedImages.length < maxImages && (
             <TouchableOpacity
@@ -150,17 +125,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  characterContainer: {
-    width: 60,
-    height: 60,
-    marginRight: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  characterImage: {
-    width: '100%',
-    height: '100%',
-  },
+
 });
 
 export default ImageSelector;
