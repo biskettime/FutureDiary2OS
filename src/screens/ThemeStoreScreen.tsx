@@ -17,51 +17,76 @@ const ThemeStoreScreen: React.FC = () => {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handlePurchase = async (theme: Theme) => {
-    setLoading(theme.id);
-    try {
-      // 실제 결제 로직은 여기에 구현
-      await new Promise(resolve => setTimeout(resolve, 1500)); // 결제 시뮬레이션
+    // 구매 확인 다이얼로그
+    Alert.alert(
+      '💰 테마 구매',
+      `"${theme.name}" 테마를 ${theme.price}원에 구매하시겠습니까?\n\n💡 구매 후 바로 적용됩니다!`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: `${theme.price}원 결제`,
+          onPress: async () => {
+            setLoading(theme.id);
+            try {
+              // 실제 결제 로직은 여기에 구현
+              await new Promise(resolve => setTimeout(resolve, 1500)); // 결제 시뮬레이션
 
-      // 테마 구매 처리 (구매 후 바로 적용)
-      await purchaseTheme(theme.id);
+              // 테마 구매 처리 (구매 후 바로 적용)
+              await purchaseTheme(theme.id);
 
-      // 테마 목록 새로고침
-      await refreshThemes();
+              // 테마 목록 새로고침
+              await refreshThemes();
 
-      Alert.alert(
-        '🎉 구매 완료!',
-        `"${theme.name}" 테마가 성공적으로 구매되어 적용되었습니다!`,
-        [
-          {
-            text: '확인',
-            style: 'default',
+              Alert.alert(
+                '🎉 구매 완료!',
+                `"${theme.name}" 테마가 성공적으로 구매되어 적용되었습니다!\n\n이제 언제든지 이 테마를 사용할 수 있습니다! 💖`,
+                [{ text: '확인' }],
+              );
+            } catch (error: any) {
+              console.error('테마 구매 중 오류:', error);
+              Alert.alert(
+                '💸 구매 실패',
+                error.message ||
+                  '테마 구매 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.',
+                [{ text: '확인' }],
+              );
+            } finally {
+              setLoading(null);
+            }
           },
-        ],
-      );
-    } catch (error) {
-      console.error('테마 구매 중 오류:', error);
-      Alert.alert(
-        '구매 실패',
-        '테마 구매 중 오류가 발생했습니다. 다시 시도해 주세요.',
-        [{ text: '확인' }],
-      );
-    } finally {
-      setLoading(null);
-    }
+        },
+      ],
+    );
   };
 
   const handleApply = async (theme: Theme) => {
     if (theme.category === 'premium') {
-      Alert.alert('알림', '먼저 테마를 구매해주세요.');
+      Alert.alert(
+        '🔒 구매 필요',
+        `"${theme.name}" 테마는 프리미엄 테마입니다.\n먼저 구매해주세요!`,
+        [
+          { text: '취소', style: 'cancel' },
+          {
+            text: '구매하기',
+            onPress: () => handlePurchase(theme),
+          },
+        ],
+      );
       return;
     }
 
     setLoading(theme.id);
     try {
       await applyTheme(theme.id);
-      Alert.alert('성공', '테마가 적용되었습니다!');
-    } catch (error) {
-      Alert.alert('오류', '테마 적용 중 오류가 발생했습니다.');
+      Alert.alert('🎨 적용 완료!', `"${theme.name}" 테마가 적용되었습니다!`);
+      // 테마 목록 새로고침
+      await refreshThemes();
+    } catch (error: any) {
+      console.error('테마 적용 실패:', error);
+      Alert.alert(
+        '적용 실패',
+        error.message || '테마 적용 중 오류가 발생했습니다.',
+      );
     } finally {
       setLoading(null);
     }

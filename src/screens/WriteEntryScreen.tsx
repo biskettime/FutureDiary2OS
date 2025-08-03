@@ -185,9 +185,22 @@ const WriteEntryScreen: React.FC<Props> = ({ navigation, route }) => {
           },
         ],
       );
-    } catch (error) {
-      console.error('일기 저장 오류:', error);
-      Alert.alert('오류', '일기 저장 중 문제가 발생했습니다.');
+    } catch (error: any) {
+      console.error('❌ 일기 저장 전체 프로세스 실패:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        error: error,
+      });
+
+      const errorMessage =
+        error.message || error.toString() || '알 수 없는 오류가 발생했습니다.';
+      console.error('📱 사용자에게 표시할 에러:', errorMessage);
+
+      Alert.alert(
+        '일기 저장 오류',
+        `저장 중 문제가 발생했습니다:\n\n${errorMessage}\n\n잠시 후 다시 시도해주세요.`,
+      );
     } finally {
       setSaving(false);
     }

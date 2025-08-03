@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme } from '../types';
+import supabaseService from '../services/SupabaseService';
+import supabaseAuthService from '../services/SupabaseAuthService';
 
 const THEMES_KEY = 'THEMES';
 const ACTIVE_THEME_KEY = 'ACTIVE_THEME';
@@ -255,9 +257,31 @@ export const saveThemes = async (themes: Theme[]): Promise<void> => {
 // 테마 불러오기
 export const loadThemes = async (): Promise<Theme[]> => {
   try {
-    // 항상 최신 테마 목록을 저장하고 반환
-    await saveThemes(allThemes);
-    return allThemes;
+    // Supabase에서 사용자 로그인 상태 확인
+    const currentUser = supabaseAuthService.getCurrentUser();
+    if (currentUser && !currentUser.isAnonymous) {
+      // 실제 로그인된 사용자 (익명 제외): 구매 상태 반영
+      const purchasedThemes = await supabaseService.getUserPurchasedThemes();
+      const userCurrentTheme = await supabaseService.getUserCurrentTheme();
+
+      const updatedThemes = allThemes.map(theme => ({
+        ...theme,
+        category: purchasedThemes.includes(theme.id) ? 'free' : theme.category,
+        isActive: theme.id === userCurrentTheme,
+      }));
+
+      return updatedThemes;
+    } else {
+      // 익명 사용자 또는 로그인되지 않은 사용자: 기본 테마만 표시
+      console.log('🎨 익명/비로그인 사용자 - 기본 테마만 표시');
+      const restrictedThemes = allThemes.map(theme => ({
+        ...theme,
+        category:
+          theme.id === 'default' ? ('free' as const) : ('premium' as const),
+        isActive: theme.id === 'default',
+      }));
+      return restrictedThemes;
+    }
   } catch (error) {
     console.error('테마 불러오기 중 오류:', error);
     return allThemes;
@@ -287,35 +311,52 @@ export const loadActiveTheme = async (): Promise<string> => {
 
 // 현재 활성 테마 가져오기
 export const getCurrentTheme = async (): Promise<Theme> => {
-  const themes = await loadThemes();
-  const activeThemeId = await loadActiveTheme();
-  return themes.find(theme => theme.id === activeThemeId) || defaultTheme;
+  try {
+    // Firebase에서 사용자 로그인 상태 확인
+    const currentUser = supabaseAuthService.getCurrentUser();
+    if (currentUser && !currentUser.isAnonymous) {
+      // 실제 로그인된 사용자 (익명 제외): Supabase에서 테마 가져오기
+      const userThemeId = await supabaseService.getUserCurrentTheme();
+      const purchasedThemes = await supabaseService.getUserPurchasedThemes();
+
+      // 테마 목록 로드하고 사용자 구매 상태 반영
+      const themes = await loadThemes();
+      const updatedThemes = themes.map(theme => ({
+        ...theme,
+        category: purchasedThemes.includes(theme.id) ? 'free' : theme.category,
+        isActive: theme.id === userThemeId,
+      }));
+
+      return (
+        updatedThemes.find(theme => theme.id === userThemeId) || defaultTheme
+      );
+    } else {
+      // 익명 사용자 또는 로그인되지 않은 사용자: 기본 테마만 사용
+      console.log('🎨 익명/비로그인 사용자 - 기본 테마 강제 적용');
+      return defaultTheme;
+    }
+  } catch (error) {
+    console.error('현재 테마 가져오기 실패:', error);
+    return defaultTheme;
+  }
 };
 
 // 테마 구매 처리 (구매 후 바로 적용)
 export const purchaseTheme = async (themeId: string): Promise<void> => {
   try {
-    const themes = await loadThemes();
-    const themeIndex = themes.findIndex(theme => theme.id === themeId);
-
-    if (themeIndex >= 0) {
-      // 테마를 무료로 변경 (구매 완료)
-      themes[themeIndex].category = 'free';
-
-      // 모든 테마의 활성화 상태를 false로 설정
-      const updatedThemes = themes.map(theme => ({
-        ...theme,
-        isActive: theme.id === themeId, // 구매한 테마만 활성화
-      }));
-
-      // 구매한 테마의 카테고리를 무료로 변경
-      updatedThemes[themeIndex].category = 'free';
-
-      // 테마 목록 저장
-      await saveThemes(updatedThemes);
-
-      // 활성 테마로 설정
-      await saveActiveTheme(themeId);
+    const currentUser = supabaseAuthService.getCurrentUser();
+    if (currentUser && !currentUser.isAnonymous) {
+      // 실제 로그인된 사용자 (익명 제외): Supabase에서 처리
+      await supabaseService.purchaseTheme(themeId);
+    } else {
+      // 익명 사용자 또는 로그인되지 않은 사용자: 구매 차단
+      if (currentUser && currentUser.isAnonymous) {
+        throw new Error(
+          '🔒 익명 사용자는 테마를 구매할 수 없습니다.\n\n💡 이메일로 회원가입하면:\n• 테마 구매 가능\n• 데이터 안전 보관\n• 기기간 동기화',
+        );
+      } else {
+        throw new Error('🔒 로그인 후 테마를 구매할 수 있습니다.');
+      }
     }
   } catch (error) {
     console.error('테마 구매 처리 중 오류:', error);
@@ -326,15 +367,33 @@ export const purchaseTheme = async (themeId: string): Promise<void> => {
 // 테마 적용
 export const applyTheme = async (themeId: string): Promise<void> => {
   try {
-    await saveActiveTheme(themeId);
+    const currentUser = supabaseAuthService.getCurrentUser();
+    if (currentUser && !currentUser.isAnonymous) {
+      // 실제 로그인된 사용자 (익명 제외): Supabase에서 처리 (구매 확인 포함)
+      await supabaseService.applyTheme(themeId);
+    } else {
+      // 익명 사용자 또는 로그인되지 않은 사용자: 기본 테마만 가능
+      if (themeId !== 'default') {
+        if (currentUser && currentUser.isAnonymous) {
+          throw new Error(
+            '🔒 익명 사용자는 기본 테마만 사용할 수 있습니다.\n이메일로 가입하면 프리미엄 테마를 구매할 수 있어요!',
+          );
+        } else {
+          throw new Error('🔒 로그인 후 프리미엄 테마를 사용할 수 있습니다.');
+        }
+      }
 
-    // 테마 활성화 상태 업데이트
-    const themes = await loadThemes();
-    const updatedThemes = themes.map(theme => ({
-      ...theme,
-      isActive: theme.id === themeId,
-    }));
-    await saveThemes(updatedThemes);
+      console.log('🎨 기본 테마 적용 중...');
+      await saveActiveTheme(themeId);
+
+      // 테마 활성화 상태 업데이트
+      const themes = await loadThemes();
+      const updatedThemes = themes.map(theme => ({
+        ...theme,
+        isActive: theme.id === themeId,
+      }));
+      await saveThemes(updatedThemes);
+    }
   } catch (error) {
     console.error('테마 적용 중 오류:', error);
     throw error;

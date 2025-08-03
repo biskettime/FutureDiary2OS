@@ -11,6 +11,9 @@ prepare_react_native_project!
 # Old Architecture로 강제 설정
 ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 
+# Firebase Swift pods를 위한 모듈 헤더 설정
+use_modular_headers!
+
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
