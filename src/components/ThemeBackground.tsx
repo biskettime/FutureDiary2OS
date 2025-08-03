@@ -13,12 +13,14 @@ const ThemeBackground: React.FC<ThemeBackgroundProps> = ({
 }) => {
   const { currentTheme } = useTheme();
 
+  console.log('🎨 ThemeBackground 렌더링 - 현재 테마:', currentTheme?.id);
+
   // 기본 배경 렌더링
   const renderDefaultBackground = () => (
     <View
       style={[
         styles.container,
-        { backgroundColor: currentTheme.colors.background },
+        { backgroundColor: currentTheme?.colors?.background || '#FFFFFF' },
       ]}
     >
       {children}

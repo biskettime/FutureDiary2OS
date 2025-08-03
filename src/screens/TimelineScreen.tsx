@@ -274,6 +274,7 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
         onPress={handleViewEntry}
         onEdit={handleEditEntry}
         onDelete={handleDeleteEntry}
+        onAddResult={handleAddResult}
         variant="default"
       />
     );

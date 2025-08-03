@@ -16,6 +16,7 @@ interface DiaryCardProps {
   onPress?: (entry: DiaryEntry) => void;
   onEdit?: (entry: DiaryEntry) => void;
   onDelete?: (entry: DiaryEntry) => void;
+  onAddResult?: (entry: DiaryEntry) => void;
   showActions?: boolean;
   showDate?: boolean;
   showMood?: boolean;
@@ -28,6 +29,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   onPress,
   onEdit,
   onDelete,
+  onAddResult,
   showActions = true,
   showDate = true,
   showMood = true,
@@ -81,6 +83,10 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
 
   const handleDelete = () => {
     onDelete?.(entry);
+  };
+
+  const handleAddResult = () => {
+    onAddResult?.(entry);
   };
 
   const cardStyles = [
@@ -150,8 +156,20 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
         <CategoryDisplay entry={entry} maxItems={3} />
       )}
 
-      {showActions && (onEdit || onDelete) && (
+      {showActions && (onEdit || onDelete || onAddResult) && (
         <View style={styles.actions}>
+          {onAddResult && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleAddResult}
+            >
+              <Icon
+                name="check-circle"
+                size={16}
+                color={currentTheme.colors.success}
+              />
+            </TouchableOpacity>
+          )}
           {onEdit && (
             <TouchableOpacity style={styles.actionButton} onPress={handleEdit}>
               <Icon

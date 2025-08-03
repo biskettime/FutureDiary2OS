@@ -60,7 +60,15 @@ const ThemeStoreScreen: React.FC = () => {
   };
 
   const handleApply = async (theme: Theme) => {
+    console.log(
+      '🎨 ThemeStore: 테마 적용 시도 - 테마 ID:',
+      theme.id,
+      '카테고리:',
+      theme.category,
+    );
+
     if (theme.category === 'premium') {
+      console.log('🔒 ThemeStore: 프리미엄 테마 - 구매 필요');
       Alert.alert(
         '🔒 구매 필요',
         `"${theme.name}" 테마는 프리미엄 테마입니다.\n먼저 구매해주세요!`,
@@ -75,14 +83,19 @@ const ThemeStoreScreen: React.FC = () => {
       return;
     }
 
+    console.log('✅ ThemeStore: 무료 테마 - 적용 시작');
     setLoading(theme.id);
     try {
+      console.log('🎨 ThemeStore: applyTheme 호출 중...');
       await applyTheme(theme.id);
+      console.log('✅ ThemeStore: 테마 적용 완료');
       Alert.alert('🎨 적용 완료!', `"${theme.name}" 테마가 적용되었습니다!`);
       // 테마 목록 새로고침
+      console.log('🔄 ThemeStore: 테마 목록 새로고침 중...');
       await refreshThemes();
+      console.log('✅ ThemeStore: 테마 목록 새로고침 완료');
     } catch (error: any) {
-      console.error('테마 적용 실패:', error);
+      console.error('❌ ThemeStore: 테마 적용 실패:', error);
       Alert.alert(
         '적용 실패',
         error.message || '테마 적용 중 오류가 발생했습니다.',

@@ -508,7 +508,9 @@ class SupabaseService {
         .single();
 
       if (error || !data) {
-        console.error('❌ Supabase 사용자 현재 테마 조회 실패:', error);
+        console.log('⚠️ 사용자 프로필이 없습니다. 기본 프로필을 생성합니다.');
+        // 사용자 프로필이 없으면 기본 프로필 생성
+        await this.createDefaultUserProfile(userId);
         return 'default';
       }
 
@@ -531,7 +533,9 @@ class SupabaseService {
         .single();
 
       if (error || !data) {
-        console.error('❌ Supabase 사용자 구매 테마 조회 실패:', error);
+        console.log('⚠️ 사용자 프로필이 없습니다. 기본 프로필을 생성합니다.');
+        // 사용자 프로필이 없으면 기본 프로필 생성
+        await this.createDefaultUserProfile(userId);
         return ['default'];
       }
 
@@ -575,6 +579,36 @@ class SupabaseService {
       console.log('✅ Supabase 테마 구매 및 적용 완료:', themeId);
     } catch (error) {
       console.error('❌ Supabase 테마 구매 실패:', error);
+      throw error;
+    }
+  }
+
+  // 기본 사용자 프로필 생성
+  private async createDefaultUserProfile(userId: string): Promise<void> {
+    try {
+      const currentUser = supabaseAuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error('사용자 정보를 찾을 수 없습니다.');
+      }
+
+      const { error } = await supabase.from('user_profiles').insert({
+        id: userId,
+        email: currentUser.email,
+        display_name: currentUser.displayName,
+        current_theme: 'default',
+        purchased_themes: ['default'],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error('❌ 기본 사용자 프로필 생성 실패:', error);
+        throw error;
+      }
+
+      console.log('✅ 기본 사용자 프로필 생성 완료:', userId);
+    } catch (error) {
+      console.error('❌ 기본 사용자 프로필 생성 실패:', error);
       throw error;
     }
   }
