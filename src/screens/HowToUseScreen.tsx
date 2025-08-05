@@ -31,7 +31,7 @@ const HowToUseScreen: React.FC = () => {
   const guideSteps: GuideStep[] = [
     {
       id: 'write',
-      title: '미래일기 작성하기',
+      title: '위시어리 작성하기',
       description: '미래에 일어날 일을 상상하여 작성해보세요',
       icon: '✏️',
       details: [
@@ -197,7 +197,7 @@ const HowToUseScreen: React.FC = () => {
               { color: currentTheme.colors.textSecondary },
             ]}
           >
-            미래일기를 더 잘 활용해보세요
+            위시어리를 더 잘 활용해보세요
           </Text>
         </View>
       </View>
@@ -212,7 +212,7 @@ const HowToUseScreen: React.FC = () => {
           <Text
             style={[styles.introTitle, { color: currentTheme.colors.text }]}
           >
-            🌟 미래일기와 함께하는 여행
+            🌟 위시어리와 함께하는 여행
           </Text>
           <Text
             style={[
@@ -231,7 +231,7 @@ const HowToUseScreen: React.FC = () => {
 
         <View style={styles.tipSection}>
           <Text style={[styles.tipTitle, { color: currentTheme.colors.text }]}>
-            💡 미래일기 꿀팁
+            💡 위시어리 꿀팁
           </Text>
           <View
             style={[

@@ -33,6 +33,8 @@ import LoginScreen from './src/screens/LoginScreen';
 import ThemeStoreScreen from './src/screens/ThemeStoreScreen';
 import SecretStoreScreen from './src/screens/SecretStoreScreen';
 import HowToUseScreen from './src/screens/HowToUseScreen';
+import OnboardingGuide from './src/components/OnboardingGuide';
+import { useOnboarding } from './src/hooks/useOnboarding';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -109,7 +111,10 @@ const MainTabs = () => {
 
 const AppContent: React.FC = () => {
   const themeContext = useTheme();
-  const { isAuthenticated, loading } = useSupabaseAuth();
+  const { user, loading } = useSupabaseAuth();
+  const { showOnboarding, completeOnboarding } = useOnboarding();
+
+  const isAuthenticated = !!user;
 
   // 테마가 로딩 중일 때는 기본값 사용
   const currentTheme = themeContext?.currentTheme || {
@@ -156,6 +161,11 @@ const AppContent: React.FC = () => {
         backgroundColor={currentTheme.colors.background}
       />
       <NavigationContainer>
+        {/* 온보딩 가이드 */}
+        <OnboardingGuide
+          visible={showOnboarding && isAuthenticated}
+          onComplete={completeOnboarding}
+        />
         {!isAuthenticated ? (
           // 🔐 로그인되지 않은 경우: 로그인 화면만 표시
           <Stack.Navigator

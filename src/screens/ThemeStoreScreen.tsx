@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { Theme } from '../types';
+import supabaseAuthService from '../services/SupabaseAuthService';
 
 const ThemeStoreScreen: React.FC = () => {
   const { currentTheme, allThemes, applyTheme, purchaseTheme, refreshThemes } =
@@ -17,7 +18,35 @@ const ThemeStoreScreen: React.FC = () => {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handlePurchase = async (theme: Theme) => {
-    // 구매 확인 다이얼로그
+    // 테스트 계정 확인
+    const isTestAccount = supabaseAuthService.isTestAccount();
+
+    if (isTestAccount) {
+      // 테스트 계정은 구매 없이 바로 적용
+      console.log('🧪 ThemeStore: 테스트 계정 - 구매 없이 바로 적용');
+      setLoading(theme.id);
+      try {
+        await applyTheme(theme.id);
+        await refreshThemes();
+        Alert.alert(
+          '🎉 테스트 적용 완료!',
+          `"${theme.name}" 테마가 테스트 계정에 적용되었습니다!`,
+          [{ text: '확인' }],
+        );
+      } catch (error: any) {
+        console.error('테스트 계정 테마 적용 중 오류:', error);
+        Alert.alert(
+          '적용 실패',
+          error.message || '테마 적용 중 오류가 발생했습니다.',
+          [{ text: '확인' }],
+        );
+      } finally {
+        setLoading(null);
+      }
+      return;
+    }
+
+    // 일반 사용자 구매 다이얼로그
     Alert.alert(
       '💰 테마 구매',
       `"${theme.name}" 테마를 ${theme.price}원에 구매하시겠습니까?\n\n💡 구매 후 바로 적용됩니다!`,
@@ -67,7 +96,11 @@ const ThemeStoreScreen: React.FC = () => {
       theme.category,
     );
 
-    if (theme.category === 'premium') {
+    // 테스트 계정 확인
+    const isTestAccount = supabaseAuthService.isTestAccount();
+    console.log('🧪 ThemeStore: 테스트 계정 여부:', isTestAccount);
+
+    if (theme.category === 'premium' && !isTestAccount) {
       console.log('🔒 ThemeStore: 프리미엄 테마 - 구매 필요');
       Alert.alert(
         '🔒 구매 필요',

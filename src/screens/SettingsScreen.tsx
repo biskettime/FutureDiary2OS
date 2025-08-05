@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import supabaseAuthService from '../services/SupabaseAuthService';
+import { useOnboarding } from '../hooks/useOnboarding';
 
 interface SettingItem {
   id: string;
@@ -25,6 +26,7 @@ const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { currentTheme } = useTheme();
   const { user } = useSupabaseAuth();
+  const { resetOnboarding } = useOnboarding();
 
   const handleSecretStore = () => {
     navigation.navigate('SecretStore');
@@ -38,10 +40,20 @@ const SettingsScreen: React.FC = () => {
     navigation.navigate('HowToUse');
   };
 
+  const handleShowOnboarding = () => {
+    Alert.alert('온보딩 가이드', '앱 사용법 가이드를 다시 보시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '보기',
+        onPress: resetOnboarding,
+      },
+    ]);
+  };
+
   const handleAbout = () => {
     Alert.alert(
-      '미래일기 정보',
-      '버전: 1.0.0\n개발자: 미래일기 팀\n\n더 나은 일기 경험을 위해 계속 업데이트됩니다.',
+      '위시어리 정보',
+      '버전: 1.0.0\n개발자: 위시어리 팀\n\n더 나은 일기 경험을 위해 계속 업데이트됩니다.',
       [{ text: '확인' }],
     );
   };
@@ -134,7 +146,7 @@ const SettingsScreen: React.FC = () => {
         {
           id: 'secret-store',
           title: '비밀 보관함',
-          subtitle: '특별한 일기를 안전하게 보관하세요',
+          subtitle: '특별한 일기를 안전하게 보관하세요 (개발중)',
           icon: '🔒',
           onPress: handleSecretStore,
         },
@@ -146,9 +158,16 @@ const SettingsScreen: React.FC = () => {
         {
           id: 'how-to-use',
           title: '사용방법',
-          subtitle: '미래일기를 더 잘 활용하는 방법을 알아보세요',
+          subtitle: '위시어리를 더 잘 활용하는 방법을 알아보세요',
           icon: '📖',
           onPress: handleHowToUse,
+        },
+        {
+          id: 'onboarding',
+          title: '앱 가이드 다시보기',
+          subtitle: '앱 사용법을 단계별로 다시 확인해보세요',
+          icon: '🎯',
+          onPress: handleShowOnboarding,
         },
       ],
     },
@@ -238,7 +257,7 @@ const SettingsScreen: React.FC = () => {
             { color: currentTheme.colors.textSecondary },
           ]}
         >
-          미래 일기 v1.0.0
+          위시어리 v1.0.0
         </Text>
         <Text
           style={[

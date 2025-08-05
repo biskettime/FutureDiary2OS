@@ -38,6 +38,7 @@ export const SupabaseAuthProvider: React.FC<AuthProviderProps> = ({
           ? `로그인됨 (${currentUser.email || currentUser.uid})`
           : '로그아웃됨',
       );
+
       setUser(currentUser);
       setLoading(false);
     });

@@ -343,20 +343,40 @@ export const getCurrentTheme = async (): Promise<Theme> => {
     const currentUser = supabaseAuthService.getCurrentUser();
     console.log('🔍 현재 사용자:', currentUser);
 
-    if (currentUser && !currentUser.isAnonymous) {
-      // 실제 로그인된 사용자 (익명 제외): Supabase에서 테마 가져오기
-      console.log('✅ 로그인된 사용자 - Supabase에서 테마 가져오기');
+    // 테스트 계정 확인
+    const isTestAccount = supabaseAuthService.isTestAccount();
+
+    if (currentUser && (!currentUser.isAnonymous || isTestAccount)) {
+      // 실제 로그인된 사용자 또는 테스트 계정: Supabase에서 테마 가져오기
+      console.log(
+        '✅ 로그인된 사용자 또는 테스트 계정 - Supabase에서 테마 가져오기',
+      );
       const userThemeId = await supabaseService.getUserCurrentTheme();
       const purchasedThemes = await supabaseService.getUserPurchasedThemes();
 
       console.log('📊 사용자 테마 ID:', userThemeId);
       console.log('📊 구매한 테마들:', purchasedThemes);
 
-      // 테마 목록 로드하고 사용자 구매 상태 반영
+      // 신규 사용자 확인: 구매한 테마가 'default'만 있으면 신규 사용자로 간주
+      const isNewUser =
+        purchasedThemes.length === 1 && purchasedThemes.includes('default');
+
+      if (isNewUser) {
+        console.log('🆕 신규 사용자 감지 - 기본 테마 강제 적용');
+        // 신규 사용자는 무조건 기본 테마로 시작
+        await supabaseService.applyTheme('default');
+        return defaultTheme;
+      }
+
+      // 테스트 계정인 경우 모든 테마를 무료로 설정
       const themes = await loadThemes();
       const updatedThemes = themes.map(theme => ({
         ...theme,
-        category: purchasedThemes.includes(theme.id) ? 'free' : theme.category,
+        category: isTestAccount
+          ? 'free'
+          : purchasedThemes.includes(theme.id)
+          ? 'free'
+          : theme.category,
         isActive: theme.id === userThemeId,
       }));
 
@@ -380,9 +400,17 @@ export const getCurrentTheme = async (): Promise<Theme> => {
 export const purchaseTheme = async (themeId: string): Promise<void> => {
   try {
     const currentUser = supabaseAuthService.getCurrentUser();
-    if (currentUser && !currentUser.isAnonymous) {
-      // 실제 로그인된 사용자 (익명 제외): Supabase에서 처리
-      await supabaseService.purchaseTheme(themeId);
+    const isTestAccount = supabaseAuthService.isTestAccount();
+
+    if (currentUser && (!currentUser.isAnonymous || isTestAccount)) {
+      // 실제 로그인된 사용자 또는 테스트 계정: Supabase에서 처리
+      if (isTestAccount) {
+        console.log('🧪 테스트 계정 - 테마 구매 시뮬레이션');
+        // 테스트 계정은 구매 없이 바로 적용
+        await applyTheme(themeId);
+      } else {
+        await supabaseService.purchaseTheme(themeId);
+      }
     } else {
       // 익명 사용자 또는 로그인되지 않은 사용자: 구매 차단
       if (currentUser && currentUser.isAnonymous) {
@@ -405,11 +433,15 @@ export const applyTheme = async (themeId: string): Promise<void> => {
     console.log('🎨 applyTheme 호출됨 - 테마 ID:', themeId);
 
     const currentUser = supabaseAuthService.getCurrentUser();
+    const isTestAccount = supabaseAuthService.isTestAccount();
     console.log('🔍 현재 사용자 (applyTheme):', currentUser);
+    console.log('🧪 테스트 계정 여부:', isTestAccount);
 
-    if (currentUser && !currentUser.isAnonymous) {
-      // 실제 로그인된 사용자 (익명 제외): Supabase에서 처리 (구매 확인 포함)
-      console.log('✅ 로그인된 사용자 - Supabase에서 테마 적용');
+    if (currentUser && (!currentUser.isAnonymous || isTestAccount)) {
+      // 실제 로그인된 사용자 또는 테스트 계정: Supabase에서 처리
+      console.log(
+        '✅ 로그인된 사용자 또는 테스트 계정 - Supabase에서 테마 적용',
+      );
       await supabaseService.applyTheme(themeId);
       console.log('✅ Supabase 테마 적용 완료');
     } else {

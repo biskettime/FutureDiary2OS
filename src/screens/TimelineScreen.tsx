@@ -176,13 +176,41 @@ const TimelineScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const getStatusIcon = (status: 'past' | 'today' | 'future') => {
+    const themeId = currentTheme.id;
+    console.log('🎨 현재 테마 ID:', themeId);
+
+    // 테마별 미래 아이콘 설정
+    const getFutureIcon = () => {
+      console.log('🔍 테마별 아이콘 확인 - themeId:', themeId);
+      switch (themeId) {
+        case 'angel':
+          console.log('👼 천사 테마 아이콘 선택');
+          return '👼'; // 천사 테마 - 아기 천사
+        case 'galaxy-dream':
+          console.log('🚀 갤럭시 드림 테마 아이콘 선택');
+          return '🚀'; // 갤럭시 드림 테마 - 우주선
+        case 'moonlight-serenade':
+          console.log('🌙 문라이트 세레나데 테마 아이콘 선택');
+          return '🌙'; // 문라이트 세레나데 테마 - 달
+        case 'rosegold-love':
+          console.log('🤍 로즈골드 러브 테마 아이콘 선택');
+          return '🤍'; // 로즈골드 러브 테마 - 빈 하트
+        case 'default':
+          console.log('🌟 기본 테마 아이콘 선택');
+          return '🌟'; // 기본 테마 - 빛나는 별
+        default:
+          console.log('🦋 기본 아이콘 선택 (themeId:', themeId, ')');
+          return '🦋'; // 기본 - 나비
+      }
+    };
+
     switch (status) {
       case 'past':
         return '📅';
       case 'today':
         return '⭐';
       case 'future':
-        return '🚀';
+        return getFutureIcon();
       default:
         return '📅';
     }

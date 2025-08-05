@@ -641,11 +641,20 @@ class SupabaseService {
     try {
       const userId = await this.getCurrentUserId();
 
-      // 구매한 테마인지 확인
-      const purchasedThemes = await this.getUserPurchasedThemes();
+      // 테스트 계정 확인
+      const isTestAccount = supabaseAuthService.isTestAccount();
+      console.log('🧪 SupabaseService: 테스트 계정 여부:', isTestAccount);
 
-      if (!purchasedThemes.includes(themeId)) {
-        throw new Error('구매하지 않은 테마는 적용할 수 없습니다.');
+      // 테스트 계정이 아닌 경우에만 구매 확인
+      if (!isTestAccount) {
+        // 구매한 테마인지 확인
+        const purchasedThemes = await this.getUserPurchasedThemes();
+
+        if (!purchasedThemes.includes(themeId)) {
+          throw new Error('구매하지 않은 테마는 적용할 수 없습니다.');
+        }
+      } else {
+        console.log('🧪 테스트 계정 - 구매 확인 건너뛰기');
       }
 
       const { error } = await supabase

@@ -13,12 +13,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useTheme } from '../contexts/ThemeContext';
-import supabaseAuthService from '../services/SupabaseAuthService';
 import supabaseService from '../services/SupabaseService';
-import { supabase } from '../services/SupabaseConfig';
-import { loadDiaryEntries } from '../utils/storage';
+import supabaseAuthService from '../services/SupabaseAuthService';
+import { loadDiaryEntries, clearLocalStorage } from '../utils/storage';
 
 interface LoginScreenProps {
   navigation: any;
@@ -34,7 +32,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -61,6 +59,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     }
   };
 
+  // 닉네임 로그인/회원가입 모달 열기
+
   // 이메일 로그인/회원가입
   const handleEmailAuth = async () => {
     if (!email.trim() || !password.trim()) {
@@ -78,162 +78,60 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
         Alert.alert('비밀번호 오류', '비밀번호는 최소 6자 이상이어야 합니다.');
         return;
       }
-
-      if (!displayName.trim()) {
-        Alert.alert('입력 오류', '사용자 이름을 입력해주세요.');
-        return;
-      }
     }
 
     setLoading(true);
     try {
-      let user;
-
       if (isLogin) {
         console.log('📧 Supabase 이메일 로그인 시도...');
-        user = await supabaseAuthService.signInWithEmail(email, password);
+        const user = await supabaseAuthService.signInWithEmail(email, password);
+
+        if (user) {
+          console.log('✅ 로그인 성공 - 사용자 정보:', {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            isAnonymous: user.isAnonymous,
+          });
+
+          // 사용자 프로필 저장
+          await supabaseService.saveUserProfile(user);
+
+          // 로그인 성공 후 로컬 데이터 마이그레이션
+          await migrateLocalData();
+        }
       } else {
         console.log('📧 Supabase 이메일 회원가입 시도...');
-        user = await supabaseAuthService.signUpWithEmail(
-          email,
-          password,
-          displayName,
-        );
-      }
+        const user = await supabaseAuthService.signUpWithEmail(email, password);
 
-      // 이메일 확인이 필요한 경우 처리
-      if (!isLogin && user.email && !user.isAnonymous) {
-        // 회원가입 성공했지만 이메일 확인이 필요할 수 있음
-        console.log('📧 회원가입 완료 - 이메일 확인 상태 체크');
+        if (user) {
+          console.log('✅ 회원가입 성공 - 사용자 정보:', {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            isAnonymous: user.isAnonymous,
+          });
+        }
 
-        // 현재 세션 확인
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
-          console.log('📧 이메일 확인 필요');
+        if (user) {
+          // 사용자 프로필 저장
+          await supabaseService.saveUserProfile(user);
+
           Alert.alert(
-            '🎉 회원가입 완료!',
-            `📧 ${user.email}로 인증 이메일을 발송했습니다.\n\n이메일을 확인하고 인증 링크를 클릭한 후 다시 로그인해주세요.`,
-            [{ text: '확인', style: 'default' }],
+            '회원가입 완료',
+            '회원가입이 완료되었습니다. 이메일을 확인해주세요.',
+            [{ text: '확인' }],
           );
-          return;
         }
       }
 
-      // 사용자 프로필 저장 (로그인된 경우에만)
-      try {
-        await supabaseService.saveUserProfile(user);
-        // 로컬 데이터 마이그레이션 (회원가입/첫 로그인 시)
-        await migrateLocalData();
-      } catch (profileError: any) {
-        console.log('⚠️ 프로필 저장 실패 (세션 없음):', profileError.message);
-        if (profileError.message?.includes('로그인이 필요')) {
-          Alert.alert(
-            '🎉 회원가입 완료!',
-            `📧 ${user.email}로 인증 이메일을 발송했습니다.\n\n이메일을 확인하고 인증 링크를 클릭한 후 다시 로그인해주세요.`,
-            [{ text: '확인', style: 'default' }],
-          );
-          return;
-        }
-        throw profileError;
-      }
-
-      console.log('✅ 인증 성공:', user.displayName || user.email);
-
-      Alert.alert(
-        '성공!',
-        isLogin ? '로그인되었습니다!' : '회원가입이 완료되었습니다!',
-        [
-          {
-            text: '확인',
-            // AuthContext가 자동으로 MainTabs로 전환함
-          },
-        ],
-      );
+      console.log('✅ Supabase 인증 성공!');
     } catch (error: any) {
-      console.error('❌ 인증 실패 상세:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-        error: error,
-      });
-
-      const errorMessage =
-        error.message ||
-        error.toString() ||
-        '인증 과정에서 오류가 발생했습니다.';
-      console.error('📱 사용자에게 표시할 에러:', errorMessage);
-
-      // 이메일 확인 관련 에러는 이미 위에서 처리됨
-      // 기타 에러만 여기서 처리
-      const title = isLogin ? '로그인 실패' : '회원가입 오류';
-      Alert.alert(title, errorMessage);
+      console.error('❌ Supabase 인증 실패:', error);
+      Alert.alert('오류', error.message || '로그인/회원가입에 실패했습니다.');
     } finally {
       setLoading(false);
     }
-  };
-
-  // 구글 로그인
-  const handleGoogleLogin = async () => {
-    Alert.alert(
-      '준비 중',
-      'Google 로그인은 현재 개발 중입니다.\n\n이메일로 회원가입하거나 테스트 로그인을 사용해주세요.',
-      [{ text: '확인' }],
-    );
-    return;
-    
-    // TODO: 추후 구현 예정
-    // React Native에서 Supabase OAuth를 사용하려면:
-    // 1. react-native-inappbrowser-reborn 설치
-    // 2. Deep linking 설정
-    // 3. Supabase Dashboard에서 Google OAuth 설정
-  };
-
-  // 애플 로그인 (Apple Sign-In)
-  const handleAppleLogin = async () => {
-    Alert.alert(
-      '🍎 Apple로 로그인',
-      'Apple Sign-In 기능은 현재 개발 중입니다.\n곧 업데이트 예정입니다!',
-      [{ text: '확인' }],
-    );
-    // TODO: Apple Sign-In 구현
-    // setLoading(true);
-    // try {
-    //   console.log('🍎 Apple 로그인 시도...');
-    //   const user = await authService.signInWithApple();
-    //   await firestoreService.saveUserProfile(user);
-    //   await migrateLocalData();
-    //   console.log('✅ Apple 로그인 성공:', user.displayName || user.email);
-    //   Alert.alert('성공!', 'Apple 로그인이 완료되었습니다!', [{ text: '확인' }]);
-    // } catch (error: any) {
-    //   console.error('❌ Apple 로그인 실패:', error);
-    //   Alert.alert('Apple 로그인 실패', error.toString());
-    // } finally {
-    //   setLoading(false);
-    // }
-  };
-
-  // 페이스북 로그인 (Facebook Login)
-  const handleFacebookLogin = async () => {
-    Alert.alert(
-      '📘 Facebook으로 로그인',
-      'Facebook 로그인 기능은 현재 개발 중입니다.\n곧 업데이트 예정입니다!',
-      [{ text: '확인' }],
-    );
-    // TODO: Facebook Login 구현
-    // setLoading(true);
-    // try {
-    //   console.log('📘 Facebook 로그인 시도...');
-    //   const user = await authService.signInWithFacebook();
-    //   await firestoreService.saveUserProfile(user);
-    //   await migrateLocalData();
-    //   console.log('✅ Facebook 로그인 성공:', user.displayName || user.email);
-    //   Alert.alert('성공!', 'Facebook 로그인이 완료되었습니다!', [{ text: '확인' }]);
-    // } catch (error: any) {
-    //   console.error('❌ Facebook 로그인 실패:', error);
-    //   Alert.alert('Facebook 로그인 실패', error.toString());
-    // } finally {
-    //   setLoading(false);
-    // }
   };
 
   // 비밀번호 재설정
@@ -260,9 +158,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     try {
       console.log('🧪 테스트 로그인 시도...');
 
-      // 테스트 계정으로 로그인 - 더 안정적인 이메일 형식 사용
-      const testEmail = 'test.user.2024@example.com';
-      const testPassword = 'TestPassword123!';
+      // 테스트 계정으로 로그인
+      const testEmail = 'test@example.com';
+      const testPassword = 'test123456';
 
       try {
         // 먼저 로그인 시도
@@ -273,22 +171,25 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
 
         if (user) {
           console.log('✅ 테스트 로그인 성공:', user.email);
-          
+
+          // 테스트 계정 데이터 초기화
+          await initializeTestAccountData(user);
+
           // 사용자 프로필 저장
           await supabaseService.saveUserProfile(user);
-          
+
           // 로컬 데이터 마이그레이션
           await migrateLocalData();
-          
+
           Alert.alert(
             '✅ 테스트 로그인 성공',
-            '테스트 계정으로 로그인되었습니다.\n이제 앱의 모든 기능을 사용할 수 있습니다.',
+            '테스트 계정으로 로그인되었습니다.\n모든 데이터가 초기화되었습니다.',
             [{ text: '확인' }],
           );
         }
       } catch (loginError: any) {
         console.log('⚠️ 테스트 계정 로그인 실패, 회원가입 시도...');
-        
+
         // 로그인 실패 시 회원가입 시도
         try {
           const user = await supabaseAuthService.signUpWithEmail(
@@ -299,30 +200,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
 
           if (user) {
             console.log('✅ 테스트 계정 생성 성공');
-            
+
             // 회원가입 후 바로 로그인 시도
             const loginUser = await supabaseAuthService.signInWithEmail(
               testEmail,
               testPassword,
             );
-            
+
             if (loginUser) {
+              // 테스트 계정 데이터 초기화
+              await initializeTestAccountData(loginUser);
+
               // 사용자 프로필 저장
               await supabaseService.saveUserProfile(loginUser);
-              
+
               // 로컬 데이터 마이그레이션
               await migrateLocalData();
-              
+
               Alert.alert(
                 '✅ 테스트 계정 생성 완료',
-                '테스트 계정이 생성되고 로그인되었습니다.\n이제 앱의 모든 기능을 사용할 수 있습니다.',
+                '테스트 계정이 생성되고 로그인되었습니다.\n모든 데이터가 초기화되었습니다.',
                 [{ text: '확인' }],
               );
             }
           }
         } catch (signUpError: any) {
           console.error('❌ 테스트 계정 생성 실패:', signUpError);
-          
+
           // 이메일 확인이 필요한 경우
           if (signUpError.message?.includes('이메일')) {
             Alert.alert(
@@ -348,6 +252,30 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 테스트 계정 데이터 초기화 함수
+  const initializeTestAccountData = async (user: any) => {
+    try {
+      console.log('🧪 테스트 계정 데이터 초기화 시작...');
+
+      // 테스트 계정인지 확인 (test@example.com)
+      if (user.email === 'test@example.com') {
+        console.log('🗑️ 테스트 계정 로컬 스토리지 초기화 중...');
+        try {
+          await clearLocalStorage();
+          console.log('✅ 테스트 계정 로컬 스토리지 초기화 완료');
+        } catch (localError) {
+          console.error('❌ 로컬 스토리지 초기화 실패:', localError);
+        }
+      } else {
+        console.log('ℹ️ 일반 계정이므로 초기화를 건너뜁니다.');
+      }
+
+      console.log('✅ 테스트 계정 데이터 초기화 완료');
+    } catch (error) {
+      console.error('❌ 테스트 계정 데이터 초기화 실패:', error);
     }
   };
 
@@ -471,41 +399,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
               />
             </View>
           </View>
-
-          {/* 회원가입 시 사용자 이름 */}
-          {!isLogin && (
-            <View style={styles.inputContainer}>
-              <Text
-                style={[styles.inputLabel, { color: currentTheme.colors.text }]}
-              >
-                사용자 이름
-              </Text>
-              <View
-                style={[
-                  styles.inputWrapper,
-                  { borderColor: currentTheme.colors.border },
-                ]}
-              >
-                <Icon
-                  name="user"
-                  size={20}
-                  color={currentTheme.colors.textSecondary}
-                />
-                <TextInput
-                  style={[
-                    styles.textInput,
-                    { color: currentTheme.colors.text },
-                  ]}
-                  value={displayName}
-                  onChangeText={setDisplayName}
-                  placeholder="사용자 이름을 입력하세요"
-                  placeholderTextColor={currentTheme.colors.textSecondary}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              </View>
-            </View>
-          )}
 
           {/* 비밀번호 입력 */}
           <View style={styles.inputContainer}>
@@ -651,74 +544,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
               ]}
             />
           </View>
-
-          {/* 구글 로그인 */}
-          <TouchableOpacity
-            style={[
-              styles.socialButton,
-              styles.googleButton,
-              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
-            ]}
-            onPress={handleGoogleLogin}
-            disabled={loading}
-          >
-            <FontAwesome
-              name="google"
-              size={20}
-              color="#4285F4"
-              style={styles.socialIcon}
-            />
-            <Text
-              style={[
-                styles.socialButtonText,
-                { color: currentTheme.colors.text },
-              ]}
-            >
-              Google로 계속하기
-            </Text>
-          </TouchableOpacity>
-
-          {/* 애플 로그인 */}
-          <TouchableOpacity
-            style={[
-              styles.socialButton,
-              styles.appleButton,
-              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
-            ]}
-            onPress={handleAppleLogin}
-            disabled={loading}
-          >
-            <FontAwesome
-              name="apple"
-              size={20}
-              color="#FFFFFF"
-              style={styles.socialIcon}
-            />
-            <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>
-              Apple로 계속하기
-            </Text>
-          </TouchableOpacity>
-
-          {/* 페이스북 로그인 */}
-          <TouchableOpacity
-            style={[
-              styles.socialButton,
-              styles.facebookButton,
-              { borderColor: '#E6E6FA' }, // 천사의 일기 테마 라벤더 테두리 색상 고정
-            ]}
-            onPress={handleFacebookLogin}
-            disabled={loading}
-          >
-            <FontAwesome
-              name="facebook"
-              size={20}
-              color="#FFFFFF"
-              style={styles.socialIcon}
-            />
-            <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>
-              Facebook으로 계속하기
-            </Text>
-          </TouchableOpacity>
 
           {/* 테스트 로그인 */}
           <TouchableOpacity
@@ -880,6 +705,9 @@ const styles = StyleSheet.create({
   testButton: {
     backgroundColor: '#FF6B35', // 주황색 테스트 버튼
   },
+  anonymousButton: {
+    backgroundColor: 'transparent', // 투명 배경
+  },
 
   socialIcon: {
     marginRight: 12,
@@ -887,6 +715,50 @@ const styles = StyleSheet.create({
 
   socialButtonText: {
     fontSize: 16,
+    fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    maxWidth: 400,
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalBody: {
+    gap: 16,
+  },
+  switchButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  switchButtonText: {
+    fontSize: 14,
     fontWeight: '500',
   },
 });
