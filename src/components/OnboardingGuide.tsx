@@ -84,14 +84,26 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [fadeAnim] = useState(new Animated.Value(0));
 
+  console.log('🎯 OnboardingGuide 렌더링:', {
+    visible,
+    currentStep,
+    props: { visible, onComplete },
+    modalVisible: visible,
+  });
+
   React.useEffect(() => {
+    console.log('🎯 OnboardingGuide useEffect 호출:', { visible });
     if (visible) {
+      console.log('🎯 OnboardingGuide 표시 시작');
+      console.log('🎯 currentStep 초기화: 0으로 설정');
+      setCurrentStep(0); // 항상 첫 번째 단계부터 시작
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
         useNativeDriver: true,
       }).start();
     } else {
+      console.log('🎯 OnboardingGuide 숨김');
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 300,

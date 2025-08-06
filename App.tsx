@@ -126,7 +126,12 @@ const AppContent: React.FC = () => {
     },
   };
 
-  console.log('🔍 앱 상태 체크:', { isAuthenticated, loading });
+  console.log('🔍 앱 상태 체크:', {
+    isAuthenticated,
+    loading,
+    showOnboarding,
+    user: user ? { uid: user.uid, email: user.email } : null,
+  });
 
   // 인증 상태 확인 중일 때는 로딩 화면을 보여줄 수 있음
   if (loading) {
@@ -166,6 +171,11 @@ const AppContent: React.FC = () => {
           visible={showOnboarding && isAuthenticated}
           onComplete={completeOnboarding}
         />
+        {console.log('🎯 OnboardingGuide 렌더링 조건:', {
+          showOnboarding,
+          isAuthenticated,
+          visible: showOnboarding && isAuthenticated,
+        })}
         {!isAuthenticated ? (
           // 🔐 로그인되지 않은 경우: 로그인 화면만 표시
           <Stack.Navigator
