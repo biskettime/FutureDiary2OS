@@ -11,7 +11,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import supabaseAuthService from '../services/SupabaseAuthService';
-import { useOnboarding } from '../hooks/useOnboarding';
 
 interface SettingItem {
   id: string;
@@ -26,10 +25,13 @@ const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { currentTheme } = useTheme();
   const { user } = useSupabaseAuth();
-  const { resetOnboarding } = useOnboarding();
 
   const handleSecretStore = () => {
-    navigation.navigate('SecretStore');
+    Alert.alert(
+      '🔒 비밀 보관함',
+      '이 기능은 현재 개발 중입니다.\n곧 출시될 예정이니 기대해 주세요!',
+      [{ text: '확인' }],
+    );
   };
 
   const handleThemeStore = () => {
@@ -38,16 +40,6 @@ const SettingsScreen: React.FC = () => {
 
   const handleHowToUse = () => {
     navigation.navigate('HowToUse');
-  };
-
-  const handleShowOnboarding = () => {
-    Alert.alert('온보딩 가이드', '앱 사용법 가이드를 다시 보시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '보기',
-        onPress: resetOnboarding,
-      },
-    ]);
   };
 
   const handleAbout = () => {
@@ -161,13 +153,6 @@ const SettingsScreen: React.FC = () => {
           subtitle: '위시어리를 더 잘 활용하는 방법을 알아보세요',
           icon: '📖',
           onPress: handleHowToUse,
-        },
-        {
-          id: 'onboarding',
-          title: '앱 가이드 다시보기',
-          subtitle: '앱 사용법을 단계별로 다시 확인해보세요',
-          icon: '🎯',
-          onPress: handleShowOnboarding,
         },
       ],
     },
